@@ -11,7 +11,7 @@ use crate::mode::normal::Normal;
 
 /// Represents the vim mode of the buffer.
 #[non_exhaustive]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Mode {
     /// Insert mode
     ///
@@ -24,6 +24,7 @@ pub enum Mode {
     /// To move and edit with vim motions.
     ///
     /// Press a, i, A, or I to exit it.
+    #[default]
     Normal,
 }
 
