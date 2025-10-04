@@ -69,3 +69,19 @@ fn not_press() {
         expect_action(Mode::Insert, event, None);
     }
 }
+
+#[test]
+fn with_modifiers() {
+    for modifier in [
+        KeyModifiers::SHIFT,
+        KeyModifiers::CONTROL,
+        KeyModifiers::ALT,
+        KeyModifiers::SUPER,
+        KeyModifiers::HYPER,
+        KeyModifiers::META,
+    ] {
+        let event = event(KeyCode::Char('i'), Some(modifier), None);
+        expect_action(Mode::Normal, event, None);
+        expect_action(Mode::Insert, event, None);
+    }
+}

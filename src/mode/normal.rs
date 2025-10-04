@@ -1,4 +1,4 @@
-use crossterm::event::{Event, KeyCode};
+use crossterm::event::{Event, KeyCode, KeyModifiers};
 
 use crate::action::Action;
 use crate::mode::{HandleEvent, Mode};
@@ -13,6 +13,9 @@ pub struct Normal;
 impl HandleEvent for Normal {
     fn handle_event(self, event: &Event) -> Option<Action> {
         let key_press_event = event.as_key_press_event()?;
+        if key_press_event.modifiers != KeyModifiers::NONE {
+            return None;
+        }
         match key_press_event.code {
             KeyCode::Char('i') => Some(Action::SelectMode(Mode::Insert)),
             _ => None,
