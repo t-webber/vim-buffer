@@ -35,12 +35,19 @@
     clippy::question_mark_used,
     reason = "chosen style"
 )]
+#![expect(clippy::missing_inline_in_public_items, reason = "bad lint")]
 #![cfg_attr(test, expect(clippy::single_call_fn, reason = "bad lint"))]
 #![allow(dead_code, reason = "dev in progress")]
 
 /// Defines the actions that can be made on the buffer
 mod action;
+/// Publicly interfaced buffer to handle vim keymap and modes
+mod buffer;
 /// Handles the vim modes and the keypresses on those modes
 mod mode;
 
-pub use mode::Mode;
+#[cfg(test)]
+mod tests;
+
+pub use buffer::Buffer;
+pub use crossterm::event;
