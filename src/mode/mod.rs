@@ -28,13 +28,13 @@ pub enum Mode {
 }
 
 /// Handle incomming terminal events, like keypresses.
-trait HandleEvent {
+pub trait HandleEvent {
     /// Handle incomming terminal events, like keypresses.
-    fn handle_event(self, event: Event) -> Option<Action>;
+    fn handle_event(self, event: &Event) -> Option<Action>;
 }
 
 impl HandleEvent for Mode {
-    fn handle_event(self, event: Event) -> Option<Action> {
+    fn handle_event(self, event: &Event) -> Option<Action> {
         match self {
             Self::Insert => Insert.handle_event(event),
             Self::Normal => Normal.handle_event(event),

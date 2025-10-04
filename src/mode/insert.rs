@@ -1,8 +1,7 @@
 use crossterm::event::{Event, KeyCode};
 
-use crate::Mode;
 use crate::action::Action;
-use crate::mode::HandleEvent;
+use crate::mode::{HandleEvent, Mode};
 
 /// Struct to handle keypresses in insert mode
 pub struct Insert;
@@ -12,7 +11,7 @@ pub struct Insert;
     reason = "partially implement events"
 )]
 impl HandleEvent for Insert {
-    fn handle_event(self, event: Event) -> Option<Action> {
+    fn handle_event(self, event: &Event) -> Option<Action> {
         let key_press_event = event.as_key_press_event()?;
         match key_press_event.code {
             KeyCode::Esc => Some(Action::SelectMode(Mode::Normal)),

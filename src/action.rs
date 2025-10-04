@@ -1,4 +1,4 @@
-use crate::Mode;
+use crate::mode::Mode;
 
 /// Action to be done on the buffer
 #[non_exhaustive]
