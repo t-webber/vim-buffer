@@ -1,5 +1,5 @@
 #![doc = include_str!("../README.md")]
-#![warn(
+#![deny(
     missing_docs,
     warnings,
     deprecated_safe,
@@ -35,6 +35,8 @@
     clippy::question_mark_used,
     reason = "chosen style"
 )]
+#![cfg_attr(test, expect(clippy::single_call_fn, reason = "bad lint"))]
+#![allow(dead_code, reason = "dev in progress")]
 
 /// Defines the actions that can be made on the buffer
 mod action;
