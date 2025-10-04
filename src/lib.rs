@@ -29,7 +29,12 @@
     clippy::pub_use,
     reason = "prevent a breaking change after refactoring the crate structure"
 )]
-#![allow(clippy::mod_module_files, reason = "chosen style")]
+#![expect(
+    clippy::implicit_return,
+    clippy::mod_module_files,
+    clippy::question_mark_used,
+    reason = "chosen style"
+)]
 
 /// Defines the actions that can be made on the buffer
 mod action;

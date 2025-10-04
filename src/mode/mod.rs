@@ -15,17 +15,17 @@ pub enum Mode {
     /// To type in content.
     ///
     /// Press `<Esc>` to exit it.
-    Insert(insert::Insert),
+    Insert,
     /// Normal mode
     ///
     /// To move and edit with vim motions.
     ///
     /// Press a, i, A, or I to exit it.
-    Normal(normal::Normal),
+    Normal,
 }
 
 /// Handle incomming terminal events, like keypresses.
 trait HandleEvent {
     /// Handle incomming terminal events, like keypresses.
-    fn handle_event(event: Event) -> Action;
+    fn handle_event(self, event: Event) -> Option<Action>;
 }
