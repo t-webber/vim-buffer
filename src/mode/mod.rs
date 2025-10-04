@@ -11,6 +11,7 @@ use crate::mode::normal::Normal;
 
 /// Represents the vim mode of the buffer.
 #[non_exhaustive]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Mode {
     /// Insert mode
     ///
@@ -40,3 +41,6 @@ impl HandleEvent for Mode {
         }
     }
 }
+
+#[cfg(test)]
+mod tests;
