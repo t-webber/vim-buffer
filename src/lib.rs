@@ -29,7 +29,9 @@
     clippy::pub_use,
     reason = "prevent a breaking change after refactoring the crate structure"
 )]
+#![allow(clippy::mod_module_files, reason = "chosen style")]
 
+/// Handles the vim modes and the keypresses on those modes
 mod mode;
 
 pub use mode::Mode;
