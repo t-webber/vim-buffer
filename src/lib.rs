@@ -25,3 +25,11 @@
 )]
 #![expect(clippy::doc_include_without_cfg, reason = "see issue #13918")]
 #![expect(clippy::blanket_clippy_restriction_lints, reason = "I want them all")]
+#![expect(
+    clippy::pub_use,
+    reason = "prevent a breaking change after refactoring the crate structure"
+)]
+
+mod mode;
+
+pub use mode::Mode;
