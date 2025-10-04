@@ -3,6 +3,10 @@ mod insert;
 /// Handles keypresses in normal mode
 mod normal;
 
+use crossterm::event::Event;
+
+use crate::action::Action;
+
 /// Represents the vim mode of the buffer.
 #[non_exhaustive]
 pub enum Mode {
@@ -18,4 +22,10 @@ pub enum Mode {
     ///
     /// Press a, i, A, or I to exit it.
     Normal(normal::Normal),
+}
+
+/// Handle incomming terminal events, like keypresses.
+trait HandleEvent {
+    /// Handle incomming terminal events, like keypresses.
+    fn handle_event(event: Event) -> Action;
 }
