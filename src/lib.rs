@@ -31,6 +31,8 @@
 )]
 #![allow(clippy::mod_module_files, reason = "chosen style")]
 
+/// Defines the actions that can be made on the buffer
+mod action;
 /// Handles the vim modes and the keypresses on those modes
 mod mode;
 
