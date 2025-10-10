@@ -28,7 +28,16 @@ fn backspace() {
     assert!(evt!(buffer, 'i'));
     assert!(evt!(buffer, 'a'));
     assert!(evt!(buffer, Backspace));
-    assert!(buffer.as_content().is_empty());
+    assert_eq!(buffer.as_content(), "");
+}
+
+#[test]
+fn chars_normal_mode() {
+    let mut buffer = Buffer::default();
+    for ch in "someotherchars".chars() {
+        assert!(!evt!(buffer, KeyCode::Char(ch)));
+    }
+    assert_eq!(buffer.as_content(), "");
 }
 
 #[test]
@@ -48,5 +57,5 @@ fn hello_world() {
     for ch in "Hello World".chars() {
         assert!(evt!(buffer, KeyCode::Char(ch)));
     }
-    assert!(buffer.as_content() == "Hello World");
+    assert_eq!(buffer.as_content(), "Hello World");
 }

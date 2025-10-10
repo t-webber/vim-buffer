@@ -40,6 +40,8 @@
 
 /// Defines the actions that can be made on the buffer
 mod action;
+/// Defines a bounded usize newtype, to safely increment, decrement a cursor.
+mod bounded_usize;
 /// Publicly interfaced buffer to handle vim keymap and modes
 mod buffer;
 /// Handles the vim modes and the keypresses on those modes
