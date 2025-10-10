@@ -2,8 +2,16 @@ use std::io::{Write, stdout};
 
 use crossterm::event::{self, KeyModifiers};
 use crossterm::terminal::disable_raw_mode;
-use vim_buffer::Buffer;
 use vim_buffer::crossterm::terminal::enable_raw_mode;
+use vim_buffer::{Buffer, Mode};
+
+const fn display_mode(mode: Mode) -> &'static str {
+    match mode {
+        Mode::Normal => "\x1b[32mnormal >>> \x1b[0m",
+        Mode::Insert => "\x1b[36minsert >>> \x1b[0m",
+        _ => panic!("unsupported"),
+    }
+}
 
 fn main() -> color_eyre::Result<()> {
     color_eyre::install()?;
@@ -13,7 +21,7 @@ fn main() -> color_eyre::Result<()> {
     let mut buffer = Buffer::default();
 
     loop {
-        print!("\r>>> {}", buffer.as_content());
+        print!("\r{}{}", display_mode(buffer.as_mode()), buffer.as_content());
         stdout().flush()?;
 
         let event = event::read()?;
@@ -24,6 +32,7 @@ fn main() -> color_eyre::Result<()> {
             && ch == 'c'
         {
             disable_raw_mode()?;
+            println!();
             break Ok(());
         }
 
