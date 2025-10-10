@@ -50,4 +50,4 @@ mod mode;
 mod tests;
 
 pub use buffer::Buffer;
-pub use crossterm::event;
+pub use crossterm;

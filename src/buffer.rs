@@ -25,7 +25,6 @@ impl Buffer {
     ///
     /// `true` if the buffer was changed, and `false` if the [`Event`] is
     /// ignored.
-    #[must_use]
     pub fn update(&mut self, event: &Event) -> bool {
         let Some(action) = self.mode.handle_event(event) else {
             return false;
