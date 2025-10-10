@@ -37,7 +37,6 @@
 )]
 #![expect(clippy::missing_inline_in_public_items, reason = "bad lint")]
 #![cfg_attr(test, expect(clippy::single_call_fn, reason = "bad lint"))]
-#![allow(dead_code, reason = "dev in progress")]
 
 /// Defines the actions that can be made on the buffer
 mod action;

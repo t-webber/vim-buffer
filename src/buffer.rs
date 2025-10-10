@@ -19,6 +19,12 @@ impl Buffer {
         &self.content
     }
 
+    /// Returns the vim mode of the buffer (insert, normal, etc.)
+    #[must_use]
+    pub const fn as_mode(&self) -> Mode {
+        self.mode
+    }
+
     /// Updates the buffer with a terminal events
     ///
     /// # Returns
