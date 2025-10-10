@@ -4,6 +4,8 @@ use crate::mode::Mode;
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Action {
+    /// Deletes the last written char
+    Backspace,
     /// Inserts a char in the buffer
     InsertChar(char),
     /// Switches to a new mode

@@ -38,6 +38,9 @@ impl Buffer {
         match action {
             Action::InsertChar(ch) => self.content.push(ch),
             Action::SelectMode(mode) => self.mode = mode,
+            Action::Backspace => {
+                self.content.pop();
+            }
         }
         true
     }

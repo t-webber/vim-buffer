@@ -19,6 +19,7 @@ impl HandleEvent for Insert {
         match key_press_event.code {
             KeyCode::Esc => Some(Action::SelectMode(Mode::Normal)),
             KeyCode::Char(ch) => Some(Action::InsertChar(ch)),
+            KeyCode::Backspace => Some(Action::Backspace),
             _ => None,
         }
     }
