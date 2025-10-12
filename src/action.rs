@@ -10,6 +10,8 @@ pub enum Action {
     DecrementCursor(usize),
     /// Action to move the cursor to a location denotated by a condition
     GoTo(GoToAction),
+    /// Increments the buffer cursor
+    IncrementCursor(usize),
     /// Inserts a char in the buffer
     InsertChar(char),
     /// Switches to a new mode

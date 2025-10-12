@@ -16,11 +16,11 @@ impl HandleEvent for Normal {
             && key_press_event.modifiers == KeyModifiers::NONE
         {
             match key_press_event.code {
-                KeyCode::Char('a') => vec![Action::SelectMode(Mode::Insert)],
-                KeyCode::Char('i') => vec![
-                    Action::DecrementCursor(1),
+                KeyCode::Char('a') => vec![
+                    Action::IncrementCursor(1),
                     Action::SelectMode(Mode::Insert),
                 ],
+                KeyCode::Char('i') => vec![Action::SelectMode(Mode::Insert)],
                 KeyCode::Char('I') => vec![
                     Action::GoTo(GoToAction::FirstNonSpace),
                     Action::SelectMode(Mode::Insert),

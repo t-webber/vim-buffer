@@ -5,7 +5,7 @@ use crate::bounded_usize::BoundedUsize;
 use crate::mode::{HandleEvent as _, Mode};
 
 /// Buffer that supports vim keymaps
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Buffer {
     /// Content of the buffer
     content: String,
@@ -60,6 +60,7 @@ impl Buffer {
                 self.content.pop();
                 self.cursor.decrement_with_capacity();
             }
+            Action::IncrementCursor(amount) => self.cursor.increment(amount),
             Action::DecrementCursor(amount) => self.cursor.decrement(amount),
             Action::GoTo(GoToAction::FirstNonSpace) => {
                 self.cursor.set(0);

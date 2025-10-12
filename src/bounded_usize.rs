@@ -26,7 +26,8 @@ impl BoundedUsize {
 
     /// Increments the inner value and the maximum value.
     pub const fn increment(&mut self, amount: usize) {
-        self.value = self.value.saturating_add(amount);
+        let sum = self.value.saturating_add(amount);
+        self.value = if sum < self.max_value { sum } else { self.max_value }
     }
 
     /// Increments the inner value and the maximum value.

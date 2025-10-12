@@ -16,7 +16,10 @@ impl HandleEvent for Insert {
             && key_press_event.modifiers == KeyModifiers::NONE
         {
             match key_press_event.code {
-                KeyCode::Esc => vec![Action::SelectMode(Mode::Normal)],
+                KeyCode::Esc => vec![
+                    Action::DecrementCursor(1),
+                    Action::SelectMode(Mode::Normal),
+                ],
                 KeyCode::Char(ch) => vec![Action::InsertChar(ch)],
                 KeyCode::Backspace => vec![Action::Backspace],
                 _ => vec![],

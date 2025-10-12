@@ -3,11 +3,10 @@ use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use crate::action::Action;
 use crate::mode::{HandleEvent as _, Mode};
 
-fn expect_action(mode: Mode, event: Event, action: Option<Action>) {
+fn expect_action(mode: Mode, event: Event, action: &[Action]) {
     let real_actions = mode.handle_event(&event);
 
-    assert!(real_actions.len() <= 1);
-    assert_eq!(real_actions.first(), action.as_ref());
+    assert_eq!(real_actions, action);
 }
 
 fn code_event(code: KeyCode) -> Event {
@@ -28,7 +27,7 @@ fn event(
 
 fn test_insert_char(ch: char) {
     let event = code_event(KeyCode::Char(ch));
-    expect_action(Mode::Insert, event, Some(Action::InsertChar(ch)));
+    expect_action(Mode::Insert, event, &[Action::InsertChar(ch)]);
 }
 
 #[test]
@@ -43,33 +42,36 @@ fn insert_char() {
 #[test]
 fn escape() {
     let event = code_event(KeyCode::Esc);
-    expect_action(Mode::Insert, event, Some(Action::SelectMode(Mode::Normal)));
+    expect_action(Mode::Insert, event, &[
+        Action::DecrementCursor(1),
+        Action::SelectMode(Mode::Normal),
+    ]);
 }
 
 #[test]
 fn insert() {
-    let event = code_event(KeyCode::Char('a'));
-    expect_action(Mode::Normal, event, Some(Action::SelectMode(Mode::Insert)));
+    let event = code_event(KeyCode::Char('i'));
+    expect_action(Mode::Normal, event, &[Action::SelectMode(Mode::Insert)]);
 }
 
 #[test]
 fn unsupported_key() {
     let event = code_event(KeyCode::Down);
-    expect_action(Mode::Insert, event, None);
-    expect_action(Mode::Normal, event, None);
+    expect_action(Mode::Insert, event, &[]);
+    expect_action(Mode::Normal, event, &[]);
 }
 
 #[test]
 fn wrong_mode_key() {
-    expect_action(Mode::Normal, code_event(KeyCode::Char('g')), None);
-    expect_action(Mode::Normal, code_event(KeyCode::Esc), None);
+    expect_action(Mode::Normal, code_event(KeyCode::Char('g')), &[]);
+    expect_action(Mode::Normal, code_event(KeyCode::Esc), &[]);
 }
 
 #[test]
 fn not_press() {
     for kind in [KeyEventKind::Release, KeyEventKind::Repeat] {
         let event = event(KeyCode::Char('x'), None, Some(kind));
-        expect_action(Mode::Insert, event, None);
+        expect_action(Mode::Insert, event, &[]);
     }
 }
 
@@ -84,7 +86,7 @@ fn with_modifiers() {
         KeyModifiers::META,
     ] {
         let event = event(KeyCode::Char('i'), Some(modifier), None);
-        expect_action(Mode::Normal, event, None);
-        expect_action(Mode::Insert, event, None);
+        expect_action(Mode::Normal, event, &[]);
+        expect_action(Mode::Insert, event, &[]);
     }
 }
