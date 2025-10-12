@@ -6,6 +6,8 @@ use crate::mode::Mode;
 pub enum Action {
     /// Deletes the last written char
     Backspace,
+    /// Decrements the buffer cursor
+    DecrementCursor(usize),
     /// Inserts a char in the buffer
     InsertChar(char),
     /// Switches to a new mode

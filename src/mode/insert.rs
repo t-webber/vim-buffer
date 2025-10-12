@@ -11,16 +11,18 @@ pub struct Insert;
     reason = "partially implement events"
 )]
 impl HandleEvent for Insert {
-    fn handle_event(self, event: &Event) -> Option<Action> {
-        let key_press_event = event.as_key_press_event()?;
-        if key_press_event.modifiers != KeyModifiers::NONE {
-            return None;
-        }
-        match key_press_event.code {
-            KeyCode::Esc => Some(Action::SelectMode(Mode::Normal)),
-            KeyCode::Char(ch) => Some(Action::InsertChar(ch)),
-            KeyCode::Backspace => Some(Action::Backspace),
-            _ => None,
+    fn handle_event(self, event: &Event) -> Vec<Action> {
+        if let Some(key_press_event) = event.as_key_press_event()
+            && key_press_event.modifiers == KeyModifiers::NONE
+        {
+            match key_press_event.code {
+                KeyCode::Esc => vec![Action::SelectMode(Mode::Normal)],
+                KeyCode::Char(ch) => vec![Action::InsertChar(ch)],
+                KeyCode::Backspace => vec![Action::Backspace],
+                _ => vec![],
+            }
+        } else {
+            vec![]
         }
     }
 }

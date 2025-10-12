@@ -11,14 +11,20 @@ pub struct Normal;
     reason = "partially implement events"
 )]
 impl HandleEvent for Normal {
-    fn handle_event(self, event: &Event) -> Option<Action> {
-        let key_press_event = event.as_key_press_event()?;
-        if key_press_event.modifiers != KeyModifiers::NONE {
-            return None;
-        }
-        match key_press_event.code {
-            KeyCode::Char('i') => Some(Action::SelectMode(Mode::Insert)),
-            _ => None,
+    fn handle_event(self, event: &Event) -> Vec<Action> {
+        if let Some(key_press_event) = event.as_key_press_event()
+            && key_press_event.modifiers == KeyModifiers::NONE
+        {
+            match key_press_event.code {
+                KeyCode::Char('a') => vec![Action::SelectMode(Mode::Insert)],
+                KeyCode::Char('i') => vec![
+                    Action::DecrementCursor(1),
+                    Action::SelectMode(Mode::Insert),
+                ],
+                _ => vec![],
+            }
+        } else {
+            vec![]
         }
     }
 }

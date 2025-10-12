@@ -14,6 +14,11 @@ impl BoundedUsize {
     }
 
     /// Decrements the inner value and the maximum value.
+    pub const fn decrement(&mut self, amount: usize) {
+        self.value = self.value.saturating_sub(amount);
+    }
+
+    /// Decrements the inner value and the maximum value.
     pub const fn decrement_with_capacity(&mut self) {
         self.max_value = self.max_value.saturating_sub(1);
         self.value = self.value.saturating_sub(1);

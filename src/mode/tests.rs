@@ -4,7 +4,10 @@ use crate::action::Action;
 use crate::mode::{HandleEvent as _, Mode};
 
 fn expect_action(mode: Mode, event: Event, action: Option<Action>) {
-    assert_eq!(action, mode.handle_event(&event));
+    let real_actions = mode.handle_event(&event);
+
+    assert!(real_actions.len() <= 1);
+    assert_eq!(real_actions.first(), action.as_ref());
 }
 
 fn code_event(code: KeyCode) -> Event {
@@ -45,7 +48,7 @@ fn escape() {
 
 #[test]
 fn insert() {
-    let event = code_event(KeyCode::Char('i'));
+    let event = code_event(KeyCode::Char('a'));
     expect_action(Mode::Normal, event, Some(Action::SelectMode(Mode::Insert)));
 }
 

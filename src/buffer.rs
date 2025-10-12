@@ -28,7 +28,7 @@ impl Buffer {
         self.mode
     }
 
-    /// Updates the buffer with a terminal events
+    /// Updates the buffer with a terminal event
     ///
     /// # Returns
     ///
@@ -39,9 +39,17 @@ impl Buffer {
     ///
     /// Returns an error if the buffer exceeds [`usize::MAX`]
     pub fn update(&mut self, event: &Event) -> bool {
-        let Some(action) = self.mode.handle_event(event) else {
-            return false;
-        };
+        let events = self.mode.handle_event(event);
+
+        for action in &events {
+            self.update_once(*action);
+        }
+
+        !events.is_empty()
+    }
+
+    /// Updates the buffer with one [`Action`]
+    fn update_once(&mut self, action: Action) {
         match action {
             Action::InsertChar(ch) => {
                 self.content.insert(self.cursor.as_value(), ch);
@@ -52,7 +60,7 @@ impl Buffer {
                 self.content.pop();
                 self.cursor.decrement_with_capacity();
             }
+            Action::DecrementCursor(amount) => self.cursor.decrement(amount),
         }
-        true
     }
 }
