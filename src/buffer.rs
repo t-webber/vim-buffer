@@ -64,12 +64,8 @@ impl Buffer {
             Action::SelectMode(mode) => self.mode = mode,
             Action::Backspace =>
                 if self.cursor.as_value() != 0 {
-                    if self.cursor.as_value() == self.content.len() {
-                        self.content.pop();
-                    } else {
-                        self.content.remove(self.cursor.as_value());
-                    }
                     self.cursor.decrement_with_capacity();
+                    self.content.remove(self.cursor.as_value());
                 },
             Action::IncrementCursor(amount) => self.cursor.increment(amount),
             Action::DecrementCursor(amount) => self.cursor.decrement(amount),

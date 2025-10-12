@@ -48,7 +48,14 @@ fn backspace() {
     assert!(do_evt!(buffer, 'i'));
     assert!(do_evt!(buffer, 'a'));
     assert!(do_evt!(buffer, Backspace));
-    assert_eq!(buffer.as_content(), "");
+    assert!(do_evt!(buffer, Backspace));
+    assert!(do_evt!(buffer, 'a'));
+    assert!(do_evt!(buffer, 'b'));
+    assert!(do_evt!(buffer, Esc));
+    assert!(do_evt!(buffer, 'i'));
+    assert!(do_evt!(buffer, Backspace));
+    assert_eq!(buffer.as_content(), "b");
+    assert_eq!(buffer.as_cursor(), 0);
 }
 
 #[test]
