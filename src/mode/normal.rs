@@ -6,29 +6,22 @@ use crate::mode::{HandleEvent, Mode};
 /// Struct to handle keypresses in insert mode
 pub struct Normal;
 
-#[expect(
-    clippy::wildcard_enum_match_arm,
-    reason = "partially implement events"
-)]
 impl HandleEvent for Normal {
     fn handle_event(self, event: &Event) -> Vec<Action> {
-        if let Some(key_press_event) = event.as_key_press_event()
-            && key_press_event.modifiers == KeyModifiers::NONE
-        {
-            match key_press_event.code {
-                KeyCode::Char('a') => vec![
+        event.as_key_press_event().map_or_else(Vec::new, |key_press_event| {
+            match (key_press_event.code, key_press_event.modifiers) {
+                (KeyCode::Char('a'), KeyModifiers::NONE) => vec![
                     Action::IncrementCursor(1),
                     Action::SelectMode(Mode::Insert),
                 ],
-                KeyCode::Char('i') => vec![Action::SelectMode(Mode::Insert)],
-                KeyCode::Char('I') => vec![
+                (KeyCode::Char('i'), KeyModifiers::NONE) =>
+                    vec![Action::SelectMode(Mode::Insert)],
+                (KeyCode::Char('I'), KeyModifiers::SHIFT) => vec![
                     Action::GoTo(GoToAction::FirstNonSpace),
                     Action::SelectMode(Mode::Insert),
                 ],
                 _ => vec![],
             }
-        } else {
-            vec![]
-        }
+        })
     }
 }

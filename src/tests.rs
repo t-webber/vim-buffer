@@ -1,4 +1,4 @@
-use crossterm::event::{Event, KeyCode, KeyEvent};
+use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
 use crate::{Buffer, Mode};
 
@@ -26,6 +26,13 @@ macro_rules! do_evt {
         $buffer.update(&evt!($name))
     };
 }
+
+const CAP_I: Event = Event::Key(KeyEvent::new_with_kind(
+    KeyCode::Char('I'),
+    KeyModifiers::SHIFT,
+    KeyEventKind::Press,
+));
+
 
 #[test]
 fn do_nothing() {
@@ -100,7 +107,7 @@ fn insert_cap_i() {
             evt!('a'),
             evt!('b'),
             evt!(Esc),
-            evt!('I'),
+            CAP_I,
             evt!('c'),
         ],
         " cab",
@@ -109,5 +116,5 @@ fn insert_cap_i() {
 
 #[test]
 fn insert_cap_i_empty_line() {
-    test_events(&[evt!('i'), evt!(' '), evt!(Esc), evt!('I'), evt!('c')], " c");
+    test_events(&[evt!('i'), evt!(' '), evt!(Esc), CAP_I, evt!('c')], " c");
 }
