@@ -20,6 +20,10 @@ impl HandleEvent for Normal {
                     Action::GoTo(GoToAction::FirstNonSpace),
                     Action::SelectMode(Mode::Insert),
                 ],
+                (KeyCode::Char('A'), KeyModifiers::SHIFT) => vec![
+                    Action::GoTo(GoToAction::EOL),
+                    Action::SelectMode(Mode::Insert),
+                ],
                 _ => vec![],
             }
         })

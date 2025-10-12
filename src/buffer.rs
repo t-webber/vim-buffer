@@ -80,6 +80,8 @@ impl Buffer {
                     self.cursor.increment(1);
                 }
             }
+            Action::GoTo(GoToAction::EOL) =>
+                self.cursor.set(self.content.len()),
         }
     }
 }

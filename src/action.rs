@@ -23,4 +23,6 @@ pub enum Action {
 pub enum GoToAction {
     /// First non space character, like with `I` and `^`
     FirstNonSpace,
+    /// End of line, like with `$` and `A'
+    EOL,
 }
