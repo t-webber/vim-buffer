@@ -17,13 +17,13 @@ macro_rules! evt {
 
 macro_rules! do_evt {
     ($buffer:ident, $name:ident) => {
-        do_evt!($buffer, KeyCode::$name)
+        $buffer.update(&evt!($name))
     };
     ($buffer:ident, $name:literal) => {
-        do_evt!($buffer, KeyCode::Char($name))
+        $buffer.update(&evt!($name))
     };
     ($buffer:ident, $name:expr) => {
-        $buffer.update(&Event::Key(KeyEvent::from($name)))
+        $buffer.update(&evt!($name))
     };
 }
 
@@ -89,4 +89,25 @@ fn insert_a() {
 #[test]
 fn insert_i() {
     test_events(&[evt!('i'), evt!('a'), evt!(Esc), evt!('i'), evt!('b')], "ba");
+}
+
+#[test]
+fn insert_cap_i() {
+    test_events(
+        &[
+            evt!('i'),
+            evt!(' '),
+            evt!('a'),
+            evt!('b'),
+            evt!(Esc),
+            evt!('I'),
+            evt!('c'),
+        ],
+        " cab",
+    );
+}
+
+#[test]
+fn insert_cap_i_empty_line() {
+    test_events(&[evt!('i'), evt!(' '), evt!(Esc), evt!('I'), evt!('c')], " c");
 }

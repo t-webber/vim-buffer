@@ -32,7 +32,6 @@
 #![expect(
     clippy::implicit_return,
     clippy::mod_module_files,
-    clippy::question_mark_used,
     reason = "chosen style"
 )]
 #![expect(clippy::missing_inline_in_public_items, reason = "bad lint")]

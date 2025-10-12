@@ -1,5 +1,5 @@
 /// `usize` bounded by a value, for safe incrementation and decrementation.
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct BoundedUsize {
     /// Maximum value the `value` field can hold.
     max_value: usize,
@@ -25,6 +25,11 @@ impl BoundedUsize {
     }
 
     /// Increments the inner value and the maximum value.
+    pub const fn increment(&mut self, amount: usize) {
+        self.value = self.value.saturating_add(amount);
+    }
+
+    /// Increments the inner value and the maximum value.
     ///
     /// # Panics
     ///
@@ -34,5 +39,12 @@ impl BoundedUsize {
         debug_assert!(self.max_value < usize::MAX, "Value too large");
         self.max_value += 1;
         self.value += 1;
+    }
+
+    /// Tries to set the cursor to the given index, and defaults to the maximum
+    /// value if it overflows.
+    pub const fn set(&mut self, value: usize) {
+        self.value =
+            if value < self.max_value { value } else { self.max_value };
     }
 }

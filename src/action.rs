@@ -8,8 +8,17 @@ pub enum Action {
     Backspace,
     /// Decrements the buffer cursor
     DecrementCursor(usize),
+    /// Action to move the cursor to a location denotated by a condition
+    GoTo(GoToAction),
     /// Inserts a char in the buffer
     InsertChar(char),
     /// Switches to a new mode
     SelectMode(Mode),
+}
+
+#[non_exhaustive]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum GoToAction {
+    /// First non space character, like with `I` and `^`
+    FirstNonSpace,
 }

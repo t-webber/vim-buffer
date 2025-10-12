@@ -1,6 +1,6 @@
 use crossterm::event::{Event, KeyCode, KeyModifiers};
 
-use crate::action::Action;
+use crate::action::{Action, GoToAction};
 use crate::mode::{HandleEvent, Mode};
 
 /// Struct to handle keypresses in insert mode
@@ -19,6 +19,10 @@ impl HandleEvent for Normal {
                 KeyCode::Char('a') => vec![Action::SelectMode(Mode::Insert)],
                 KeyCode::Char('i') => vec![
                     Action::DecrementCursor(1),
+                    Action::SelectMode(Mode::Insert),
+                ],
+                KeyCode::Char('I') => vec![
+                    Action::GoTo(GoToAction::FirstNonSpace),
                     Action::SelectMode(Mode::Insert),
                 ],
                 _ => vec![],

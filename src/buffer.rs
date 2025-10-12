@@ -1,6 +1,6 @@
 use crossterm::event::Event;
 
-use crate::action::Action;
+use crate::action::{Action, GoToAction};
 use crate::bounded_usize::BoundedUsize;
 use crate::mode::{HandleEvent as _, Mode};
 
@@ -61,6 +61,17 @@ impl Buffer {
                 self.cursor.decrement_with_capacity();
             }
             Action::DecrementCursor(amount) => self.cursor.decrement(amount),
+            Action::GoTo(GoToAction::FirstNonSpace) => {
+                self.cursor.set(0);
+                let mut chars = self.content.chars();
+                loop {
+                    match chars.next() {
+                        Some(current) if current.is_whitespace() => (),
+                        None | Some(_) => break,
+                    }
+                    self.cursor.increment(1);
+                }
+            }
         }
     }
 }
