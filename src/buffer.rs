@@ -22,6 +22,12 @@ impl Buffer {
         &self.content
     }
 
+    /// Returns the cursor position in the buffer
+    #[must_use]
+    pub const fn as_cursor(&self) -> usize {
+        self.cursor.as_value()
+    }
+
     /// Returns the vim mode of the buffer (insert, normal, etc.)
     #[must_use]
     pub const fn as_mode(&self) -> Mode {

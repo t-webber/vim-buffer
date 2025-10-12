@@ -6,20 +6,51 @@ use crossterm::terminal::disable_raw_mode;
 use vim_buffer::crossterm::terminal::enable_raw_mode;
 use vim_buffer::{Buffer, Mode};
 
-const NORMAL: &str = "\x1b[32mnormal >>> \x1b[0m";
-const INSERT: &str = "\x1b[36minsert >>> \x1b[0m";
+const RESET: &str = "\x1b[0m";
+const NORMAL: ModeDisplay =
+    ModeDisplay { colour: "\x1b[32m", prompt: "normal >>> " };
+const INSERT: ModeDisplay =
+    ModeDisplay { colour: "\x1b[36m", prompt: "insert >>> " };
+const _: () = assert!(NORMAL.prompt.len() == INSERT.prompt.len());
+const DISPLAY_MODE_LEN: usize = NORMAL.prompt.len();
 
-const _: () = assert!(NORMAL.len() == INSERT.len());
-const DISPLAY_MODE_LEN: usize = NORMAL.len();
+struct ModeDisplay {
+    colour: &'static str,
+    prompt: &'static str,
+}
 
-const fn display_mode(mode: Mode) -> &'static str {
-    match mode {
-        Mode::Normal => NORMAL,
-        Mode::Insert => INSERT,
-        _ => panic!("unsupported"),
+impl ModeDisplay {
+    fn display(&self) -> String {
+        let Self { colour, prompt } = self;
+        format!("{colour}{prompt}{RESET}")
     }
 }
 
+impl From<Mode> for ModeDisplay {
+    fn from(value: Mode) -> Self {
+        match value {
+            Mode::Insert => INSERT,
+            Mode::Normal => NORMAL,
+            _ => panic!("unsupported"),
+        }
+    }
+}
+
+fn print_current(
+    buffer: &Buffer,
+    previous_len: usize,
+) -> color_eyre::Result<()> {
+    let spaces =
+        repeat_n(' ', previous_len + DISPLAY_MODE_LEN).collect::<Box<str>>();
+    let cursor = buffer.as_cursor() + DISPLAY_MODE_LEN;
+    print!(
+        "\r{spaces}\r{}{}\r\x1b[{cursor}C",
+        ModeDisplay::from(buffer.as_mode()).display(),
+        buffer.as_content()
+    );
+    stdout().flush()?;
+    Ok(())
+}
 
 fn main() -> color_eyre::Result<()> {
     color_eyre::install()?;
@@ -30,15 +61,7 @@ fn main() -> color_eyre::Result<()> {
     let mut previous_len = 0;
 
     loop {
-        let spaces = repeat_n(' ', previous_len + DISPLAY_MODE_LEN)
-            .collect::<Box<str>>();
-        print!(
-            "\r{spaces}\r{}{}",
-            display_mode(buffer.as_mode()),
-            buffer.as_content()
-        );
-        stdout().flush()?;
-
+        print_current(&buffer, previous_len)?;
         previous_len = buffer.as_content().len();
 
         let event = event::read()?;
