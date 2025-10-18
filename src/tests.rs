@@ -27,11 +27,13 @@ macro_rules! do_evt {
     };
 }
 
-const CAP_I: Event = Event::Key(KeyEvent::new_with_kind(
-    KeyCode::Char('I'),
-    KeyModifiers::SHIFT,
-    KeyEventKind::Press,
-));
+fn cap(cap: char) -> Event {
+    Event::Key(KeyEvent::new_with_kind(
+        KeyCode::Char(cap),
+        KeyModifiers::SHIFT,
+        KeyEventKind::Press,
+    ))
+}
 
 
 #[test]
@@ -90,7 +92,7 @@ fn hello_world() {
 fn test_events(events: &[Event], expected: &str) {
     let mut buffer = Buffer::default();
     for event in events {
-        buffer.update(event);
+        assert!(buffer.update(event), "{event:?}");
     }
     assert_eq!(buffer.as_content(), expected);
 }
@@ -114,7 +116,7 @@ fn insert_cap_i() {
             evt!('a'),
             evt!('b'),
             evt!(Esc),
-            CAP_I,
+            cap('I'),
             evt!('c'),
         ],
         " cab",
@@ -122,6 +124,27 @@ fn insert_cap_i() {
 }
 
 #[test]
+fn insert_cap_a() {
+    test_events(
+        &[
+            evt!('i'),
+            evt!(' '),
+            evt!('a'),
+            evt!('b'),
+            evt!(Esc),
+            evt!('i'),
+            evt!(Esc),
+            evt!('i'),
+            evt!('c'),
+            evt!(Esc),
+            cap('A'),
+            evt!('d'),
+        ],
+        " cabd",
+    );
+}
+
+#[test]
 fn insert_cap_i_empty_line() {
-    test_events(&[evt!('i'), evt!(' '), evt!(Esc), CAP_I, evt!('c')], " c");
+    test_events(&[evt!('i'), evt!(' '), evt!(Esc), cap('I'), evt!('c')], " c");
 }
