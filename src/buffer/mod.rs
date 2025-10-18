@@ -13,6 +13,7 @@ pub use mode::Mode;
 
 use crate::buffer::action::{Action, GoToAction};
 use crate::buffer::bounded_usize::BoundedUsize;
+use crate::event_parser::parse_events;
 
 /// Buffer that supports vim keymaps
 #[derive(Debug, Default)]
@@ -81,6 +82,19 @@ impl Buffer {
                     self.cursor.increment();
                 }
             }
+        }
+    }
+
+    /// Updates the buffer using a string with all the keymaps.
+    ///
+    /// The string must be in the format that are valid according to the
+    /// `vim.keymap` documentation.
+    ///
+    /// For example, `"i0<Esc><C-A>a0<Esc>I0"` will create a buffer whose
+    /// content is `"020"`.
+    pub fn update_from_string(&mut self, keymaps: &str) {
+        for event in parse_events(keymaps) {
+            self.update(&event);
         }
     }
 

@@ -39,6 +39,8 @@
 
 /// Publicly interfaced buffer to handle vim keymap and modes
 mod buffer;
+/// Parser to convert a vim-like keymap string to a list of events
+mod event_parser;
 
 pub use buffer::{Buffer, Mode};
 pub use crossterm;

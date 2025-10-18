@@ -190,3 +190,12 @@ fn h_l_keys() {
         "dabec",
     );
 }
+
+#[test]
+fn string_inputs() {
+    let mut buffer = Buffer::default();
+    buffer.update_from_string("abc");
+    buffer.update(&evt!(Esc));
+    buffer.update_from_string("idef");
+    assert_eq!(buffer.as_content(), "bdefc");
+}
