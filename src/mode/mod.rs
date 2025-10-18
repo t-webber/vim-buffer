@@ -5,7 +5,7 @@ mod normal;
 
 use crossterm::event::{KeyCode, KeyModifiers};
 
-use crate::action::Action;
+use crate::action::{Action, GoToAction};
 use crate::mode::insert::Insert;
 use crate::mode::normal::Normal;
 
@@ -44,6 +44,17 @@ impl HandleKeyPress for Mode {
         code: KeyCode,
         modifiers: KeyModifiers,
     ) -> Vec<Action> {
+        if modifiers == KeyModifiers::NONE {
+            #[expect(
+                clippy::wildcard_enum_match_arm,
+                reason = "take only a few"
+            )]
+            match code {
+                KeyCode::Left => return vec![Action::GoTo(GoToAction::Left)],
+                KeyCode::Right => return vec![Action::GoTo(GoToAction::Right)],
+                _ => (),
+            }
+        }
         match self {
             Self::Insert => Insert.handle_key_press(code, modifiers),
             Self::Normal => Normal.handle_key_press(code, modifiers),

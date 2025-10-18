@@ -148,3 +148,22 @@ fn insert_cap_a() {
 fn insert_cap_i_empty_line() {
     test_events(&[evt!('i'), evt!(' '), evt!(Esc), cap('I'), evt!('c')], " c");
 }
+
+#[test]
+fn arrows() {
+    test_events(
+        &[
+            evt!('i'),
+            evt!('a'),
+            evt!('b'),
+            evt!('c'),
+            evt!(Left),
+            evt!('d'),
+            evt!(Esc),
+            evt!(Right),
+            evt!('a'),
+            evt!('e'),
+        ],
+        "abdce",
+    );
+}

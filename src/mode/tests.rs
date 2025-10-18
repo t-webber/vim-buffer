@@ -1,7 +1,7 @@
 use crossterm::event::{KeyCode, KeyModifiers};
 
 use crate::action::{Action, GoToAction};
-use crate::mode::{HandleKeyPress, Mode};
+use crate::mode::{HandleKeyPress as _, Mode};
 
 fn expect_action(
     mode: Mode,
