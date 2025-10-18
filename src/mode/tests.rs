@@ -1,6 +1,6 @@
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
-use crate::action::Action;
+use crate::action::{Action, GoToAction};
 use crate::mode::{HandleEvent as _, Mode};
 
 fn expect_action(mode: Mode, event: Event, action: &[Action]) {
@@ -43,7 +43,7 @@ fn insert_char() {
 fn escape() {
     let event = code_event(KeyCode::Esc);
     expect_action(Mode::Insert, event, &[
-        Action::DecrementCursor(1),
+        Action::GoTo(GoToAction::Left),
         Action::SelectMode(Mode::Normal),
     ]);
 }

@@ -11,7 +11,7 @@ impl HandleEvent for Normal {
         event.as_key_press_event().map_or_else(Vec::new, |key_press_event| {
             match (key_press_event.code, key_press_event.modifiers) {
                 (KeyCode::Char('a'), KeyModifiers::NONE) => vec![
-                    Action::IncrementCursor(1),
+                    Action::GoTo(GoToAction::Right),
                     Action::SelectMode(Mode::Insert),
                 ],
                 (KeyCode::Char('i'), KeyModifiers::NONE) =>
@@ -21,7 +21,7 @@ impl HandleEvent for Normal {
                     Action::SelectMode(Mode::Insert),
                 ],
                 (KeyCode::Char('A'), KeyModifiers::SHIFT) => vec![
-                    Action::GoTo(GoToAction::EOL),
+                    Action::GoTo(GoToAction::Eol),
                     Action::SelectMode(Mode::Insert),
                 ],
                 _ => vec![],

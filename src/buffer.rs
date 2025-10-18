@@ -54,6 +54,26 @@ impl Buffer {
         !events.is_empty()
     }
 
+    /// Updates the cursor position with a [`GoToAction`]
+    fn update_cursor(&mut self, goto_action: GoToAction) {
+        match goto_action {
+            GoToAction::Right => self.cursor.increment(),
+            GoToAction::Left => self.cursor.decrement(),
+            GoToAction::Eol => self.cursor.set(self.content.len()),
+            GoToAction::FirstNonSpace => {
+                self.cursor.set(0);
+                let mut chars = self.content.chars();
+                loop {
+                    match chars.next() {
+                        Some(current) if current.is_whitespace() => (),
+                        None | Some(_) => break,
+                    }
+                    self.cursor.increment();
+                }
+            }
+        }
+    }
+
     /// Updates the buffer with one [`Action`]
     fn update_once(&mut self, action: Action) {
         match action {
@@ -67,21 +87,7 @@ impl Buffer {
                     self.cursor.decrement_with_capacity();
                     self.content.remove(self.cursor.as_value());
                 },
-            Action::IncrementCursor(amount) => self.cursor.increment(amount),
-            Action::DecrementCursor(amount) => self.cursor.decrement(amount),
-            Action::GoTo(GoToAction::FirstNonSpace) => {
-                self.cursor.set(0);
-                let mut chars = self.content.chars();
-                loop {
-                    match chars.next() {
-                        Some(current) if current.is_whitespace() => (),
-                        None | Some(_) => break,
-                    }
-                    self.cursor.increment(1);
-                }
-            }
-            Action::GoTo(GoToAction::EOL) =>
-                self.cursor.set(self.content.len()),
+            Action::GoTo(goto_action) => self.update_cursor(goto_action),
         }
     }
 }
