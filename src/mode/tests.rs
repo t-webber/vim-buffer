@@ -1,27 +1,28 @@
-use crossterm::event::{KeyCode, KeyModifiers};
+use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
 use crate::action::{Action, GoToAction};
-use crate::mode::{HandleKeyPress as _, Mode};
+use crate::mode::Mode;
 
-fn expect_action(
-    mode: Mode,
-    (code, modifiers): (KeyCode, KeyModifiers),
-    action: &[Action],
-) {
-    let real_actions = mode.handle_key_press(code, modifiers);
+fn expect_action(mode: Mode, event: Event, action: &[Action]) {
+    let real_actions = mode.handle_event(&event);
 
     assert_eq!(real_actions, action);
 }
 
-fn code_event(code: KeyCode) -> (KeyCode, KeyModifiers) {
-    event(code, None)
+fn code_event(code: KeyCode) -> Event {
+    event(code, None, None)
 }
 
 fn event(
     code: KeyCode,
     modifiers: Option<KeyModifiers>,
-) -> (KeyCode, KeyModifiers) {
-    (code, modifiers.unwrap_or(KeyModifiers::empty()))
+    kind: Option<KeyEventKind>,
+) -> Event {
+    Event::Key(KeyEvent::new_with_kind(
+        code,
+        modifiers.unwrap_or(KeyModifiers::empty()),
+        kind.unwrap_or(KeyEventKind::Press),
+    ))
 }
 
 fn test_insert_char(ch: char) {
@@ -76,8 +77,16 @@ fn with_modifiers() {
         KeyModifiers::HYPER,
         KeyModifiers::META,
     ] {
-        let event = event(KeyCode::Char('i'), Some(modifier));
+        let event = event(KeyCode::Char('i'), Some(modifier), None);
         expect_action(Mode::Normal, event, &[]);
+        expect_action(Mode::Insert, event, &[]);
+    }
+}
+
+#[test]
+fn not_press() {
+    for kind in [KeyEventKind::Release, KeyEventKind::Repeat] {
+        let event = event(KeyCode::Char('x'), None, Some(kind));
         expect_action(Mode::Insert, event, &[]);
     }
 }

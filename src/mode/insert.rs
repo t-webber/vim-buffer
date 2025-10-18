@@ -1,4 +1,4 @@
-use crossterm::event::{KeyCode, KeyModifiers};
+use crossterm::event::KeyCode;
 
 use crate::action::{Action, GoToAction};
 use crate::mode::{HandleKeyPress, Mode};
@@ -11,14 +11,7 @@ pub struct Insert;
     reason = "partially implement events"
 )]
 impl HandleKeyPress for Insert {
-    fn handle_key_press(
-        self,
-        code: KeyCode,
-        modifiers: KeyModifiers,
-    ) -> Vec<Action> {
-        if modifiers != KeyModifiers::NONE {
-            return vec![];
-        }
+    fn handle_blank_key_press(&self, code: KeyCode) -> Vec<Action> {
         match code {
             KeyCode::Esc => vec![
                 Action::GoTo(GoToAction::Left),
@@ -28,5 +21,9 @@ impl HandleKeyPress for Insert {
             KeyCode::Backspace => vec![Action::Backspace],
             _ => vec![],
         }
+    }
+
+    fn handle_shift_key_press(&self, _: KeyCode) -> Vec<Action> {
+        vec![]
     }
 }

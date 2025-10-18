@@ -2,7 +2,7 @@ use crossterm::event::Event;
 
 use crate::action::{Action, GoToAction};
 use crate::bounded_usize::BoundedUsize;
-use crate::mode::{HandleKeyPress as _, Mode};
+use crate::mode::Mode;
 
 /// Buffer that supports vim keymaps
 #[derive(Debug, Default)]
@@ -45,9 +45,7 @@ impl Buffer {
     ///
     /// Returns an error if the buffer exceeds [`usize::MAX`]
     pub fn update(&mut self, event: &Event) -> bool {
-        let Some(key_event) = event.as_key_press_event() else { return false };
-        let events =
-            self.mode.handle_key_press(key_event.code, key_event.modifiers);
+        let events = self.mode.handle_event(event);
 
         for action in &events {
             self.update_once(*action);

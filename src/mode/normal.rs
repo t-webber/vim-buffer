@@ -1,4 +1,4 @@
-use crossterm::event::{KeyCode, KeyModifiers};
+use crossterm::event::KeyCode;
 
 use crate::action::{Action, GoToAction};
 use crate::mode::{HandleKeyPress, Mode};
@@ -6,24 +6,26 @@ use crate::mode::{HandleKeyPress, Mode};
 /// Struct to handle keypresses in insert mode
 pub struct Normal;
 
+#[expect(clippy::wildcard_enum_match_arm, reason = "only support a few")]
 impl HandleKeyPress for Normal {
-    fn handle_key_press(
-        self,
-        code: KeyCode,
-        modifiers: KeyModifiers,
-    ) -> Vec<Action> {
-        match (code, modifiers) {
-            (KeyCode::Char('a'), KeyModifiers::NONE) => vec![
+    fn handle_blank_key_press(&self, code: KeyCode) -> Vec<Action> {
+        match code {
+            KeyCode::Char('a') => vec![
                 Action::GoTo(GoToAction::Right),
                 Action::SelectMode(Mode::Insert),
             ],
-            (KeyCode::Char('i'), KeyModifiers::NONE) =>
-                vec![Action::SelectMode(Mode::Insert)],
-            (KeyCode::Char('I'), KeyModifiers::SHIFT) => vec![
+            KeyCode::Char('i') => vec![Action::SelectMode(Mode::Insert)],
+            _ => vec![],
+        }
+    }
+
+    fn handle_shift_key_press(&self, code: KeyCode) -> Vec<Action> {
+        match code {
+            KeyCode::Char('I') => vec![
                 Action::GoTo(GoToAction::FirstNonSpace),
                 Action::SelectMode(Mode::Insert),
             ],
-            (KeyCode::Char('A'), KeyModifiers::SHIFT) => vec![
+            KeyCode::Char('A') => vec![
                 Action::GoTo(GoToAction::Eol),
                 Action::SelectMode(Mode::Insert),
             ],

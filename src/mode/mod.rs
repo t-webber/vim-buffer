@@ -3,11 +3,21 @@ mod insert;
 /// Handles keypresses in normal mode
 mod normal;
 
-use crossterm::event::{KeyCode, KeyModifiers};
+use crossterm::event::{Event, KeyCode, KeyModifiers};
 
 use crate::action::{Action, GoToAction};
 use crate::mode::insert::Insert;
 use crate::mode::normal::Normal;
+
+/// Handle incomming terminal events, like keypresses.
+trait HandleKeyPress {
+    /// Handle incomming terminal events that are keypresses with no modifiers.
+    fn handle_blank_key_press(&self, code: KeyCode) -> Vec<Action>;
+
+    /// Handle incomming terminal events that are keypresses with no modifiers.
+    fn handle_shift_key_press(&self, code: KeyCode) -> Vec<Action>;
+}
+
 
 /// Represents the vim mode of the buffer.
 #[non_exhaustive]
@@ -28,36 +38,39 @@ pub enum Mode {
     Normal,
 }
 
-/// Handle incomming terminal events, like keypresses.
-pub trait HandleKeyPress {
-    /// Handle incomming terminal events, like keypresses.
-    fn handle_key_press(
-        self,
-        code: KeyCode,
-        modifiers: KeyModifiers,
-    ) -> Vec<Action>;
+impl Mode {
+    /// Handle incomming terminal events on any kind.
+    pub fn handle_event(&self, event: &Event) -> Vec<Action> {
+        event.as_key_press_event().map_or_else(Vec::new, |key_event| {
+            match key_event.modifiers {
+                KeyModifiers::NONE =>
+                    self.handle_blank_key_press(key_event.code),
+                KeyModifiers::SHIFT =>
+                    self.handle_shift_key_press(key_event.code),
+                _ => vec![],
+            }
+        })
+    }
 }
 
 impl HandleKeyPress for Mode {
-    fn handle_key_press(
-        self,
-        code: KeyCode,
-        modifiers: KeyModifiers,
-    ) -> Vec<Action> {
-        if modifiers == KeyModifiers::NONE {
-            #[expect(
-                clippy::wildcard_enum_match_arm,
-                reason = "take only a few"
-            )]
-            match code {
-                KeyCode::Left => return vec![Action::GoTo(GoToAction::Left)],
-                KeyCode::Right => return vec![Action::GoTo(GoToAction::Right)],
-                _ => (),
-            }
+    fn handle_blank_key_press(&self, code: KeyCode) -> Vec<Action> {
+        #[expect(clippy::wildcard_enum_match_arm, reason = "take only a few")]
+        match code {
+            KeyCode::Left => return vec![Action::GoTo(GoToAction::Left)],
+            KeyCode::Right => return vec![Action::GoTo(GoToAction::Right)],
+            _ => (),
         }
-        match self {
-            Self::Insert => Insert.handle_key_press(code, modifiers),
-            Self::Normal => Normal.handle_key_press(code, modifiers),
+        match *self {
+            Self::Insert => Insert.handle_blank_key_press(code),
+            Self::Normal => Normal.handle_blank_key_press(code),
+        }
+    }
+
+    fn handle_shift_key_press(&self, code: KeyCode) -> Vec<Action> {
+        match *self {
+            Self::Insert => Insert.handle_shift_key_press(code),
+            Self::Normal => Normal.handle_shift_key_press(code),
         }
     }
 }
