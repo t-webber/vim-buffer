@@ -1,7 +1,8 @@
 use crossterm::event::KeyCode;
 
-use crate::action::{Action, GoToAction};
-use crate::mode::{HandleKeyPress, Mode};
+use crate::Mode;
+use crate::buffer::action::{Action, GoToAction};
+use crate::buffer::mode::HandleKeyPress;
 
 /// Struct to handle keypresses in insert mode
 pub struct Insert;

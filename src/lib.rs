@@ -37,18 +37,8 @@
 #![expect(clippy::missing_inline_in_public_items, reason = "bad lint")]
 #![cfg_attr(test, expect(clippy::single_call_fn, reason = "bad lint"))]
 
-/// Defines the actions that can be made on the buffer
-mod action;
-/// Defines a bounded usize newtype, to safely increment, decrement a cursor.
-mod bounded_usize;
 /// Publicly interfaced buffer to handle vim keymap and modes
 mod buffer;
-/// Handles the vim modes and the keypresses on those modes
-mod mode;
 
-#[cfg(test)]
-mod tests;
-
-pub use buffer::Buffer;
+pub use buffer::{Buffer, Mode};
 pub use crossterm;
-pub use mode::Mode;

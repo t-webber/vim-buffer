@@ -1,7 +1,8 @@
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
-use crate::action::{Action, GoToAction};
-use crate::mode::Mode;
+use crate::Mode;
+use crate::buffer::action::{Action, GoToAction};
+
 
 fn expect_action(mode: Mode, event: Event, action: &[Action]) {
     let real_actions = mode.handle_event(&event);

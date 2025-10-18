@@ -5,9 +5,9 @@ mod normal;
 
 use crossterm::event::{Event, KeyCode, KeyModifiers};
 
-use crate::action::{Action, GoToAction};
-use crate::mode::insert::Insert;
-use crate::mode::normal::Normal;
+use crate::buffer::action::{Action, GoToAction};
+use crate::buffer::mode::insert::Insert;
+use crate::buffer::mode::normal::Normal;
 
 /// Handle incomming terminal events, like keypresses.
 trait HandleKeyPress {

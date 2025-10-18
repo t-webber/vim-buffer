@@ -1,8 +1,18 @@
-use crossterm::event::Event;
+/// Defines the actions that can be made on the buffer
+mod action;
+/// Defines a bounded usize newtype, to safely increment, decrement a cursor.
+mod bounded_usize;
+/// Handles the vim modes and the keypresses on those modes
+mod mode;
 
-use crate::action::{Action, GoToAction};
-use crate::bounded_usize::BoundedUsize;
-use crate::mode::Mode;
+#[cfg(test)]
+mod tests;
+
+use crossterm::event::Event;
+pub use mode::Mode;
+
+use crate::buffer::action::{Action, GoToAction};
+use crate::buffer::bounded_usize::BoundedUsize;
 
 /// Buffer that supports vim keymaps
 #[derive(Debug, Default)]
