@@ -63,7 +63,7 @@ fn backspace() {
 #[test]
 fn chars_normal_mode() {
     let mut buffer = Buffer::default();
-    for ch in "someotherchrs".chars() {
+    for ch in '\0'..'Z' {
         assert!(!do_evt!(buffer, KeyCode::Char(ch)));
     }
     assert_eq!(buffer.as_content(), "");
@@ -165,5 +165,28 @@ fn arrows() {
             evt!('e'),
         ],
         "abdce",
+    );
+}
+
+#[test]
+fn h_l_keys() {
+    test_events(
+        &[
+            evt!('i'),
+            evt!('a'),
+            evt!('b'),
+            evt!('c'),
+            evt!(Esc),
+            evt!('h'),
+            evt!('h'),
+            evt!('i'),
+            evt!('d'),
+            evt!(Esc),
+            evt!('l'),
+            evt!('l'),
+            evt!('a'),
+            evt!('e'),
+        ],
+        "dabec",
     );
 }
