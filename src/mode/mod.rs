@@ -3,7 +3,7 @@ mod insert;
 /// Handles keypresses in normal mode
 mod normal;
 
-use crossterm::event::Event;
+use crossterm::event::{KeyCode, KeyModifiers};
 
 use crate::action::Action;
 use crate::mode::insert::Insert;
@@ -29,16 +29,24 @@ pub enum Mode {
 }
 
 /// Handle incomming terminal events, like keypresses.
-pub trait HandleEvent {
+pub trait HandleKeyPress {
     /// Handle incomming terminal events, like keypresses.
-    fn handle_event(self, event: &Event) -> Vec<Action>;
+    fn handle_key_press(
+        self,
+        code: KeyCode,
+        modifiers: KeyModifiers,
+    ) -> Vec<Action>;
 }
 
-impl HandleEvent for Mode {
-    fn handle_event(self, event: &Event) -> Vec<Action> {
+impl HandleKeyPress for Mode {
+    fn handle_key_press(
+        self,
+        code: KeyCode,
+        modifiers: KeyModifiers,
+    ) -> Vec<Action> {
         match self {
-            Self::Insert => Insert.handle_event(event),
-            Self::Normal => Normal.handle_event(event),
+            Self::Insert => Insert.handle_key_press(code, modifiers),
+            Self::Normal => Normal.handle_key_press(code, modifiers),
         }
     }
 }
