@@ -1,7 +1,7 @@
 /// Defines the valid modifiers that can be used within a chevron group.
 mod char_modifier;
-/// Defines the parser for simple keys inside chevron groups, like <Esc> and
-/// <CR>.
+/// Defines the parser for simple keys inside chevron groups, like `<Esc>` and
+/// `<CR>`.
 mod key;
 /// Defines the state to parse the chevron groups that represent modified keys
 mod modified_key;
@@ -15,7 +15,6 @@ use crate::event_parser::EventParser;
 use crate::event_parser::chevron_parser::key::{LENGTHS, build_named_key};
 pub use crate::event_parser::chevron_parser::modified_key::ModifiedKeyError;
 use crate::event_parser::chevron_parser::modified_key::ModifiedKeyParsingState;
-
 
 /// Parses one chevron group.
 ///
@@ -75,7 +74,6 @@ impl ChevronGroupParsingState {
     }
 }
 
-
 impl EventParser for ChevronGroupParsingState {
     type Error = ChevronGroupError;
 
@@ -100,7 +98,7 @@ impl EventParser for ChevronGroupParsingState {
                 );
                 Ok(None)
             }
-            &mut Self::Unknown(previous) if ch == '>' =>
+            &mut Self::Unknown(_) if ch == '>' =>
                 Err(Self::Error::SingleCharGroup),
             &mut Self::Unknown(previous) =>
                 self.evolve_to_named_key(previous, ch).map(|()| None),
@@ -123,7 +121,6 @@ impl EventParser for ChevronGroupParsingState {
         }
     }
 }
-
 
 /// Errors that may occur while parsing a chevron group
 #[non_exhaustive]
