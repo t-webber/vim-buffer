@@ -16,7 +16,6 @@ use crate::event_parser::chevron_parser::state::ChevronGroupParsingState;
 /// Parses one chevron group.
 ///
 /// Chevron groups are used to denote keys with keymodifiers.
-#[derive(Debug)]
 pub struct ChevronGroupParser(ChevronGroupParsingState);
 
 impl ChevronGroupParser {

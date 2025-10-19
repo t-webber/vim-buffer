@@ -5,7 +5,7 @@ use crate::event_parser::chevron_parser::Result;
 use crate::event_parser::chevron_parser::char_modifier::ChevronModifier;
 
 /// Struct to represent a state where at least one key modifier has been found.
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone)]
 pub struct NonEmptyModifiers {
     /// Last modifier to have been read.
     last_modifier:      ChevronModifier,

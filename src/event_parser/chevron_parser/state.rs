@@ -5,7 +5,7 @@ use crate::event_parser::chevron_parser::{ChevronParsingError, Result};
 
 
 /// Parsing state to parse a chevron group.
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone)]
 pub enum ChevronGroupParsingState {
     /// The group was just opened, nothing was read yet.
     None,

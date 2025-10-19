@@ -1,22 +1,30 @@
 use crossterm::event::KeyModifiers;
 
-/// Valid modifiers for inside a chevron group
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+/// Defines all the valid modifiers for modifier group keys.
+#[derive(Copy, Clone)]
 pub enum ChevronModifier {
-    /// Control
+    /// `'A'`
+    Alt,
+    /// `'D'`
+    Command,
+    /// `'C'`
     Control,
-    /// Meta
+    /// `'M'`
     Meta,
-    /// Shift
+    /// `'S'`
     Shift,
+    /// `'T'`
+    TrueMeta,
 }
-
 impl ChevronModifier {
     /// Creates a new [`ChevronModifier`] from a `char`, if possible.
     pub const fn maybe_from(ch: char) -> Option<Self> {
         Some(match ch {
             'C' => Self::Control,
             'M' => Self::Meta,
+            'A' => Self::Alt,
+            'T' => Self::TrueMeta,
+            'D' => Self::Command,
             'S' => Self::Shift,
             _ => return None,
         })
@@ -28,6 +36,9 @@ impl ChevronModifier {
         match self {
             Self::Control => 'c',
             Self::Meta => 'm',
+            Self::Alt => 'a',
+            Self::TrueMeta => 't',
+            Self::Command => 'd',
             Self::Shift => 's',
         }
     }
@@ -37,7 +48,9 @@ impl ChevronModifier {
     pub const fn to_modifier(self) -> KeyModifiers {
         match self {
             Self::Control => KeyModifiers::CONTROL,
-            Self::Meta => KeyModifiers::META,
+            Self::Meta | Self::Alt => KeyModifiers::ALT,
+            Self::TrueMeta => KeyModifiers::META,
+            Self::Command => KeyModifiers::SUPER,
             Self::Shift => KeyModifiers::SHIFT,
         }
     }

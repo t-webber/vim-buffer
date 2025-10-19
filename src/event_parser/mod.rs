@@ -13,7 +13,7 @@ pub use crate::event_parser::chevron_parser::ChevronParsingError;
 
 
 /// Current state of the parser, to know what char to expect next.
-#[derive(Default, Debug)]
+#[derive(Default)]
 enum EventParserState {
     /// A chevron group was opened, handing the parsing over to
     /// [`ChevronGroupParser`]

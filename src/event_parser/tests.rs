@@ -97,18 +97,18 @@ fn missing_hypen() {
 
 
 #[test]
-fn control_s() {
+fn true_meta_t() {
     assert_eq!(
-        parse_events("<C-s>"),
-        Ok(vec![mod_evt('s', KeyModifiers::CONTROL)])
+        parse_events("<T-T>"),
+        Ok(vec![mod_evt('t', KeyModifiers::META)])
     );
 }
 
 #[test]
-fn control_shift_s() {
+fn control_shift_alt_s() {
     assert_eq!(
-        parse_events("<C-S-s>"),
-        Ok(vec![mod_evt('s', KeyModifiers::CONTROL | KeyModifiers::SHIFT)])
+        parse_events("<C-S-A>"),
+        Ok(vec![mod_evt('A', KeyModifiers::CONTROL | KeyModifiers::SHIFT)])
     );
 }
 
@@ -116,11 +116,12 @@ fn control_shift_s() {
 #[test]
 fn modifier_chars() {
     assert_eq!(
-        parse_events("<C-C><C-M><C-S>"),
+        parse_events("<C-C><A-M><C-S><T-D>"),
         Ok(vec![
             mod_evt('c', KeyModifiers::CONTROL),
-            mod_evt('m', KeyModifiers::CONTROL),
+            mod_evt('m', KeyModifiers::ALT),
             mod_evt('s', KeyModifiers::CONTROL),
+            mod_evt('d', KeyModifiers::META),
         ])
     );
 }
@@ -129,12 +130,12 @@ fn modifier_chars() {
 #[test]
 fn alternate() {
     assert_eq!(
-        parse_events("a<M-b>c<S-d>e"),
+        parse_events("a<M-b>c<D-d>e"),
         Ok(vec![
             evt!('a'),
-            mod_evt('b', KeyModifiers::META),
+            mod_evt('b', KeyModifiers::ALT),
             evt!('c'),
-            mod_evt('d', KeyModifiers::SHIFT),
+            mod_evt('d', KeyModifiers::SUPER),
             evt!('e')
         ])
     );
