@@ -32,10 +32,12 @@
 #![expect(
     clippy::implicit_return,
     clippy::mod_module_files,
+    clippy::single_call_fn,
+    clippy::question_mark_used,
+    clippy::pattern_type_mismatch,
     reason = "chosen style"
 )]
 #![expect(clippy::missing_inline_in_public_items, reason = "bad lint")]
-#![cfg_attr(test, expect(clippy::single_call_fn, reason = "bad lint"))]
 
 /// Publicly interfaced buffer to handle vim keymap and modes
 mod buffer;
@@ -44,3 +46,4 @@ mod event_parser;
 
 pub use buffer::{Buffer, Mode};
 pub use crossterm;
+pub use event_parser::{ChevronParsingError, EventParsingError, parse_events};

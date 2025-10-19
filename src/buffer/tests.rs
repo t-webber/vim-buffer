@@ -1,16 +1,20 @@
+#![expect(clippy::unwrap_used, reason = "tests should panic")]
+
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
-use crate::{Buffer, Mode};
+use crate::{Buffer, ChevronParsingError, EventParsingError, Mode};
 
+/// Converts an expression to a keyevent.
+#[macro_export]
 macro_rules! evt {
     ($name:ident) => {
-        evt!(KeyCode::$name)
+        evt!(crossterm::event::KeyCode::$name)
     };
     ($name:literal) => {
-        evt!(KeyCode::Char($name))
+        evt!(crossterm::event::KeyCode::Char($name))
     };
     ($name:expr) => {
-        Event::Key(KeyEvent::from($name))
+        crossterm::event::Event::Key(crossterm::event::KeyEvent::from($name))
     };
 }
 
@@ -194,8 +198,19 @@ fn h_l_keys() {
 #[test]
 fn string_inputs() {
     let mut buffer = Buffer::default();
-    buffer.update_from_string("abc");
+    buffer.update_from_string("abc").unwrap();
     buffer.update(&evt!(Esc));
-    buffer.update_from_string("idef");
+    buffer.update_from_string("id<C-S-M-A>ef").unwrap();
     assert_eq!(buffer.as_content(), "bdefc");
+}
+
+#[test]
+fn empty_group() {
+    let mut buffer = Buffer::default();
+    assert_eq!(
+        buffer.update_from_string("<>"),
+        Err(EventParsingError::ChevronGroupError(
+            ChevronParsingError::MissingModifier
+        ))
+    );
 }
