@@ -1,5 +1,3 @@
-#![expect(clippy::unwrap_used, reason = "tests should panic")]
-
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
 use crate::{Buffer, ChevronParsingError, EventParsingError, Mode};

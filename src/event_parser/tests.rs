@@ -156,3 +156,14 @@ fn mismatched_chevron() {
         Err(EventParsingError::MismatchedClosingChevron),
     );
 }
+
+#[test]
+fn shift_without_modifiers() {
+    let event = parse_events("S")
+        .unwrap()
+        .first()
+        .unwrap()
+        .as_key_press_event()
+        .unwrap();
+    assert_eq!(event.modifiers, KeyModifiers::SHIFT);
+}
