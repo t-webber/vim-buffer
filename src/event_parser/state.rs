@@ -1,8 +1,9 @@
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
 
-use crate::ChevronParsingError;
 use crate::event_parser::EventParser;
-use crate::event_parser::chevron_parser::ChevronGroupParser;
+use crate::event_parser::chevron_parser::{
+    ChevronGroupError, ChevronGroupParser
+};
 
 /// Current state of the parser, to know what char to expect next.
 #[derive(Default)]
@@ -54,7 +55,7 @@ impl EventParser for EventParserState {
                         Ok(Some(event))
                     }
                     Ok(None) => Ok(None),
-                    Err(err) => Err(EventParsingError::ChevronGroupError(err)),
+                    Err(err) => Err(EventParsingError::ChevronGroup(err)),
                 },
         }
     }
@@ -69,7 +70,7 @@ pub enum EventParsingError {
     /// Error occurred while parsing a chevron group
     ///
     /// A chevron group is anything between `<` and `>`.
-    ChevronGroupError(ChevronParsingError),
+    ChevronGroup(ChevronGroupError),
     /// The provided named key isn't a valid key name.
     InvalidNamedKey,
     /// Found a closing `>` without a corresponding `<`.

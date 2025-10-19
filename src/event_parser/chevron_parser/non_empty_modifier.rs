@@ -1,10 +1,9 @@
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
 
-use crate::ChevronParsingError;
 use crate::event_parser::chevron_parser::char_modifier::ChevronModifier;
 
 /// Struct to represent a state where at least one key modifier has been found.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct NonEmptyModifiers {
     /// Last modifier to have been read.
     last_modifier:      ChevronModifier,
@@ -14,15 +13,11 @@ pub struct NonEmptyModifiers {
 
 impl NonEmptyModifiers {
     /// Builds an [`Event`] from a [`NonEmptyModifiers`]
-    pub const fn build_event(self) -> Result<Event, ChevronParsingError> {
-        if self.previous_modifiers.is_empty() {
-            Err(ChevronParsingError::MissingChar)
-        } else {
-            Ok(Self::build_event_from_char_modifiers(
-                self.last_modifier.to_char(),
-                self.previous_modifiers,
-            ))
-        }
+    pub const fn build_event(self) -> Event {
+        Self::build_event_from_char_modifiers(
+            self.last_modifier.to_char(),
+            self.previous_modifiers,
+        )
     }
 
     /// Builds an [`Event`] from a `char` and [`KeyModifiers`].

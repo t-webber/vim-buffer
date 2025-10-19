@@ -1,6 +1,6 @@
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
-use crate::{Buffer, ChevronParsingError, EventParsingError, Mode};
+use crate::{Buffer, ChevronGroupError, EventParsingError, Mode};
 
 /// Converts an expression to a keyevent.
 #[macro_export]
@@ -207,8 +207,8 @@ fn empty_group() {
     let mut buffer = Buffer::default();
     assert_eq!(
         buffer.update_from_string("<>"),
-        Err(EventParsingError::ChevronGroupError(
-            ChevronParsingError::MissingModifier
+        Err(EventParsingError::ChevronGroup(
+            ChevronGroupError::ExpectedLetter { got: '>' }
         ))
     );
 }

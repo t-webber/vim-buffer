@@ -1,7 +1,7 @@
 use crossterm::event::KeyModifiers;
 
 /// Defines all the valid modifiers for modifier group keys.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum ChevronModifier {
     /// `'A'`
     Alt,

@@ -1,7 +1,8 @@
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
-use crate::event_parser::chevron_parser::ChevronParsingError;
-use crate::{EventParsingError, evt, parse_events};
+use crate::{
+    ChevronGroupError, EventParsingError, ModifiedKeyError, evt, parse_events
+};
 
 
 fn mod_evt(ch: char, modifiers: KeyModifiers) -> Event {
@@ -17,9 +18,9 @@ fn mod_evt(ch: char, modifiers: KeyModifiers) -> Event {
 fn empty_chevron_group() {
     assert_eq!(
         parse_events("<>"),
-        Err(EventParsingError::ChevronGroupError(
-            ChevronParsingError::MissingModifier
-        )),
+        Err(EventParsingError::ChevronGroup(
+            ChevronGroupError::ExpectedLetter { got: '>' }
+        ))
     );
 }
 
@@ -27,9 +28,9 @@ fn empty_chevron_group() {
 fn missing_char() {
     assert_eq!(
         parse_events("<C->"),
-        Err(EventParsingError::ChevronGroupError(
-            ChevronParsingError::MissingChar
-        )),
+        Err(EventParsingError::ChevronGroup(ChevronGroupError::ModifiedKey(
+            ModifiedKeyError::MissingChar
+        ))),
     );
 }
 
@@ -37,8 +38,8 @@ fn missing_char() {
 fn missing_char_and_hyphen() {
     assert_eq!(
         parse_events("<C>"),
-        Err(EventParsingError::ChevronGroupError(
-            ChevronParsingError::MissingChar
+        Err(EventParsingError::ChevronGroup(
+            ChevronGroupError::SingleCharGroup
         )),
     );
 }
@@ -47,8 +48,8 @@ fn missing_char_and_hyphen() {
 fn missing_modifier_and_hyphen() {
     assert_eq!(
         parse_events("<c>"),
-        Err(EventParsingError::ChevronGroupError(
-            ChevronParsingError::MissingModifier
+        Err(EventParsingError::ChevronGroup(
+            ChevronGroupError::SingleCharGroup
         )),
     );
 }
@@ -58,9 +59,9 @@ fn missing_modifier_and_hyphen() {
 fn too_many_separated_chars() {
     assert_eq!(
         parse_events("<C-a-b>"),
-        Err(EventParsingError::ChevronGroupError(
-            ChevronParsingError::ExpectedChevron { got: '-' }
-        ))
+        Err(EventParsingError::ChevronGroup(ChevronGroupError::ModifiedKey(
+            ModifiedKeyError::ExpectedChevron { got: '-' }
+        )))
     );
 }
 
@@ -68,9 +69,9 @@ fn too_many_separated_chars() {
 fn too_many_successive_chars() {
     assert_eq!(
         parse_events("<C-ab>"),
-        Err(EventParsingError::ChevronGroupError(
-            ChevronParsingError::ExpectedChevron { got: 'b' }
-        ))
+        Err(EventParsingError::ChevronGroup(ChevronGroupError::ModifiedKey(
+            ModifiedKeyError::ExpectedChevron { got: 'b' }
+        )))
     );
 }
 
@@ -79,8 +80,8 @@ fn too_many_successive_chars() {
 fn missing_modifier() {
     assert_eq!(
         parse_events("<->"),
-        Err(EventParsingError::ChevronGroupError(
-            ChevronParsingError::MissingModifier
+        Err(EventParsingError::ChevronGroup(
+            ChevronGroupError::ExpectedLetter { got: '-' }
         )),
     );
 }
@@ -89,8 +90,8 @@ fn missing_modifier() {
 fn missing_hypen() {
     assert_eq!(
         parse_events("<Ca>"),
-        Err(EventParsingError::ChevronGroupError(
-            ChevronParsingError::ExpectedChevronOrHyphen { got: 'a' }
+        Err(EventParsingError::ChevronGroup(
+            ChevronGroupError::InvalidNamedKey
         )),
     );
 }
@@ -134,7 +135,6 @@ fn control_x() {
     );
 }
 
-
 #[test]
 fn alternate() {
     assert_eq!(
@@ -150,12 +150,60 @@ fn alternate() {
 }
 
 #[test]
+fn backspace() {
+    assert_eq!(parse_events("<Return>"), Ok(vec![evt!(Backspace),]));
+}
+
+
+#[test]
 fn mismatched_chevron() {
     assert_eq!(
         parse_events(">"),
         Err(EventParsingError::MismatchedClosingChevron),
     );
 }
+
+#[test]
+fn invalid_modifier() {
+    assert_eq!(
+        parse_events("<c-s>"),
+        Err(EventParsingError::ChevronGroup(ChevronGroupError::ModifiedKey(
+            ModifiedKeyError::InvalidModifier('c')
+        ))),
+    );
+}
+
+#[test]
+fn non_u8_char() {
+    assert_eq!(
+        parse_events("<a\u{fff}>"),
+        Err(EventParsingError::ChevronGroup(
+            ChevronGroupError::InvalidNamedKey
+        )),
+    );
+}
+
+
+#[test]
+fn to_many_letters() {
+    assert_eq!(
+        parse_events("<C-Cs>"),
+        Err(EventParsingError::ChevronGroup(ChevronGroupError::ModifiedKey(
+            ModifiedKeyError::ExpectedChevronOrHyphen { got: 's' }
+        ))),
+    );
+}
+
+#[test]
+fn key_too_long() {
+    assert_eq!(
+        parse_events("<Caaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa>"),
+        Err(EventParsingError::ChevronGroup(
+            ChevronGroupError::InvalidNamedKey
+        )),
+    );
+}
+
 
 #[test]
 fn shift_without_modifiers() {

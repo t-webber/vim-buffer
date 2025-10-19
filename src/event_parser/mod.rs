@@ -9,7 +9,9 @@ mod tests;
 
 use crossterm::event::Event;
 
-pub use crate::event_parser::chevron_parser::ChevronParsingError;
+pub use crate::event_parser::chevron_parser::{
+    ChevronGroupError, ModifiedKeyError
+};
 use crate::event_parser::state::EventParserState;
 pub use crate::event_parser::state::EventParsingError;
 
