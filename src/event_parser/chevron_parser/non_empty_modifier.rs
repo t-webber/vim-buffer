@@ -31,7 +31,10 @@ impl NonEmptyModifiers {
         ch: char,
         modifiers: KeyModifiers,
     ) -> Event {
-        Event::Key(KeyEvent::new(KeyCode::Char(ch), modifiers))
+        Event::Key(KeyEvent::new(
+            KeyCode::Char(ch.to_ascii_lowercase()),
+            modifiers,
+        ))
     }
 
     /// Builds an [`Event`] from a [`NonEmptyModifiers`] applied to a `char`.

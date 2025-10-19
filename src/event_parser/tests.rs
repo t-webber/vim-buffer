@@ -126,6 +126,14 @@ fn modifier_chars() {
     );
 }
 
+#[test]
+fn control_x() {
+    assert_eq!(
+        parse_events("<C-X>"),
+        Ok(vec![mod_evt('x', KeyModifiers::CONTROL)])
+    );
+}
+
 
 #[test]
 fn alternate() {

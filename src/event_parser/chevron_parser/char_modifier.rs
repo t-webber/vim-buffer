@@ -34,12 +34,12 @@ impl ChevronModifier {
     /// place.
     pub const fn to_char(self) -> char {
         match self {
-            Self::Control => 'c',
-            Self::Meta => 'm',
-            Self::Alt => 'a',
-            Self::TrueMeta => 't',
-            Self::Command => 'd',
-            Self::Shift => 's',
+            Self::Control => 'C',
+            Self::Meta => 'M',
+            Self::Alt => 'A',
+            Self::TrueMeta => 'T',
+            Self::Command => 'D',
+            Self::Shift => 'S',
         }
     }
 
