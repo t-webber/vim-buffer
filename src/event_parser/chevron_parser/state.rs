@@ -1,7 +1,8 @@
 use crossterm::event::Event;
 
+use crate::event_parser::EventParser;
+use crate::event_parser::chevron_parser::ChevronParsingError;
 use crate::event_parser::chevron_parser::non_empty_modifier::NonEmptyModifiers;
-use crate::event_parser::chevron_parser::{ChevronParsingError, Result};
 
 
 /// Parsing state to parse a chevron group.
@@ -18,9 +19,10 @@ pub enum ChevronGroupParsingState {
 }
 
 
-impl ChevronGroupParsingState {
-    /// Parse one more char with the given [`ChevronGroupParsingState`]
-    pub const fn parse_char(&mut self, ch: char) -> Result<Option<Event>> {
+impl EventParser for ChevronGroupParsingState {
+    type Error = ChevronParsingError;
+
+    fn parse_char(&mut self, ch: char) -> Result<Option<Event>, Self::Error> {
         match self {
             // None //
             Self::None => {

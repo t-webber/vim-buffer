@@ -6,10 +6,9 @@ mod non_empty_modifier;
 /// Defines the state to parse the chevron groups
 mod state;
 
-use core::result;
-
 use crossterm::event::Event;
 
+use crate::event_parser::EventParser;
 use crate::event_parser::chevron_parser::state::ChevronGroupParsingState;
 
 
@@ -23,9 +22,12 @@ impl ChevronGroupParser {
     pub const fn new() -> Self {
         Self(ChevronGroupParsingState::None)
     }
+}
 
-    /// Parse one more char for the current chevron group state.
-    pub const fn parse_char(&mut self, ch: char) -> Result<Option<Event>> {
+impl EventParser for ChevronGroupParser {
+    type Error = ChevronParsingError;
+
+    fn parse_char(&mut self, ch: char) -> Result<Option<Event>, Self::Error> {
         self.0.parse_char(ch)
     }
 }
@@ -50,6 +52,3 @@ pub enum ChevronParsingError {
     /// The chevron group is missing a modifier.
     MissingModifier,
 }
-
-/// Result wrapper for chevron group parsing
-type Result<T> = result::Result<T, ChevronParsingError>;
