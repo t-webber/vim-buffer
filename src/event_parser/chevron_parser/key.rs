@@ -5,7 +5,7 @@ use crossterm::event::KeyCode;
 
 /// Defines the key interface
 macro_rules! key {
-    ($($name:ident: $code:ident),*) => {
+    ($($name:ident: $code:ident,)*) => {
         /// Minimum and maximum length of the string represetation of a key
         pub const LENGTHS:Bounds = {
 
@@ -48,29 +48,28 @@ macro_rules! key {
         });
 }}
 
-
 key! {
 // Nul,
 // BS,
-// Tab,
+Tab: Tab,
 // NL,
-// CR: Enter
-Return: Backspace
-// Enter,
-// Esc,
+CR: Enter,
+Return: Backspace,
+Enter: Enter,
+Esc: Esc,
 // Space,
 // lt,
 // Bslash,
 // Bar,
-// Del,
+ Del: Delete,
 // CSI,
 // EOL,
 // Ignore,
 // NOP,
-// Up,
-// Down,
-// Left,
-// Right,
+Up: Up,
+Down: Down,
+Left: Left,
+Right: Right,
 // F1,
 // F2,
 // F3,
@@ -88,10 +87,10 @@ Return: Backspace
 // Find,
 // Select,
 // Insert,
-// Home,
-// End,
-// PageUp,
-// PageDown,
+Home: Home,
+End: End,
+PageUp: PageUp,
+PageDown: PageDown,
 // kUp,
 // kDown,
 // kLeft,

@@ -215,3 +215,20 @@ fn shift_without_modifiers() {
         .unwrap();
     assert_eq!(event.modifiers, KeyModifiers::SHIFT);
 }
+
+#[test]
+fn test_key() {
+    assert_eq!(
+        parse_events("<Up><Down><Left><Right><Tab><Return><CR><Esc>"),
+        Ok(vec![
+            evt!(Up),
+            evt!(Down),
+            evt!(Left),
+            evt!(Right),
+            evt!(Tab),
+            evt!(Backspace),
+            evt!(Enter),
+            evt!(Esc)
+        ])
+    );
+}
