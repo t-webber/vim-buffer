@@ -32,10 +32,14 @@ impl HandleKeyPress for Insert {
 
     fn handle_shift_key_press(
         &self,
-        _code: KeyCode,
+        code: KeyCode,
         pending: &mut Option<OPending>,
     ) -> Vec<Action> {
         *pending = None;
-        vec![]
+        if let KeyCode::Char(ch) = code {
+            vec![Action::InsertChar(ch.to_ascii_uppercase())]
+        } else {
+            vec![]
+        }
     }
 }

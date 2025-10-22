@@ -70,9 +70,8 @@ fn wrong_mode_key() {
 }
 
 #[test]
-fn with_modifiers() {
+fn with_modifiers_char() {
     for modifier in [
-        KeyModifiers::SHIFT,
         KeyModifiers::CONTROL,
         KeyModifiers::ALT,
         KeyModifiers::SUPER,
@@ -83,7 +82,28 @@ fn with_modifiers() {
         expect_action(Mode::Normal, event, &[]);
         expect_action(Mode::Insert, event, &[]);
     }
+    let event = event(KeyCode::Char('i'), Some(KeyModifiers::SHIFT), None);
+    expect_action(Mode::Normal, event, &[]);
+    expect_action(Mode::Insert, event, &[Action::InsertChar('I')]);
 }
+
+
+#[test]
+fn with_modifiers_esc() {
+    for modifier in [
+        KeyModifiers::CONTROL,
+        KeyModifiers::ALT,
+        KeyModifiers::SUPER,
+        KeyModifiers::HYPER,
+        KeyModifiers::META,
+        KeyModifiers::SHIFT,
+    ] {
+        let event = event(KeyCode::Esc, Some(modifier), None);
+        expect_action(Mode::Normal, event, &[]);
+        expect_action(Mode::Insert, event, &[]);
+    }
+}
+
 
 #[test]
 fn not_press() {
