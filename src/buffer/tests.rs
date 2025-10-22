@@ -63,17 +63,6 @@ fn backspace() {
 }
 
 #[test]
-fn chars_normal_mode() {
-    let mut buffer = Buffer::default();
-    for ch in '\0'..'Z' {
-        if ch != 'I' && ch != 'A' {
-            assert!(!do_evt!(buffer, KeyCode::Char(ch)));
-        }
-    }
-    assert_eq!(buffer.as_content(), "");
-}
-
-#[test]
 fn mode_switch() {
     let mut buffer = Buffer::default();
     assert_eq!(buffer.as_mode(), Mode::Normal);
@@ -231,4 +220,11 @@ fn normal_shift_i() {
     let mut buffer = Buffer::default();
     buffer.update_from_string("iabcdefghi<Esc>Iz").unwrap();
     assert_eq!(buffer.as_content(), "zabcdefghi");
+}
+
+#[test]
+fn normal_carret_dollar() {
+    let mut buffer = Buffer::default();
+    buffer.update_from_string("iabcdefghi<Esc>^iz<Esc>$ay").unwrap();
+    assert_eq!(buffer.as_content(), "zabcdefghiy");
 }

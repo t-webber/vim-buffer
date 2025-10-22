@@ -35,6 +35,9 @@ impl HandleKeyPress for Normal {
                     *pending = Some(OPending::FindNext);
                     vec![]
                 }
+                KeyCode::Char('^') =>
+                    vec![Action::GoTo(GoToAction::FirstNonSpace)],
+                KeyCode::Char('$') => vec![Action::GoTo(GoToAction::Eol)],
                 _ => vec![],
             },
         }
