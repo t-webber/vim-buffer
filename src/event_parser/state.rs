@@ -20,7 +20,7 @@ impl EventParserState {
     /// Push a normal char to the list of events.
     const fn char_event(ch: char) -> Event {
         Event::Key(KeyEvent::new(
-            KeyCode::Char(ch.to_ascii_lowercase()),
+            KeyCode::Char(ch),
             if ch.is_uppercase() {
                 KeyModifiers::SHIFT
             } else {

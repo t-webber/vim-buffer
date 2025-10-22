@@ -3,7 +3,7 @@ mod insert;
 /// Handles keypresses in normal mode
 mod normal;
 
-use crossterm::event::{Event, KeyCode, KeyModifiers};
+use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
 
 use crate::buffer::action::{Action, GoToAction};
 use crate::buffer::mode::insert::Insert;
@@ -54,7 +54,8 @@ impl Mode {
         event: &Event,
         pending: &mut Option<OPending>,
     ) -> Vec<Action> {
-        event.as_key_press_event().map_or_else(Vec::new, |key_event| {
+        event.as_key_press_event().map_or_else(Vec::new, |mut key_event| {
+            fix_shift_modifier(&mut key_event);
             match key_event.modifiers {
                 KeyModifiers::NONE =>
                     self.handle_blank_key_press(key_event.code, pending),
@@ -92,6 +93,21 @@ impl HandleKeyPress for Mode {
         match *self {
             Self::Insert => Insert.handle_shift_key_press(code, pending),
             Self::Normal => Normal.handle_shift_key_press(code, pending),
+        }
+    }
+}
+
+/// Adds [`KeyModifiers::SHIFT`] if the event is a capital char, and capitalises
+/// the char if the modifiers contain shift.
+fn fix_shift_modifier(key_event: &mut KeyEvent) {
+    #[expect(clippy::else_if_without_else, reason = "checked")]
+    if let KeyCode::Char(ch) = &mut key_event.code {
+        if ch.is_ascii_uppercase() {
+            key_event.modifiers |= KeyModifiers::SHIFT;
+        } else if key_event.modifiers & KeyModifiers::SHIFT
+            == KeyModifiers::SHIFT
+        {
+            *ch = ch.to_ascii_uppercase();
         }
     }
 }

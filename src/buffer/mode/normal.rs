@@ -47,11 +47,11 @@ impl HandleKeyPress for Normal {
     ) -> Vec<Action> {
         *pending = None;
         match code {
-            KeyCode::Char('I') => vec![
+            KeyCode::Char('I' | 'i') => vec![
                 Action::GoTo(GoToAction::FirstNonSpace),
                 Action::SelectMode(Mode::Insert),
             ],
-            KeyCode::Char('A') => vec![
+            KeyCode::Char('A' | 'a') => vec![
                 Action::GoTo(GoToAction::Eol),
                 Action::SelectMode(Mode::Insert),
             ],

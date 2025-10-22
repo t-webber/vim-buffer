@@ -66,7 +66,9 @@ fn backspace() {
 fn chars_normal_mode() {
     let mut buffer = Buffer::default();
     for ch in '\0'..'Z' {
-        assert!(!do_evt!(buffer, KeyCode::Char(ch)));
+        if ch != 'I' && ch != 'A' {
+            assert!(!do_evt!(buffer, KeyCode::Char(ch)));
+        }
     }
     assert_eq!(buffer.as_content(), "");
 }
@@ -222,4 +224,11 @@ fn normal_f() {
         )
         .unwrap();
     assert_eq!(buffer.as_content(), "abcdefzghi");
+}
+
+#[test]
+fn normal_shift_i() {
+    let mut buffer = Buffer::default();
+    buffer.update_from_string("iabcdefghi<Esc>Iz").unwrap();
+    assert_eq!(buffer.as_content(), "zabcdefghi");
 }
