@@ -3,6 +3,7 @@ use crossterm::event::KeyCode;
 use crate::Mode;
 use crate::buffer::action::{Action, GoToAction};
 use crate::buffer::mode::HandleKeyPress;
+use crate::buffer::o_pending::OPending;
 
 /// Struct to handle keypresses in insert mode
 pub struct Insert;
@@ -12,7 +13,12 @@ pub struct Insert;
     reason = "partially implement events"
 )]
 impl HandleKeyPress for Insert {
-    fn handle_blank_key_press(&self, code: KeyCode) -> Vec<Action> {
+    fn handle_blank_key_press(
+        &self,
+        code: KeyCode,
+        pending: &mut Option<OPending>,
+    ) -> Vec<Action> {
+        *pending = None;
         match code {
             KeyCode::Esc => vec![
                 Action::GoTo(GoToAction::Left),
@@ -24,7 +30,12 @@ impl HandleKeyPress for Insert {
         }
     }
 
-    fn handle_shift_key_press(&self, _: KeyCode) -> Vec<Action> {
+    fn handle_shift_key_press(
+        &self,
+        _code: KeyCode,
+        pending: &mut Option<OPending>,
+    ) -> Vec<Action> {
+        *pending = None;
         vec![]
     }
 }

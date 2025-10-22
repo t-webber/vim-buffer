@@ -4,6 +4,8 @@ mod action;
 mod bounded_usize;
 /// Handles the vim modes and the keypresses on those modes
 mod mode;
+/// Pending keys that need more keys before doing an action.
+mod o_pending;
 
 #[cfg(test)]
 mod tests;
@@ -13,6 +15,7 @@ pub use mode::Mode;
 
 use crate::buffer::action::{Action, GoToAction};
 use crate::buffer::bounded_usize::BoundedUsize;
+use crate::buffer::o_pending::OPending;
 use crate::event_parser::{EventParsingError, parse_events};
 
 /// Buffer that supports vim keymaps
@@ -24,6 +27,8 @@ pub struct Buffer {
     cursor:  BoundedUsize,
     /// Vim mode of the buffer
     mode:    Mode,
+    /// Pending actions that require more keymaps
+    pending: Option<OPending>,
 }
 
 impl Buffer {
@@ -56,7 +61,7 @@ impl Buffer {
     ///
     /// Returns an error if the buffer exceeds [`usize::MAX`]
     pub fn update(&mut self, event: &Event) -> bool {
-        let events = self.mode.handle_event(event);
+        let events = self.mode.handle_event(event, &mut self.pending);
 
         for action in &events {
             self.update_once(*action);
@@ -78,6 +83,18 @@ impl Buffer {
                     match chars.next() {
                         Some(current) if current.is_whitespace() => (),
                         None | Some(_) => break,
+                    }
+                    self.cursor.increment();
+                }
+            }
+            GoToAction::NextOccurrenceOf(ch) => {
+                let mut chars =
+                    self.content.chars().skip(self.cursor.as_value());
+                loop {
+                    if let Some(next) = chars.next()
+                        && next == ch
+                    {
+                        break;
                     }
                     self.cursor.increment();
                 }

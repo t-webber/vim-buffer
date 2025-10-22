@@ -24,6 +24,8 @@ pub enum GoToAction {
     FirstNonSpace,
     /// Move the cursor left by one character
     Left,
+    /// Find next occurrence of char and place cursor on it
+    NextOccurrenceOf(char),
     /// Move the cursor right by one character
     Right,
 }

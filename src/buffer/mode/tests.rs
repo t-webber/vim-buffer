@@ -2,10 +2,11 @@ use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
 use crate::Mode;
 use crate::buffer::action::{Action, GoToAction};
+use crate::buffer::o_pending::OPending;
 
 
 fn expect_action(mode: Mode, event: Event, action: &[Action]) {
-    let real_actions = mode.handle_event(&event);
+    let real_actions = mode.handle_event(&event, &mut None);
 
     assert_eq!(real_actions, action);
 }
@@ -90,4 +91,23 @@ fn not_press() {
         let event = event(KeyCode::Char('x'), None, Some(kind));
         expect_action(Mode::Insert, event, &[]);
     }
+}
+
+#[test]
+fn pending_insert() {
+    let mut pending = Some(OPending::FindNext);
+    let event = code_event(KeyCode::Char('i'));
+    assert_eq!(Mode::Insert.handle_event(&event, &mut pending), vec![
+        Action::InsertChar('i')
+    ]);
+    assert_eq!(pending, None);
+}
+
+
+#[test]
+fn pending_cancelled() {
+    let mut pending = Some(OPending::FindNext);
+    let event = code_event(KeyCode::Esc);
+    assert_eq!(Mode::Normal.handle_event(&event, &mut pending), vec![]);
+    assert_eq!(pending, None);
 }

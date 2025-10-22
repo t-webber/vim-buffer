@@ -212,3 +212,14 @@ fn empty_group() {
         ))
     );
 }
+
+#[test]
+fn normal_f() {
+    let mut buffer = Buffer::default();
+    buffer
+        .update_from_string(
+            "iabcdefghi<Esc><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left>fgiz",
+        )
+        .unwrap();
+    assert_eq!(buffer.as_content(), "abcdefzghi");
+}
