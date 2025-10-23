@@ -18,6 +18,8 @@ pub enum Action {
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum GoToAction {
+    /// Beginning of line (column 0), reached with `0`
+    Bol,
     /// End of line, like with `$` and `A`
     Eol,
     /// First non space character, like with `I` and `^`

@@ -75,6 +75,7 @@ impl Buffer {
         match goto_action {
             GoToAction::Right => self.cursor.increment(),
             GoToAction::Left => self.cursor.decrement(),
+            GoToAction::Bol => self.cursor.set(0),
             GoToAction::Eol => self.cursor.set(self.content.len()),
             GoToAction::FirstNonSpace => {
                 self.cursor.set(0);

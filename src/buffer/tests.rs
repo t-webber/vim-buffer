@@ -228,3 +228,10 @@ fn normal_carret_dollar() {
     buffer.update_from_string("Ai<Esc>^iz<Esc>$ay").unwrap();
     assert_eq!(buffer.as_content(), "zabcdefghiy");
 }
+
+#[test]
+fn normal_0() {
+    let mut buffer = Buffer::from("  abcdef");
+    buffer.update_from_string("$Iz<Esc>0iy").unwrap();
+    assert_eq!(buffer.as_content(), "y  zabcdef");
+}
