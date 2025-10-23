@@ -5,7 +5,7 @@ use crate::Mode;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Action {
     /// Deletes the last written char
-    Backspace,
+    DeleteChar,
     /// Action to move the cursor to a location denotated by a condition
     GoTo(GoToAction),
     /// Inserts a char in the buffer

@@ -151,7 +151,12 @@ fn alternate() {
 
 #[test]
 fn backspace() {
-    assert_eq!(parse_events("<Return>"), Ok(vec![evt!(Backspace),]));
+    assert_eq!(parse_events("<BS>"), Ok(vec![evt!(Backspace),]));
+}
+
+#[test]
+fn enter_return() {
+    assert_eq!(parse_events("<Return>"), Ok(vec![evt!(Enter),]));
 }
 
 
@@ -219,7 +224,7 @@ fn shift_without_modifiers() {
 #[test]
 fn test_key() {
     assert_eq!(
-        parse_events("<Up><Down><Left><Right><Tab><Return><CR><Esc>"),
+        parse_events("<Up><Down><Left><Right><Tab><BS><CR><Esc>"),
         Ok(vec![
             evt!(Up),
             evt!(Down),

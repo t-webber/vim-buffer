@@ -47,7 +47,7 @@ fn do_nothing() {
 }
 
 #[test]
-fn backspace() {
+fn insert_backspace() {
     let mut buffer = Buffer::default();
     assert!(do_evt!(buffer, 'i'));
     assert!(do_evt!(buffer, 'a'));
@@ -234,4 +234,11 @@ fn normal_0() {
     let mut buffer = Buffer::from("  abcdef");
     buffer.update_from_string("$Iz<Esc>0iy").unwrap();
     assert_eq!(buffer.as_content(), "y  zabcdef");
+}
+
+#[test]
+fn backspace() {
+    let mut buffer = Buffer::from("abcdef");
+    buffer.update_from_string("$<BS>i<BS>").unwrap();
+    assert_eq!(buffer.as_content(), "abcdf");
 }

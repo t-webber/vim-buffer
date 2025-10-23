@@ -29,7 +29,8 @@ impl HandleKeyPress for Normal {
                     Action::SelectMode(Mode::Insert),
                 ],
                 KeyCode::Char('i') => vec![Action::SelectMode(Mode::Insert)],
-                KeyCode::Char('h') => vec![Action::GoTo(GoToAction::Left)],
+                KeyCode::Backspace | KeyCode::Char('h') =>
+                    vec![Action::GoTo(GoToAction::Left)],
                 KeyCode::Char('l') => vec![Action::GoTo(GoToAction::Right)],
                 KeyCode::Char('f') => {
                     *pending = Some(OPending::FindNext);

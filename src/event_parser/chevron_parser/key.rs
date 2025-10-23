@@ -50,11 +50,11 @@ macro_rules! key {
 
 key! {
 // Nul,
-// BS,
+BS: Backspace,
 Tab: Tab,
 // NL,
 CR: Enter,
-Return: Backspace,
+Return: Enter,
 Enter: Enter,
 Esc: Esc,
 // Space,

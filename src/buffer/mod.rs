@@ -133,7 +133,7 @@ impl Buffer {
                 self.cursor.increment_with_capacity_unchecked();
             }
             Action::SelectMode(mode) => self.mode = mode,
-            Action::Backspace =>
+            Action::DeleteChar =>
                 if self.cursor.as_value() != 0 {
                     self.cursor.decrement_with_capacity();
                     self.content.remove(self.cursor.as_value());

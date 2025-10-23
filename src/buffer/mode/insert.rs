@@ -25,7 +25,7 @@ impl HandleKeyPress for Insert {
                 Action::SelectMode(Mode::Normal),
             ],
             KeyCode::Char(ch) => vec![Action::InsertChar(ch)],
-            KeyCode::Backspace => vec![Action::Backspace],
+            KeyCode::Backspace => vec![Action::DeleteChar],
             _ => vec![],
         }
     }
