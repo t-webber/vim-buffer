@@ -29,6 +29,7 @@ impl HandleKeyPress for Normal {
                     Action::SelectMode(Mode::Insert),
                 ],
                 KeyCode::Char('i') => vec![Action::SelectMode(Mode::Insert)],
+                KeyCode::Char('x') => vec![Action::DeleteChar],
                 KeyCode::Backspace | KeyCode::Char('h') =>
                     vec![Action::GoTo(GoToAction::Left)],
                 KeyCode::Char('l') => vec![Action::GoTo(GoToAction::Right)],
@@ -59,6 +60,11 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('A' | 'a') => vec![
                 Action::GoTo(GoToAction::Eol),
                 Action::SelectMode(Mode::Insert),
+            ],
+            KeyCode::Char('X') => vec![
+                Action::GoTo(GoToAction::Left),
+                Action::DeleteChar,
+                Action::GoTo(GoToAction::Right),
             ],
             _ => vec![],
         }

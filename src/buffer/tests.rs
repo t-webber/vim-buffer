@@ -242,3 +242,10 @@ fn backspace() {
     buffer.update_from_string("$<BS>i<BS>").unwrap();
     assert_eq!(buffer.as_content(), "abcdf");
 }
+
+#[test]
+fn normal_x_shift_x() {
+    let mut buffer = Buffer::from("abcdefgh");
+    buffer.update_from_string("$hhhhXllx").unwrap();
+    assert_eq!(buffer.as_content(), "abdegh");
+}
