@@ -48,4 +48,9 @@ impl BoundedUsize {
         self.value =
             if value < self.max_value { value } else { self.max_value };
     }
+
+    /// Creates a new [`BoundedUsize`] with a given maximum value.
+    pub const fn with_capacity(max_value: usize) -> Self {
+        Self { max_value, value: 0 }
+    }
 }

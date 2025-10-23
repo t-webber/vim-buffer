@@ -141,3 +141,19 @@ impl Buffer {
         }
     }
 }
+
+impl From<String> for Buffer {
+    fn from(value: String) -> Self {
+        Self {
+            cursor: BoundedUsize::with_capacity(value.len()),
+            content: value,
+            ..Default::default()
+        }
+    }
+}
+
+impl From<&str> for Buffer {
+    fn from(value: &str) -> Self {
+        Self::from(value.to_owned())
+    }
+}

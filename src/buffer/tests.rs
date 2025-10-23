@@ -217,14 +217,14 @@ fn normal_f() {
 
 #[test]
 fn normal_shift_i() {
-    let mut buffer = Buffer::default();
-    buffer.update_from_string("iabcdefghi<Esc>Iz").unwrap();
+    let mut buffer = Buffer::from(String::from("abcdef"));
+    buffer.update_from_string("Aghi<Esc>Iz").unwrap();
     assert_eq!(buffer.as_content(), "zabcdefghi");
 }
 
 #[test]
 fn normal_carret_dollar() {
-    let mut buffer = Buffer::default();
-    buffer.update_from_string("iabcdefghi<Esc>^iz<Esc>$ay").unwrap();
+    let mut buffer = Buffer::from("abcdefgh");
+    buffer.update_from_string("Ai<Esc>^iz<Esc>$ay").unwrap();
     assert_eq!(buffer.as_content(), "zabcdefghiy");
 }
