@@ -276,3 +276,31 @@ fn find_prev_ignore() {
     buffer.update_from_string("iabcd<Esc>FIF<Esc>iy<Esc>Fbiz").unwrap();
     assert_eq!(buffer.as_content(), "azbcyd");
 }
+
+#[test]
+fn find_t() {
+    let mut buffer = Buffer::from("abc");
+    buffer.update_from_string("tbad").unwrap();
+    assert_eq!(buffer.as_content(), "adbc");
+}
+
+#[test]
+fn find_f() {
+    let mut buffer = Buffer::from("abc");
+    buffer.update_from_string("fbad").unwrap();
+    assert_eq!(buffer.as_content(), "abdc");
+}
+
+#[test]
+fn find_shift_f() {
+    let mut buffer = Buffer::default();
+    buffer.update_from_string("iabc<Esc>Fbid").unwrap();
+    assert_eq!(buffer.as_content(), "adbc");
+}
+
+#[test]
+fn find_shift_t() {
+    let mut buffer = Buffer::default();
+    buffer.update_from_string("iabc<Esc>Tbid").unwrap();
+    assert_eq!(buffer.as_content(), "abdc");
+}

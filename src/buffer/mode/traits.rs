@@ -1,6 +1,6 @@
 use crossterm::event::KeyCode;
 
-use crate::buffer::keymaps::{Action, OPending};
+use crate::buffer::keymaps::{Action, GoToAction, OPending};
 
 /// Actions to be taken as a result of a keypress
 pub enum Actions {
@@ -21,6 +21,20 @@ impl From<OPending> for Actions {
         Self::OPending(opending)
     }
 }
+
+
+impl From<Action> for Actions {
+    fn from(action: Action) -> Self {
+        Self::List(vec![action])
+    }
+}
+
+impl From<GoToAction> for Actions {
+    fn from(action: GoToAction) -> Self {
+        Self::List(vec![Action::GoTo(action)])
+    }
+}
+
 
 impl From<Vec<Action>> for Actions {
     fn from(list: Vec<Action>) -> Self {

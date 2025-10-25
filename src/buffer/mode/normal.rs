@@ -14,21 +14,19 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('a') => vec![
                 Action::GoTo(GoToAction::Right),
                 Action::SelectMode(Mode::Insert),
-            ],
-            KeyCode::Char('i') => vec![Action::SelectMode(Mode::Insert)],
-            KeyCode::Char('x') => vec![Action::DeleteChar],
-            KeyCode::Backspace | KeyCode::Char('h') =>
-                vec![Action::GoTo(GoToAction::Left)],
-            KeyCode::Char('l') => vec![Action::GoTo(GoToAction::Right)],
-            KeyCode::Char('f') => {
-                return Actions::from(OPending::FindNext);
-            }
-            KeyCode::Char('0') => vec![Action::GoTo(GoToAction::Bol)],
-            KeyCode::Char('^') => vec![Action::GoTo(GoToAction::FirstNonSpace)],
-            KeyCode::Char('$') => vec![Action::GoTo(GoToAction::Eol)],
-            _ => vec![],
+            ]
+            .into(),
+            KeyCode::Char('i') => Action::SelectMode(Mode::Insert).into(),
+            KeyCode::Char('x') => Action::DeleteChar.into(),
+            KeyCode::Backspace | KeyCode::Char('h') => GoToAction::Left.into(),
+            KeyCode::Char('l') => GoToAction::Right.into(),
+            KeyCode::Char('f') => OPending::FindNext.into(),
+            KeyCode::Char('t') => OPending::FindNextDecrement.into(),
+            KeyCode::Char('0') => GoToAction::Bol.into(),
+            KeyCode::Char('^') => GoToAction::FirstNonSpace.into(),
+            KeyCode::Char('$') => GoToAction::Eol.into(),
+            _ => Actions::default(),
         }
-        .into()
     }
 
     fn handle_shift_key_press(&self, code: KeyCode) -> Actions {
@@ -36,21 +34,22 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('I') => vec![
                 Action::GoTo(GoToAction::FirstNonSpace),
                 Action::SelectMode(Mode::Insert),
-            ],
+            ]
+            .into(),
             KeyCode::Char('A') => vec![
                 Action::GoTo(GoToAction::Eol),
                 Action::SelectMode(Mode::Insert),
-            ],
+            ]
+            .into(),
             KeyCode::Char('X') => vec![
                 Action::GoTo(GoToAction::Left),
                 Action::DeleteChar,
                 Action::GoTo(GoToAction::Right),
-            ],
-            KeyCode::Char('F') => {
-                return Actions::from(OPending::FindPrevious);
-            }
-            _ => vec![],
+            ]
+            .into(),
+            KeyCode::Char('F') => OPending::FindPrevious.into(),
+            KeyCode::Char('T') => OPending::FindPreviousIncrement.into(),
+            _ => Actions::default(),
         }
-        .into()
     }
 }

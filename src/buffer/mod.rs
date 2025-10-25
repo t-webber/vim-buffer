@@ -115,7 +115,6 @@ impl Buffer {
                     .char_indices()
                     .rev()
                     .skip(self.len() - self.as_cursor())
-                    .skip(1)
                     .find(|&(_idx, next)| next == ch)
                 {
                     self.cursor.set(idx);

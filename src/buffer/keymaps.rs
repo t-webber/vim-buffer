@@ -40,6 +40,10 @@ pub enum GoToAction {
 pub enum OPending {
     /// Find next char that is equal to...
     FindNext,
+    /// Find next char that is equal to... and decrement
+    FindNextDecrement,
     /// Find previous char that is equal to...
     FindPrevious,
+    /// Find previous char that is equal to... and increment
+    FindPreviousIncrement,
 }

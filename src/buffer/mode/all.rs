@@ -41,11 +41,7 @@ impl Mode {
                     vec![]
                 }
             },
-            |old_pending| {
-                Self::handle_opending_event(old_pending, event)
-                    .map(|action| vec![action])
-                    .unwrap_or_default()
-            },
+            |old_pending| Self::handle_opending_event(old_pending, event),
         )
     }
 
@@ -68,21 +64,26 @@ impl Mode {
 
     /// Handle a keypress when an [`OPending`] is in progress and waiting for
     /// keys.
-    fn handle_opending_event(
-        opending: OPending,
-        event: &Event,
-    ) -> Option<Action> {
+    fn handle_opending_event(opending: OPending, event: &Event) -> Vec<Action> {
         if let Some(key_event) = event.as_key_press_event()
             && let KeyCode::Char(ch) = key_event.code
         {
             match opending {
                 OPending::FindNext =>
-                    Some(Action::GoTo(GoToAction::NextOccurrenceOf(ch))),
+                    vec![Action::GoTo(GoToAction::NextOccurrenceOf(ch))],
+                OPending::FindNextDecrement => vec![
+                    Action::GoTo(GoToAction::NextOccurrenceOf(ch)),
+                    Action::GoTo(GoToAction::Left),
+                ],
                 OPending::FindPrevious =>
-                    Some(Action::GoTo(GoToAction::PreviousOccurrenceOf(ch))),
+                    vec![Action::GoTo(GoToAction::PreviousOccurrenceOf(ch))],
+                OPending::FindPreviousIncrement => vec![
+                    Action::GoTo(GoToAction::PreviousOccurrenceOf(ch)),
+                    Action::GoTo(GoToAction::Right),
+                ],
             }
         } else {
-            None
+            vec![]
         }
     }
 }
