@@ -47,6 +47,18 @@ impl Buffer {
         self.mode
     }
 
+    /// Returns `true` if the buffer is empty, and `false` otherwise.
+    #[must_use]
+    pub const fn is_empty(&self) -> bool {
+        self.content.is_empty()
+    }
+
+    /// Returns the length of the buffer
+    #[must_use]
+    pub const fn len(&self) -> usize {
+        self.content.len()
+    }
+
     /// Updates the buffer with a terminal event
     ///
     /// # Returns

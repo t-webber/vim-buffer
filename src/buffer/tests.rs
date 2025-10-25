@@ -60,6 +60,8 @@ fn insert_backspace() {
     assert!(do_evt!(buffer, Backspace));
     assert_eq!(buffer.as_content(), "b");
     assert_eq!(buffer.as_cursor(), 0);
+    assert_eq!(buffer.len(), 1);
+    assert!(!buffer.is_empty());
 }
 
 #[test]
