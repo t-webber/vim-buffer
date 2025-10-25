@@ -1,11 +1,9 @@
-/// Defines the actions that can be made on the buffer
-mod action;
 /// Defines a bounded usize newtype, to safely increment, decrement a cursor.
 mod bounded_usize;
+/// Defines the actions that can be made on the buffer
+mod keymaps;
 /// Handles the vim modes and the keypresses on those modes
 mod mode;
-/// Pending keys that need more keys before doing an action.
-mod o_pending;
 
 #[cfg(test)]
 mod tests;
@@ -13,9 +11,8 @@ mod tests;
 use crossterm::event::Event;
 pub use mode::Mode;
 
-use crate::buffer::action::{Action, GoToAction};
 use crate::buffer::bounded_usize::BoundedUsize;
-use crate::buffer::o_pending::OPending;
+use crate::buffer::keymaps::{Action, GoToAction, OPending};
 use crate::event_parser::{EventParsingError, parse_events};
 
 /// Buffer that supports vim keymaps

@@ -1,8 +1,7 @@
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
 use crate::Mode;
-use crate::buffer::action::{Action, GoToAction};
-use crate::buffer::o_pending::OPending;
+use crate::buffer::keymaps::{Action, GoToAction, OPending};
 
 
 fn expect_action(mode: Mode, event: Event, action: &[Action]) {

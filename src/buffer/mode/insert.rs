@@ -1,9 +1,8 @@
 use crossterm::event::KeyCode;
 
 use crate::Mode;
-use crate::buffer::action::{Action, GoToAction};
+use crate::buffer::keymaps::{Action, GoToAction, OPending};
 use crate::buffer::mode::HandleKeyPress;
-use crate::buffer::o_pending::OPending;
 
 /// Struct to handle keypresses in insert mode
 pub struct Insert;

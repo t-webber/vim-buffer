@@ -31,3 +31,11 @@ pub enum GoToAction {
     /// Move the cursor right by one character
     Right,
 }
+
+
+/// Action that is pending for another keypress
+#[derive(Debug, PartialEq, Eq)]
+pub enum OPending {
+    /// Find next char that is equal to...
+    FindNext,
+}
