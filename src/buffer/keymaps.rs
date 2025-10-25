@@ -28,6 +28,8 @@ pub enum GoToAction {
     Left,
     /// Find next occurrence of char and place cursor on it
     NextOccurrenceOf(char),
+    /// Find previous occurrence of char and place cursor on it
+    PreviousOccurrenceOf(char),
     /// Move the cursor right by one character
     Right,
 }
@@ -38,4 +40,6 @@ pub enum GoToAction {
 pub enum OPending {
     /// Find next char that is equal to...
     FindNext,
+    /// Find previous char that is equal to...
+    FindPrevious,
 }

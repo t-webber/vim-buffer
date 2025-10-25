@@ -85,28 +85,40 @@ impl Buffer {
             GoToAction::Right => self.cursor.increment(),
             GoToAction::Left => self.cursor.decrement(),
             GoToAction::Bol => self.cursor.set(0),
-            GoToAction::Eol => self.cursor.set(self.content.len()),
+            GoToAction::Eol => self.cursor.set(self.len()),
             GoToAction::FirstNonSpace => {
-                self.cursor.set(0);
-                let mut chars = self.content.chars();
-                loop {
-                    match chars.next() {
-                        Some(current) if current.is_whitespace() => (),
-                        None | Some(_) => break,
-                    }
-                    self.cursor.increment();
-                }
+                let idx = self
+                    .as_content()
+                    .char_indices()
+                    .find(|(_idx, ch)| !ch.is_whitespace())
+                    .map_or_else(|| self.len(), |(idx, _ch)| idx);
+                self.cursor.set(idx);
             }
             GoToAction::NextOccurrenceOf(ch) => {
-                let mut chars =
-                    self.content.chars().skip(self.cursor.as_value());
-                loop {
-                    if let Some(next) = chars.next()
-                        && next == ch
-                    {
-                        break;
-                    }
-                    self.cursor.increment();
+                if let Some((idx, _ch)) = self
+                    .as_content()
+                    .char_indices()
+                    .skip(self.as_cursor())
+                    .skip(1)
+                    .find(|(_idx, next)| *next == ch)
+                {
+                    self.cursor.set(idx);
+                }
+            }
+            GoToAction::PreviousOccurrenceOf(ch) => {
+                #[expect(
+                    clippy::arithmetic_side_effects,
+                    reason = "cursor <= len"
+                )]
+                if let Some((idx, _ch)) = self
+                    .as_content()
+                    .char_indices()
+                    .rev()
+                    .skip(self.len() - self.as_cursor())
+                    .skip(1)
+                    .find(|&(_idx, next)| next == ch)
+                {
+                    self.cursor.set(idx);
                 }
             }
         }

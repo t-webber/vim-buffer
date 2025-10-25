@@ -253,8 +253,26 @@ fn normal_x_shift_x() {
 }
 
 #[test]
+fn find_next_prev() {
+    let mut buffer = Buffer::default();
+    buffer
+        .update_from_string(
+            "iabcdefab<Esc>FIF<Left>FaFaiz<Esc>fAf<Right>fbfbaz",
+        )
+        .unwrap();
+    assert_eq!(buffer.as_content(), "zabcdefabz");
+}
+
+#[test]
 fn find_next_ignore() {
     let mut buffer = Buffer::from("abic");
     buffer.update_from_string("fAiz<Esc>fiay").unwrap();
     assert_eq!(buffer.as_content(), "zabiyc");
+}
+
+#[test]
+fn find_prev_ignore() {
+    let mut buffer = Buffer::default();
+    buffer.update_from_string("iabcd<Esc>FIF<Esc>iy<Esc>Fbiz").unwrap();
+    assert_eq!(buffer.as_content(), "azbcyd");
 }

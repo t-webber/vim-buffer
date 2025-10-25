@@ -22,6 +22,12 @@ impl HandleKeyPress for Normal {
                 } else {
                     vec![]
                 },
+            Some(OPending::FindPrevious) =>
+                if let KeyCode::Char(ch) = code {
+                    vec![Action::GoTo(GoToAction::PreviousOccurrenceOf(ch))]
+                } else {
+                    vec![]
+                },
             None => match code {
                 KeyCode::Char('a') => vec![
                     Action::GoTo(GoToAction::Right),
@@ -68,6 +74,10 @@ impl HandleKeyPress for Normal {
                 Action::DeleteChar,
                 Action::GoTo(GoToAction::Right),
             ],
+            KeyCode::Char('F') => {
+                *pending = Some(OPending::FindPrevious);
+                vec![]
+            }
             _ => vec![],
         }
     }
