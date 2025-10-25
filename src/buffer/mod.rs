@@ -9,10 +9,10 @@ mod mode;
 mod tests;
 
 use crossterm::event::Event;
-pub use mode::Mode;
 
 use crate::buffer::bounded_usize::BoundedUsize;
 use crate::buffer::keymaps::{Action, GoToAction, OPending};
+pub use crate::buffer::mode::Mode;
 use crate::event_parser::{EventParsingError, parse_events};
 
 /// Buffer that supports vim keymaps

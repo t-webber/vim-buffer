@@ -1,8 +1,8 @@
 use crossterm::event::KeyCode;
 
-use crate::Mode;
-use crate::buffer::keymaps::{Action, GoToAction, OPending};
-use crate::buffer::mode::HandleKeyPress;
+use crate::buffer::keymaps::{Action, GoToAction};
+use crate::buffer::mode::all::Mode;
+use crate::buffer::mode::traits::{Actions, HandleKeyPress};
 
 /// Struct to handle keypresses in insert mode
 pub struct Insert;
@@ -12,12 +12,7 @@ pub struct Insert;
     reason = "partially implement events"
 )]
 impl HandleKeyPress for Insert {
-    fn handle_blank_key_press(
-        &self,
-        code: KeyCode,
-        pending: &mut Option<OPending>,
-    ) -> Vec<Action> {
-        debug_assert!(pending.is_none(), "o-pending prevents mode switch");
+    fn handle_blank_key_press(&self, code: KeyCode) -> Actions {
         match code {
             KeyCode::Esc => vec![
                 Action::GoTo(GoToAction::Left),
@@ -27,18 +22,15 @@ impl HandleKeyPress for Insert {
             KeyCode::Backspace => vec![Action::DeleteChar],
             _ => vec![],
         }
+        .into()
     }
 
-    fn handle_shift_key_press(
-        &self,
-        code: KeyCode,
-        pending: &mut Option<OPending>,
-    ) -> Vec<Action> {
-        debug_assert!(pending.is_none(), "o-pending prevents mode switch");
+    fn handle_shift_key_press(&self, code: KeyCode) -> Actions {
         if let KeyCode::Char(ch) = code {
             vec![Action::InsertChar(ch.to_ascii_uppercase())]
         } else {
             vec![]
         }
+        .into()
     }
 }

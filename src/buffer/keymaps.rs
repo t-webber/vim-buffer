@@ -36,7 +36,7 @@ pub enum GoToAction {
 
 
 /// Action that is pending for another keypress
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum OPending {
     /// Find next char that is equal to...
     FindNext,

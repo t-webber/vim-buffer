@@ -222,7 +222,7 @@ fn shift_without_modifiers() {
 }
 
 #[test]
-fn test_key() {
+fn named_keys() {
     assert_eq!(
         parse_events("<Up><Down><Left><Right><Tab><BS><CR><Esc>"),
         Ok(vec![
