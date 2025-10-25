@@ -29,4 +29,4 @@ jobs:
                 override: true
 
             - name: Check documentation
-              run: RUSTDOCFLAGS="-D warnings" cargo doc --document-private-items --all --verbose --release
+              run: RUSTDOCFLAGS="-D warnings" cargo doc --document-private-items --all --release

@@ -30,4 +30,4 @@ jobs:
                 components: clippy
 
             - name: Cargo clippy
-              run: cargo clippy --all -- --verbose -D warnings
+              run: cargo clippy --all

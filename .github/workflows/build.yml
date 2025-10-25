@@ -29,5 +29,5 @@ jobs:
                 override: true
 
             - name: Cargo build
-              run: cargo build --release --verbose
+              run: cargo build --release
 
