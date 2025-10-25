@@ -116,17 +116,6 @@ fn not_press() {
 }
 
 #[test]
-fn pending_insert() {
-    let mut pending = Some(OPending::FindNext);
-    let event = code_event(KeyCode::Char('i'));
-    assert_eq!(Mode::Insert.handle_event(&event, &mut pending), vec![
-        Action::InsertChar('i')
-    ]);
-    assert_eq!(pending, None);
-}
-
-
-#[test]
 fn pending_cancelled() {
     let mut pending = Some(OPending::FindNext);
     let event = code_event(KeyCode::Esc);

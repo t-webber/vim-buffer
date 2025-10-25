@@ -17,7 +17,7 @@ impl HandleKeyPress for Insert {
         code: KeyCode,
         pending: &mut Option<OPending>,
     ) -> Vec<Action> {
-        *pending = None;
+        debug_assert!(pending.is_none(), "o-pending prevents mode switch");
         match code {
             KeyCode::Esc => vec![
                 Action::GoTo(GoToAction::Left),
@@ -34,7 +34,7 @@ impl HandleKeyPress for Insert {
         code: KeyCode,
         pending: &mut Option<OPending>,
     ) -> Vec<Action> {
-        *pending = None;
+        debug_assert!(pending.is_none(), "o-pending prevents mode switch");
         if let KeyCode::Char(ch) = code {
             vec![Action::InsertChar(ch.to_ascii_uppercase())]
         } else {

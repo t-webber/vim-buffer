@@ -50,13 +50,16 @@ impl HandleKeyPress for Normal {
         code: KeyCode,
         pending: &mut Option<OPending>,
     ) -> Vec<Action> {
-        *pending = None;
+        if pending.is_some() {
+            *pending = None;
+            return vec![];
+        }
         match code {
-            KeyCode::Char('I' | 'i') => vec![
+            KeyCode::Char('I') => vec![
                 Action::GoTo(GoToAction::FirstNonSpace),
                 Action::SelectMode(Mode::Insert),
             ],
-            KeyCode::Char('A' | 'a') => vec![
+            KeyCode::Char('A') => vec![
                 Action::GoTo(GoToAction::Eol),
                 Action::SelectMode(Mode::Insert),
             ],

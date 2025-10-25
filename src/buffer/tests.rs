@@ -251,3 +251,10 @@ fn normal_x_shift_x() {
     buffer.update_from_string("$hhhhXllx").unwrap();
     assert_eq!(buffer.as_content(), "abdegh");
 }
+
+#[test]
+fn find_next_ignore() {
+    let mut buffer = Buffer::from("abic");
+    buffer.update_from_string("fAiz<Esc>fiay").unwrap();
+    assert_eq!(buffer.as_content(), "zabiyc");
+}

@@ -72,11 +72,16 @@ impl HandleKeyPress for Mode {
         code: KeyCode,
         pending: &mut Option<OPending>,
     ) -> Vec<Action> {
-        #[expect(clippy::wildcard_enum_match_arm, reason = "take only a few")]
-        match code {
-            KeyCode::Left => return vec![Action::GoTo(GoToAction::Left)],
-            KeyCode::Right => return vec![Action::GoTo(GoToAction::Right)],
-            _ => (),
+        if pending.is_none() {
+            #[expect(
+                clippy::wildcard_enum_match_arm,
+                reason = "take only a few"
+            )]
+            match code {
+                KeyCode::Left => return vec![Action::GoTo(GoToAction::Left)],
+                KeyCode::Right => return vec![Action::GoTo(GoToAction::Right)],
+                _ => (),
+            }
         }
         match *self {
             Self::Insert => Insert.handle_blank_key_press(code, pending),
