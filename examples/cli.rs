@@ -1,6 +1,7 @@
 use core::iter::repeat_n;
 use std::io::{Write, stdout};
 
+use color_eyre as colour_eyre; // ignore-spell
 use crossterm::event::{self, KeyModifiers};
 use crossterm::terminal::disable_raw_mode;
 use vim_buffer::crossterm::terminal::enable_raw_mode;
@@ -39,7 +40,7 @@ impl From<Mode> for ModeDisplay {
 fn print_current(
     buffer: &Buffer,
     previous_len: usize,
-) -> color_eyre::Result<()> {
+) -> colour_eyre::Result<()> {
     let spaces =
         repeat_n(' ', previous_len + DISPLAY_MODE_LEN).collect::<Box<str>>();
     let cursor = buffer.as_cursor() + DISPLAY_MODE_LEN;
@@ -52,8 +53,8 @@ fn print_current(
     Ok(())
 }
 
-fn main() -> color_eyre::Result<()> {
-    color_eyre::install()?;
+fn main() -> colour_eyre::Result<()> {
+    colour_eyre::install()?;
     println!("Press <C-c> to exit");
     enable_raw_mode()?;
 

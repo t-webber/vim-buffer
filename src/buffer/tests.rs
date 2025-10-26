@@ -99,7 +99,7 @@ fn insert_a() {
 
 #[test]
 fn insert_i() {
-    test_events(&[evt!('i'), evt!('a'), evt!(Esc), evt!('i'), evt!('b')], "ba");
+    test_events(&[evt!('i'), evt!('a'), evt!(Esc), evt!('i'), evt!('b')], "ba"); // ignore-spell
 }
 
 #[test]
@@ -225,7 +225,7 @@ fn normal_shift_i() {
 }
 
 #[test]
-fn normal_carret_dollar() {
+fn normal_caret_dollar() {
     let mut buffer = Buffer::from("abcdefgh");
     buffer.update_from_string("Ai<Esc>^iz<Esc>$ay").unwrap();
     assert_eq!(buffer.as_content(), "zabcdefghiy");

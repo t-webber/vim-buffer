@@ -6,7 +6,7 @@ use crossterm::event::KeyCode;
 /// Defines the key interface
 macro_rules! key {
     ($($name:ident: $code:ident,)*) => {
-        /// Minimum and maximum length of the string represetation of a key
+        /// Minimum and maximum length of the string representation of a key
         pub const LENGTHS:Bounds = {
 
             let keys = &[

@@ -9,7 +9,7 @@ use crate::event_parser::chevron_parser::non_empty_modifier::NonEmptyModifiers;
 pub enum ModifiedKeyParsingState {
     /// A non-modifier char has just been read.
     ReadChar(NonEmptyModifiers, char),
-    /// A hypen has just been read.
+    /// A hyphen has just been read.
     ReadHyphen(NonEmptyModifiers),
     /// A modifier has just been read.
     ReadLetter(NonEmptyModifiers),

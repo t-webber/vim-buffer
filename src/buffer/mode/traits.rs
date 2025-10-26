@@ -42,11 +42,11 @@ impl From<Vec<Action>> for Actions {
     }
 }
 
-/// Handle incomming terminal events, like keypresses.
+/// Handle incoming terminal events, like keypresses.
 pub trait HandleKeyPress {
-    /// Handle incomming terminal events that are keypresses with no modifiers.
+    /// Handle incoming terminal events that are keypresses with no modifiers.
     fn handle_blank_key_press(&self, code: KeyCode) -> Actions;
 
-    /// Handle incomming terminal events that are keypresses with no modifiers.
+    /// Handle incoming terminal events that are keypresses with no modifiers.
     fn handle_shift_key_press(&self, code: KeyCode) -> Actions;
 }

@@ -87,7 +87,7 @@ fn missing_modifier() {
 }
 
 #[test]
-fn missing_hypen() {
+fn missing_hyphen() {
     assert_eq!(
         parse_events("<Ca>"),
         Err(EventParsingError::ChevronGroup(

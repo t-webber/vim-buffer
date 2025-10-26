@@ -27,7 +27,7 @@ pub enum Mode {
 }
 
 impl Mode {
-    /// Handle incomming terminal events on any kind.
+    /// Handle incoming terminal events on any kind.
     pub fn handle_event(
         &self,
         event: &Event,

@@ -1,9 +1,10 @@
+use color_eyre as colour_eyre; // ignore-spell
 use crossterm::event::{self, KeyModifiers};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 
 
-fn main() -> color_eyre::Result<()> {
-    color_eyre::install()?;
+fn main() -> colour_eyre::Result<()> {
+    colour_eyre::install()?;
     enable_raw_mode()?;
 
     loop {
