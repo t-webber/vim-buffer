@@ -25,6 +25,7 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('l') => GoToAction::Right.into(),
             KeyCode::Char('f') => OPending::FindNext.into(),
             KeyCode::Char('t') => OPending::FindNextDecrement.into(),
+            KeyCode::Char('r') => OPending::ReplaceOne.into(),
             KeyCode::Char('0') => GoToAction::Bol.into(),
             KeyCode::Char('^') => GoToAction::FirstNonSpace.into(),
             KeyCode::Char('$') => GoToAction::Eol.into(),

@@ -14,6 +14,8 @@ pub enum Action {
     GoTo(GoToAction),
     /// Inserts a char in the buffer
     InsertChar(char),
+    /// Replace the char under the cursor with
+    ReplaceWith(char),
     /// Switches to a new mode
     SelectMode(Mode),
 }
@@ -61,4 +63,6 @@ pub enum OPending {
     FindPrevious,
     /// Find previous char that is equal to... and increment
     FindPreviousIncrement,
+    /// Replace one character
+    ReplaceOne,
 }

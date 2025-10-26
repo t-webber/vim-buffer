@@ -43,5 +43,6 @@ normal_x_empty: "x" => "",
 normal_cap_x: "iabcd<Esc>X<Left>X" => "bd",
 normal_s: "iabcd<Esc>se<Esc>hsf" => "abfe",
 normal_cap_s: "iabcdef<Esc>hhhSghij" => "ghij",
+normal_r: "iabcd<Esc>Fbre" => "aecd",
 
 );

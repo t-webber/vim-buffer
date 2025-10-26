@@ -21,7 +21,7 @@ use crate::buffer::keymaps::OPending;
 /// assert_eq!(buffer.as_content(), "hello");
 ///
 /// // Update with Vim string
-/// buffer.update_from_string("<Esc>0sH<Esc>A, World!");
+/// buffer.update_from_string("<Esc>0rHA, World!");
 /// assert_eq!(buffer.as_content(), "Hello, World!");
 /// ```
 #[derive(Debug, Default)]

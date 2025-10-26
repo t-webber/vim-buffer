@@ -73,6 +73,7 @@ impl Mode {
                     GoToAction::PreviousOccurrenceOf(ch).into(),
                     GoToAction::Right.into(),
                 ],
+                OPending::ReplaceOne => vec![Action::ReplaceWith(ch)],
             }
         } else {
             vec![]

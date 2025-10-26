@@ -123,7 +123,7 @@ impl Buffer {
     /// buffer.update_from_string("iHello, World!");
     /// assert_eq!(buffer.as_content(), "Hello, World!");
     ///
-    /// buffer.update_from_string("<Esc>F,xllsw<Esc>FHsh<Esc>f!x");
+    /// buffer.update_from_string("<Esc>F,xllrwFHrhf!x");
     /// assert_eq!(buffer.as_content(), "hello world");
     /// ```
     pub fn update_from_string(
@@ -173,6 +173,11 @@ impl Buffer {
                 true
             }
             Action::GoTo(goto_action) => self.update_cursor(goto_action),
+            Action::ReplaceWith(ch) => {
+                self.content.remove(self.as_cursor());
+                self.content.insert(self.as_cursor(), ch);
+                true
+            }
         }
     }
 }
