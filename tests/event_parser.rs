@@ -1,8 +1,21 @@
-use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
-
-use crate::{
-    ChevronGroupError, EventParsingError, ModifiedKeyError, evt, parse_events
+use vim_buffer::crossterm::event::{
+    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers
 };
+use vim_buffer::{
+    ChevronGroupError, EventParsingError, ModifiedKeyError, parse_events
+};
+
+macro_rules! evt {
+    ($name:ident) => {
+        evt!(crossterm::event::KeyCode::$name)
+    };
+    ($name:literal) => {
+        evt!(crossterm::event::KeyCode::Char($name))
+    };
+    ($name:expr) => {
+        crossterm::event::Event::Key(crossterm::event::KeyEvent::from($name))
+    };
+}
 
 fn mod_evt(ch: char, modifiers: KeyModifiers) -> Event {
     Event::Key(KeyEvent::new_with_kind(

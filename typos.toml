@@ -1,5 +1,5 @@
 [files]
-extend-exclude = [".git", "rustfmt.toml", "LICENSE-*"]
+extend-exclude = [".git", "rustfmt.toml", "LICENSE-*", "tests/keys.rs"]
 ignore-hidden = false
 ignore-files = false
 ignore-dot = false

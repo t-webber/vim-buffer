@@ -17,7 +17,7 @@ impl HandleKeyPress for Normal {
             ]
             .into(),
             KeyCode::Char('i') => Action::SelectMode(Mode::Insert).into(),
-            KeyCode::Char('x') => Action::DeleteChar.into(),
+            KeyCode::Char('x') => Action::DeleteNextChar.into(),
             KeyCode::Backspace | KeyCode::Char('h') => GoToAction::Left.into(),
             KeyCode::Char('l') => GoToAction::Right.into(),
             KeyCode::Char('f') => OPending::FindNext.into(),
@@ -41,12 +41,7 @@ impl HandleKeyPress for Normal {
                 Action::SelectMode(Mode::Insert),
             ]
             .into(),
-            KeyCode::Char('X') => vec![
-                Action::GoTo(GoToAction::Left),
-                Action::DeleteChar,
-                Action::GoTo(GoToAction::Right),
-            ]
-            .into(),
+            KeyCode::Char('X') => Action::DeletePreviousChar.into(),
             KeyCode::Char('F') => OPending::FindPrevious.into(),
             KeyCode::Char('T') => OPending::FindPreviousIncrement.into(),
             _ => Actions::default(),

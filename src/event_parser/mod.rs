@@ -3,9 +3,6 @@ mod chevron_parser;
 /// Main state for event parsing
 mod state;
 
-#[cfg(test)]
-mod tests;
-
 use crossterm::event::Event;
 
 pub use crate::event_parser::chevron_parser::{

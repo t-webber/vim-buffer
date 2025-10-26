@@ -27,7 +27,9 @@
 #![expect(clippy::blanket_clippy_restriction_lints, reason = "I want them all")]
 #![expect(
     clippy::pub_use,
-    reason = "prevent a breaking change after refactoring the crate structure"
+    clippy::field_scoped_visibility_modifiers,
+    clippy::multiple_inherent_impl,
+    reason = "better API"
 )]
 #![expect(
     clippy::implicit_return,
@@ -39,7 +41,6 @@
     reason = "chosen style"
 )]
 #![expect(clippy::missing_inline_in_public_items, reason = "bad lint")]
-#![cfg_attr(test, expect(clippy::unwrap_used, reason = "tests should panic"))]
 
 /// Publicly interfaced buffer to handle vim keymap and modes
 mod buffer;

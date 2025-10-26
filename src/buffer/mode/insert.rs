@@ -19,7 +19,7 @@ impl HandleKeyPress for Insert {
                 Action::SelectMode(Mode::Normal),
             ],
             KeyCode::Char(ch) => vec![Action::InsertChar(ch)],
-            KeyCode::Backspace => vec![Action::DeleteChar],
+            KeyCode::Backspace => vec![Action::DeletePreviousChar],
             _ => vec![],
         }
         .into()
