@@ -61,7 +61,6 @@ impl EventParser for EventParserState {
     }
 }
 
-
 /// Errors that may occur when trying to parse a keymaps string into a list of
 /// key events.
 #[derive(Debug, PartialEq, Eq)]

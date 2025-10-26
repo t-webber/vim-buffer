@@ -4,7 +4,6 @@ use crate::{
     ChevronGroupError, EventParsingError, ModifiedKeyError, evt, parse_events
 };
 
-
 fn mod_evt(ch: char, modifiers: KeyModifiers) -> Event {
     Event::Key(KeyEvent::new_with_kind(
         KeyCode::Char(ch),
@@ -12,7 +11,6 @@ fn mod_evt(ch: char, modifiers: KeyModifiers) -> Event {
         KeyEventKind::Press,
     ))
 }
-
 
 #[test]
 fn empty_chevron_group() {
@@ -54,7 +52,6 @@ fn missing_modifier_and_hyphen() {
     );
 }
 
-
 #[test]
 fn too_many_separated_chars() {
     assert_eq!(
@@ -74,7 +71,6 @@ fn too_many_successive_chars() {
         )))
     );
 }
-
 
 #[test]
 fn missing_modifier() {
@@ -96,7 +92,6 @@ fn missing_hyphen() {
     );
 }
 
-
 #[test]
 fn true_meta_t() {
     assert_eq!(
@@ -112,7 +107,6 @@ fn control_shift_alt_s() {
         Ok(vec![mod_evt('A', KeyModifiers::CONTROL | KeyModifiers::SHIFT)])
     );
 }
-
 
 #[test]
 fn modifier_chars() {
@@ -159,7 +153,6 @@ fn enter_return() {
     assert_eq!(parse_events("<Return>"), Ok(vec![evt!(Enter),]));
 }
 
-
 #[test]
 fn mismatched_chevron() {
     assert_eq!(
@@ -188,7 +181,6 @@ fn non_u8_char() {
     );
 }
 
-
 #[test]
 fn to_many_letters() {
     assert_eq!(
@@ -208,7 +200,6 @@ fn key_too_long() {
         )),
     );
 }
-
 
 #[test]
 fn shift_without_modifiers() {

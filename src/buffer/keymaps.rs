@@ -34,7 +34,6 @@ pub enum GoToAction {
     Right,
 }
 
-
 /// Action that is pending for another keypress
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum OPending {

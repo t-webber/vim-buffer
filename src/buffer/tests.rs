@@ -16,7 +16,6 @@ macro_rules! evt {
     };
 }
 
-
 macro_rules! do_evt {
     ($buffer:ident, $name:ident) => {
         $buffer.update(&evt!($name))
@@ -36,7 +35,6 @@ fn cap(cap: char) -> Event {
         KeyEventKind::Press,
     ))
 }
-
 
 #[test]
 fn do_nothing() {

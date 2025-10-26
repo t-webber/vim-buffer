@@ -3,7 +3,6 @@ use crossterm::event::Event;
 use crate::event_parser::EventParser;
 use crate::event_parser::chevron_parser::non_empty_modifier::NonEmptyModifiers;
 
-
 /// Parsing state to parse a chevron group for a modified key.
 #[derive(Copy, Clone, Debug)]
 pub enum ModifiedKeyParsingState {
@@ -14,7 +13,6 @@ pub enum ModifiedKeyParsingState {
     /// A modifier has just been read.
     ReadLetter(NonEmptyModifiers),
 }
-
 
 impl ModifiedKeyParsingState {
     /// Initialises a [`ModifiedKeyParsingState`] from a char that is found
@@ -61,7 +59,6 @@ impl EventParser for ModifiedKeyParsingState {
         }
     }
 }
-
 
 /// Errors that may occur whilst parsing a chevron group.
 #[derive(Debug, PartialEq, Eq)]

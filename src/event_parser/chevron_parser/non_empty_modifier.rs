@@ -6,7 +6,7 @@ use crate::event_parser::chevron_parser::char_modifier::ChevronModifier;
 #[derive(Copy, Clone, Debug)]
 pub struct NonEmptyModifiers {
     /// Last modifier to have been read.
-    last_modifier:      ChevronModifier,
+    last_modifier: ChevronModifier,
     /// All read modifiers, except the last one.
     previous_modifiers: KeyModifiers,
 }

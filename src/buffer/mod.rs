@@ -21,9 +21,9 @@ pub struct Buffer {
     /// Content of the buffer
     content: String,
     /// Position of the cursor within the buffer
-    cursor:  BoundedUsize,
+    cursor: BoundedUsize,
     /// Vim mode of the buffer
-    mode:    Mode,
+    mode: Mode,
     /// Pending actions that require more keymaps
     pending: Option<OPending>,
 }

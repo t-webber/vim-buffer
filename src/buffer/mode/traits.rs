@@ -22,7 +22,6 @@ impl From<OPending> for Actions {
     }
 }
 
-
 impl From<Action> for Actions {
     fn from(action: Action) -> Self {
         Self::List(vec![action])
@@ -34,7 +33,6 @@ impl From<GoToAction> for Actions {
         Self::List(vec![Action::GoTo(action)])
     }
 }
-
 
 impl From<Vec<Action>> for Actions {
     fn from(list: Vec<Action>) -> Self {

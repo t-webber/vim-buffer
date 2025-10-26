@@ -3,7 +3,6 @@ use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use crate::buffer::keymaps::{Action, GoToAction, OPending};
 use crate::buffer::mode::all::Mode;
 
-
 fn expect_action(mode: Mode, event: Event, action: &[Action]) {
     let real_actions = mode.handle_event(&event, &mut None);
 
@@ -89,7 +88,6 @@ fn with_modifiers_char() {
     expect_action(Mode::Insert, event, &[Action::InsertChar('I')]);
 }
 
-
 #[test]
 fn with_modifiers_esc() {
     for modifier in [
@@ -105,7 +103,6 @@ fn with_modifiers_esc() {
         expect_action(Mode::Insert, event, &[]);
     }
 }
-
 
 #[test]
 fn not_press() {

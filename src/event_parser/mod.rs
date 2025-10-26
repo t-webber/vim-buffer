@@ -6,7 +6,6 @@ mod state;
 #[cfg(test)]
 mod tests;
 
-
 use crossterm::event::Event;
 
 pub use crate::event_parser::chevron_parser::{
@@ -23,7 +22,6 @@ trait EventParser {
     /// Parses one more char with the given state.
     fn parse_char(&mut self, ch: char) -> Result<Option<Event>, Self::Error>;
 }
-
 
 /// Transforms a string input of keymaps into a list of events.
 ///

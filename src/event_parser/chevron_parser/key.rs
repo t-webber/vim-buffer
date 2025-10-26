@@ -129,7 +129,6 @@ pub struct Bounds {
     pub min: usize,
 }
 
-
 /// Converts a keycode to a string
 pub fn build_named_key(name: &[u8]) -> Option<KeyCode> {
     if let Ok(name_str) = str::from_utf8(name)

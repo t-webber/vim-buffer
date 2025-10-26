@@ -4,7 +4,7 @@ pub struct BoundedUsize {
     /// Maximum value the `value` field can hold.
     max_value: usize,
     /// Inner value of the [`BoundedUsize`]
-    value:     usize,
+    value: usize,
 }
 
 impl BoundedUsize {
