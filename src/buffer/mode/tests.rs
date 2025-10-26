@@ -43,7 +43,7 @@ fn insert_char() {
 fn escape() {
     let event = code_event(KeyCode::Esc);
     expect_action(Mode::Insert, event, &[
-        Action::GoTo(GoToAction::Left),
+        GoToAction::Left.into(),
         Action::SelectMode(Mode::Normal),
     ]);
 }
@@ -82,7 +82,7 @@ fn with_modifiers_char() {
     }
     let event = event(KeyCode::Char('i'), Some(KeyModifiers::SHIFT), None);
     expect_action(Mode::Normal, event, &[
-        Action::GoTo(GoToAction::FirstNonSpace),
+        GoToAction::FirstNonSpace.into(),
         Action::SelectMode(Mode::Insert),
     ]);
     expect_action(Mode::Insert, event, &[Action::InsertChar('I')]);

@@ -70,16 +70,16 @@ impl Mode {
         {
             match opending {
                 OPending::FindNext =>
-                    vec![Action::GoTo(GoToAction::NextOccurrenceOf(ch))],
+                    vec![GoToAction::NextOccurrenceOf(ch).into()],
                 OPending::FindNextDecrement => vec![
-                    Action::GoTo(GoToAction::NextOccurrenceOf(ch)),
-                    Action::GoTo(GoToAction::Left),
+                    GoToAction::NextOccurrenceOf(ch).into(),
+                    GoToAction::Left.into(),
                 ],
                 OPending::FindPrevious =>
-                    vec![Action::GoTo(GoToAction::PreviousOccurrenceOf(ch))],
+                    vec![GoToAction::PreviousOccurrenceOf(ch).into()],
                 OPending::FindPreviousIncrement => vec![
-                    Action::GoTo(GoToAction::PreviousOccurrenceOf(ch)),
-                    Action::GoTo(GoToAction::Right),
+                    GoToAction::PreviousOccurrenceOf(ch).into(),
+                    GoToAction::Right.into(),
                 ],
             }
         } else {
@@ -92,10 +92,8 @@ impl HandleKeyPress for Mode {
     fn handle_blank_key_press(&self, code: KeyCode) -> Actions {
         #[expect(clippy::wildcard_enum_match_arm, reason = "take only a few")]
         match code {
-            KeyCode::Left =>
-                return vec![Action::GoTo(GoToAction::Left)].into(),
-            KeyCode::Right =>
-                return vec![Action::GoTo(GoToAction::Right)].into(),
+            KeyCode::Left => return vec![GoToAction::Left.into()].into(),
+            KeyCode::Right => return vec![GoToAction::Right.into()].into(),
             _ => (),
         }
         match *self {

@@ -14,23 +14,20 @@ pub struct Insert;
 impl HandleKeyPress for Insert {
     fn handle_blank_key_press(&self, code: KeyCode) -> Actions {
         match code {
-            KeyCode::Esc => vec![
-                Action::GoTo(GoToAction::Left),
-                Action::SelectMode(Mode::Normal),
-            ],
-            KeyCode::Char(ch) => vec![Action::InsertChar(ch)],
-            KeyCode::Backspace => vec![Action::DeletePreviousChar],
-            _ => vec![],
+            KeyCode::Esc =>
+                vec![GoToAction::Left.into(), Action::SelectMode(Mode::Normal)]
+                    .into(),
+            KeyCode::Char(ch) => Action::InsertChar(ch).into(),
+            KeyCode::Backspace => Action::DeletePreviousChar.into(),
+            _ => Actions::default(),
         }
-        .into()
     }
 
     fn handle_shift_key_press(&self, code: KeyCode) -> Actions {
         if let KeyCode::Char(ch) = code {
-            vec![Action::InsertChar(ch.to_ascii_uppercase())]
+            Action::InsertChar(ch.to_ascii_uppercase()).into()
         } else {
-            vec![]
+            Actions::default()
         }
-        .into()
     }
 }

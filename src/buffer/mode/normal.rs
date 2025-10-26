@@ -11,11 +11,9 @@ pub struct Normal;
 impl HandleKeyPress for Normal {
     fn handle_blank_key_press(&self, code: KeyCode) -> Actions {
         match code {
-            KeyCode::Char('a') => vec![
-                Action::GoTo(GoToAction::Right),
-                Action::SelectMode(Mode::Insert),
-            ]
-            .into(),
+            KeyCode::Char('a') =>
+                vec![GoToAction::Right.into(), Action::SelectMode(Mode::Insert)]
+                    .into(),
             KeyCode::Char('i') => Action::SelectMode(Mode::Insert).into(),
             KeyCode::Char('x') => Action::DeleteNextChar.into(),
             KeyCode::Backspace | KeyCode::Char('h') => GoToAction::Left.into(),
@@ -32,15 +30,13 @@ impl HandleKeyPress for Normal {
     fn handle_shift_key_press(&self, code: KeyCode) -> Actions {
         match code {
             KeyCode::Char('I') => vec![
-                Action::GoTo(GoToAction::FirstNonSpace),
+                GoToAction::FirstNonSpace.into(),
                 Action::SelectMode(Mode::Insert),
             ]
             .into(),
-            KeyCode::Char('A') => vec![
-                Action::GoTo(GoToAction::Eol),
-                Action::SelectMode(Mode::Insert),
-            ]
-            .into(),
+            KeyCode::Char('A') =>
+                vec![GoToAction::Eol.into(), Action::SelectMode(Mode::Insert)]
+                    .into(),
             KeyCode::Char('X') => Action::DeletePreviousChar.into(),
             KeyCode::Char('F') => OPending::FindPrevious.into(),
             KeyCode::Char('T') => OPending::FindPreviousIncrement.into(),

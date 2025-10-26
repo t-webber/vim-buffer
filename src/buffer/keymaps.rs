@@ -16,6 +16,12 @@ pub enum Action {
     SelectMode(Mode),
 }
 
+impl From<GoToAction> for Action {
+    fn from(value: GoToAction) -> Self {
+        Self::GoTo(value)
+    }
+}
+
 /// Actions to move the cursor
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
