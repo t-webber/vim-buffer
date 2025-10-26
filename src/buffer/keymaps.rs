@@ -4,6 +4,8 @@ use crate::Mode;
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Action {
+    /// Deletes the whole line
+    DeleteLine,
     /// Deletes the char after the cursor
     DeleteNextChar,
     /// Deletes the char before the cursor
@@ -19,6 +21,12 @@ pub enum Action {
 impl From<GoToAction> for Action {
     fn from(value: GoToAction) -> Self {
         Self::GoTo(value)
+    }
+}
+
+impl From<Mode> for Action {
+    fn from(value: Mode) -> Self {
+        Self::SelectMode(value)
     }
 }
 

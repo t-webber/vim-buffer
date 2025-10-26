@@ -1,3 +1,5 @@
+use core::mem::take;
+
 use crossterm::event::Event;
 
 use crate::buffer::api::Buffer;
@@ -131,6 +133,11 @@ impl Buffer {
                 } else {
                     false
                 },
+            Action::DeleteLine => {
+                self.content.clear();
+                take(&mut self.cursor);
+                true
+            }
             Action::GoTo(goto_action) => self.update_cursor(goto_action),
         }
     }

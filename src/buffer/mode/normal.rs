@@ -12,10 +12,15 @@ impl HandleKeyPress for Normal {
     fn handle_blank_key_press(&self, code: KeyCode) -> Actions {
         match code {
             KeyCode::Char('a') =>
-                vec![GoToAction::Right.into(), Action::SelectMode(Mode::Insert)]
-                    .into(),
-            KeyCode::Char('i') => Action::SelectMode(Mode::Insert).into(),
+                vec![GoToAction::Right.into(), Mode::Insert.into()].into(),
+            KeyCode::Char('i') => Mode::Insert.into(),
             KeyCode::Char('x') => Action::DeleteNextChar.into(),
+            KeyCode::Char('s') => vec![
+                Action::DeleteNextChar,
+                GoToAction::Right.into(),
+                Mode::Insert.into(),
+            ]
+            .into(),
             KeyCode::Backspace | KeyCode::Char('h') => GoToAction::Left.into(),
             KeyCode::Char('l') => GoToAction::Right.into(),
             KeyCode::Char('f') => OPending::FindNext.into(),
@@ -29,15 +34,14 @@ impl HandleKeyPress for Normal {
 
     fn handle_shift_key_press(&self, code: KeyCode) -> Actions {
         match code {
-            KeyCode::Char('I') => vec![
-                GoToAction::FirstNonSpace.into(),
-                Action::SelectMode(Mode::Insert),
-            ]
-            .into(),
-            KeyCode::Char('A') =>
-                vec![GoToAction::Eol.into(), Action::SelectMode(Mode::Insert)]
+            KeyCode::Char('I') =>
+                vec![GoToAction::FirstNonSpace.into(), Mode::Insert.into()]
                     .into(),
+            KeyCode::Char('A') =>
+                vec![GoToAction::Eol.into(), Mode::Insert.into()].into(),
             KeyCode::Char('X') => Action::DeletePreviousChar.into(),
+            KeyCode::Char('S') =>
+                vec![Action::DeleteLine, Mode::Insert.into()].into(),
             KeyCode::Char('F') => OPending::FindPrevious.into(),
             KeyCode::Char('T') => OPending::FindPreviousIncrement.into(),
             _ => Actions::default(),

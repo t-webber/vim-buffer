@@ -14,6 +14,7 @@ macro_rules! buffer_tests {
 }
 
 buffer_tests!(
+
 insert_backspace: "ia<BS><BS>bcd<BS>" => "bc",
 normal_backspace: "ia<Esc><BS><BS>ibcd<Esc><BS>ie" => "becda",
 normal_a: "ia<Esc>ab" => "ab",
@@ -40,4 +41,7 @@ normal_cap_t: "iabcabc<Esc>Taad<Esc>hhTaae" => "abecabdc",
 normal_x: "iabcd<Esc>x<Left>x" => "ac",
 normal_x_empty: "x" => "",
 normal_cap_x: "iabcd<Esc>X<Left>X" => "bd",
-    );
+normal_s: "iabcd<Esc>se<Esc>hsf" => "abfe",
+normal_cap_s: "iabcdef<Esc>hhhSghij" => "ghij",
+
+);

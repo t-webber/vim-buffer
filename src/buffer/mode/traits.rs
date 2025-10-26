@@ -1,5 +1,6 @@
 use crossterm::event::KeyCode;
 
+use crate::Mode;
 use crate::buffer::keymaps::{Action, GoToAction, OPending};
 
 /// Actions to be taken as a result of a keypress
@@ -12,7 +13,13 @@ pub enum Actions {
 
 impl Default for Actions {
     fn default() -> Self {
-        Self::List(vec![])
+        vec![].into()
+    }
+}
+
+impl From<Vec<Action>> for Actions {
+    fn from(list: Vec<Action>) -> Self {
+        Self::List(list)
     }
 }
 
@@ -24,19 +31,19 @@ impl From<OPending> for Actions {
 
 impl From<Action> for Actions {
     fn from(action: Action) -> Self {
-        Self::List(vec![action])
+        vec![action].into()
+    }
+}
+
+impl From<Mode> for Actions {
+    fn from(action: Mode) -> Self {
+        vec![action.into()].into()
     }
 }
 
 impl From<GoToAction> for Actions {
     fn from(action: GoToAction) -> Self {
-        Self::List(vec![Action::GoTo(action)])
-    }
-}
-
-impl From<Vec<Action>> for Actions {
-    fn from(list: Vec<Action>) -> Self {
-        Self::List(list)
+        vec![action.into()].into()
     }
 }
 

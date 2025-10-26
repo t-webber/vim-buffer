@@ -15,8 +15,7 @@ impl HandleKeyPress for Insert {
     fn handle_blank_key_press(&self, code: KeyCode) -> Actions {
         match code {
             KeyCode::Esc =>
-                vec![GoToAction::Left.into(), Action::SelectMode(Mode::Normal)]
-                    .into(),
+                vec![GoToAction::Left.into(), Mode::Normal.into()].into(),
             KeyCode::Char(ch) => Action::InsertChar(ch).into(),
             KeyCode::Backspace => Action::DeletePreviousChar.into(),
             _ => Actions::default(),
