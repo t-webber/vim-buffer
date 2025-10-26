@@ -1,7 +1,7 @@
 use vim_buffer::Buffer;
 
 macro_rules! buffer_tests {
-    ($($name:ident: $keymaps:expr => $output:expr,)*) => {
+    ($($name:ident: $keymaps:literal => $output:literal,)*) => {
         $(
             #[test]
             fn $name() {

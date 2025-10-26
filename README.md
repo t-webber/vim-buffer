@@ -20,12 +20,7 @@ A buffer that listens for vim keymaps.
 
 The buffer only supports a single line for now.
 
-Supported keymaps:
-
-- Insert mode
-  - Characters, `Escape`, `Backspace`, `LeftArrow`, `RightArrow`
-- Normal mode
-  - `i`, `a`, `h`, `l`, `I`, `A`, `LeftArrow`, `RightArrow`
+Refer to [keys.rs](tests/keys.rs) to see the list of supported keymaps.
 
 ## CLI demo
 
@@ -33,4 +28,25 @@ You can play with an example of this library in the terminal with
 
 ```sh
 cargo run --example cli
+```
+
+## Usage
+
+```rust
+use vim_buffer::{Buffer, Mode};
+use vim_buffer::crossterm::event::{Event, KeyEvent, KeyCode};
+
+let mut buffer = Buffer::default();
+assert_eq!(buffer.as_mode(), Mode::Normal);
+
+// Update it with crossterm events
+buffer.update(&Event::Key(KeyEvent::from(KeyCode::Char('i'))));
+for ch in "hello".chars() {
+    buffer.update(&Event::Key(KeyEvent::from(KeyCode::Char(ch))));
+}
+assert_eq!(buffer.as_content(), "hello");
+
+// Update with Vim string
+buffer.update_from_string("<Esc>0sH<Esc>A, World!");
+assert_eq!(buffer.as_content(), "Hello, World!");
 ```

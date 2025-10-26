@@ -22,13 +22,16 @@ impl NonEmptyModifiers {
 
     /// Builds an [`Event`] from a `char` and [`KeyModifiers`].
     const fn build_event_from_char_modifiers(
-        ch: char,
-        modifiers: KeyModifiers,
+        mut ch: char,
+        mut modifiers: KeyModifiers,
     ) -> Event {
-        Event::Key(KeyEvent::new(
-            KeyCode::Char(ch.to_ascii_lowercase()),
-            modifiers,
-        ))
+        #[expect(clippy::else_if_without_else, reason = "not needed")]
+        if modifiers.contains(KeyModifiers::SHIFT) {
+            ch = ch.to_ascii_uppercase();
+        } else if ch.is_uppercase() {
+            modifiers = modifiers.union(KeyModifiers::SHIFT);
+        }
+        Event::Key(KeyEvent::new(KeyCode::Char(ch), modifiers))
     }
 
     /// Builds an [`Event`] from a [`NonEmptyModifiers`] applied to a `char`.

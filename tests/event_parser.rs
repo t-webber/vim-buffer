@@ -109,7 +109,7 @@ fn missing_hyphen() {
 fn true_meta_t() {
     assert_eq!(
         parse_events("<T-T>"),
-        Ok(vec![mod_evt('t', KeyModifiers::META)])
+        Ok(vec![mod_evt('t', KeyModifiers::META | KeyModifiers::SHIFT)])
     );
 }
 
@@ -126,10 +126,10 @@ fn modifier_chars() {
     assert_eq!(
         parse_events("<C-C><A-M><C-S><T-D>"),
         Ok(vec![
-            mod_evt('c', KeyModifiers::CONTROL),
-            mod_evt('m', KeyModifiers::ALT),
-            mod_evt('s', KeyModifiers::CONTROL),
-            mod_evt('d', KeyModifiers::META),
+            mod_evt('c', KeyModifiers::CONTROL | KeyModifiers::SHIFT),
+            mod_evt('M', KeyModifiers::ALT),
+            mod_evt('s', KeyModifiers::CONTROL | KeyModifiers::SHIFT),
+            mod_evt('D', KeyModifiers::META),
         ])
     );
 }
@@ -138,7 +138,7 @@ fn modifier_chars() {
 fn control_x() {
     assert_eq!(
         parse_events("<C-X>"),
-        Ok(vec![mod_evt('x', KeyModifiers::CONTROL)])
+        Ok(vec![mod_evt('X', KeyModifiers::CONTROL | KeyModifiers::SHIFT)])
     );
 }
 

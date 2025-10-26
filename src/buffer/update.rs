@@ -17,6 +17,25 @@ impl Buffer {
     /// # Errors
     ///
     /// Returns an error if the buffer exceeds [`usize::MAX`]
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vim_buffer::Buffer;
+    /// use vim_buffer::crossterm::event::{Event, KeyCode, KeyEvent};
+    ///
+    /// let mut buffer = Buffer::default();
+    ///
+    /// // Update it with crossterm events
+    /// buffer.update(&Event::Key(KeyEvent::from(KeyCode::Char('i'))));
+    /// for ch in "hello".chars() {
+    ///     buffer.update(&Event::Key(KeyEvent::from(KeyCode::Char('h'))));
+    /// }
+    /// buffer.update(&Event::Key(KeyEvent::from(KeyCode::Esc)));
+    /// buffer.update(&Event::Key(KeyEvent::from(KeyCode::Char('^'))));
+    /// buffer.update(&Event::Key(KeyEvent::from(KeyCode::Char('s'))));
+    /// buffer.update(&Event::Key(KeyEvent::from(KeyCode::Char('H'))));
+    /// ```
     pub fn update(&mut self, event: &Event) -> bool {
         let events = self.as_mode().handle_event(event, &mut self.pending);
 
@@ -32,6 +51,7 @@ impl Buffer {
     /// Updates the cursor position with a [`GoToAction`]
     ///
     /// Returns `true` if the action was successful.
+    #[must_use]
     fn update_cursor(&mut self, goto_action: GoToAction) -> bool {
         match goto_action {
             GoToAction::Right => self.cursor.increment(),
@@ -92,6 +112,20 @@ impl Buffer {
     ///
     /// Returns an error if the string is invalid, and the parser failed to
     /// convert it to a list of events.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vim_buffer::Buffer;
+    ///
+    /// let mut buffer = Buffer::default();
+    ///
+    /// buffer.update_from_string("iHello, World!");
+    /// assert_eq!(buffer.as_content(), "Hello, World!");
+    ///
+    /// buffer.update_from_string("<Esc>F,xllsw<Esc>FHsh<Esc>f!x");
+    /// assert_eq!(buffer.as_content(), "hello world");
+    /// ```
     pub fn update_from_string(
         &mut self,
         keymaps: &str,
@@ -118,12 +152,12 @@ impl Buffer {
                 true
             }
             Action::DeleteNextChar =>
-                if self.as_cursor() != 0 {
+                if self.is_empty() {
+                    false
+                } else {
                     self.content.remove(self.as_cursor());
                     self.cursor.decrement_with_capacity();
                     true
-                } else {
-                    false
                 },
             Action::DeletePreviousChar =>
                 if self.as_cursor() != 0 {

@@ -16,8 +16,8 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('i') => Mode::Insert.into(),
             KeyCode::Char('x') => Action::DeleteNextChar.into(),
             KeyCode::Char('s') => vec![
-                Action::DeleteNextChar,
                 GoToAction::Right.into(),
+                Action::DeletePreviousChar,
                 Mode::Insert.into(),
             ]
             .into(),

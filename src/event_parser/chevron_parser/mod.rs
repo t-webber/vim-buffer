@@ -1,10 +1,10 @@
 /// Defines the valid modifiers that can be used within a chevron group.
 mod char_modifier;
-/// Defines the parser for simple keys inside chevron groups, like `<Esc>` and
-/// `<CR>`.
-mod key;
 /// Defines the state to parse the chevron groups that represent modified keys
 mod modified_key;
+/// Defines the parser for simple keys inside chevron groups, like `<Esc>` and
+/// `<CR>`.
+mod named_key;
 /// Defines logic to push into the modifiers, and get back the last one if
 /// needed.
 mod non_empty_modifier;
@@ -12,9 +12,11 @@ mod non_empty_modifier;
 use crossterm::event::{Event, KeyEvent};
 
 use crate::event_parser::EventParser;
-use crate::event_parser::chevron_parser::key::{LENGTHS, build_named_key};
 pub use crate::event_parser::chevron_parser::modified_key::ModifiedKeyError;
 use crate::event_parser::chevron_parser::modified_key::ModifiedKeyParsingState;
+use crate::event_parser::chevron_parser::named_key::{
+    LENGTHS, build_named_key
+};
 
 /// Parses one chevron group.
 ///

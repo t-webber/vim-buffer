@@ -12,24 +12,16 @@ use crate::buffer::mode::traits::{Actions, HandleKeyPress};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Mode {
     /// Insert mode
-    ///
-    /// To type in content.
-    ///
-    /// Press `<Esc>` to exit it.
     Insert,
     /// Normal mode
-    ///
-    /// To move and edit with vim motions.
-    ///
-    /// Press a, i, A, or I to exit it.
     #[default]
     Normal,
 }
 
 impl Mode {
     /// Handle incoming terminal events on any kind.
-    pub fn handle_event(
-        &self,
+    pub(crate) fn handle_event(
+        self,
         event: &Event,
         pending: &mut Option<OPending>,
     ) -> Vec<Action> {
@@ -112,14 +104,13 @@ impl HandleKeyPress for Mode {
 
 /// Adds [`KeyModifiers::SHIFT`] if the event is a capital char, and capitalises
 /// the char if the modifiers contain shift.
-fn fix_shift_modifier(key_event: &mut KeyEvent) {
+const fn fix_shift_modifier(key_event: &mut KeyEvent) {
     #[expect(clippy::else_if_without_else, reason = "checked")]
     if let KeyCode::Char(ch) = &mut key_event.code {
         if ch.is_ascii_uppercase() {
-            key_event.modifiers |= KeyModifiers::SHIFT;
-        } else if key_event.modifiers & KeyModifiers::SHIFT
-            == KeyModifiers::SHIFT
-        {
+            key_event.modifiers =
+                key_event.modifiers.union(KeyModifiers::SHIFT);
+        } else if key_event.modifiers.contains(KeyModifiers::SHIFT) {
             *ch = ch.to_ascii_uppercase();
         }
     }
