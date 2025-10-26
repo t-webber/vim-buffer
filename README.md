@@ -3,9 +3,11 @@
 ![Clippy](https://github.com/t-webber/vim-buffer/actions/workflows/clippy.yml/badge.svg?branch=main)
 ![Build](https://github.com/t-webber/vim-buffer/actions/workflows/build.yml/badge.svg?branch=main)
 ![Tests](https://github.com/t-webber/vim-buffer/actions/workflows/tests.yml/badge.svg?branch=main)
-![Docs](https://github.com/t-webber/vim-buffer/actions/workflows/docs.yml/badge.svg?branch=main)
-![Fmt](https://github.com/t-webber/vim-buffer/actions/workflows/fmt.yml/badge.svg?branch=main)
+![Rustdoc](https://github.com/t-webber/vim-buffer/actions/workflows/rustdoc.yml/badge.svg?branch=main)
+![Rusfmt](https://github.com/t-webber/vim-buffer/actions/workflows/rustfmt.yml/badge.svg?branch=main)
 ![Coverage](https://github.com/t-webber/vim-buffer/actions/workflows/coverage.yml/badge.svg?branch=main)
+![Taplo](https://github.com/t-webber/vim-buffer/actions/workflows/taplo.yml/badge.svg?branch=main)
+![Spelling](https://github.com/t-webber/vim-buffer/actions/workflows/spelling.yml/badge.svg?branch=main)
 
 [![github](https://img.shields.io/badge/GitHub-t--webber/vim--buffer-blue?logo=GitHub)](https://github.com/t-webber/vim-buffer)
 [![license](https://img.shields.io/badge/Licence-MIT%20or%20Apache%202.0-darkgreen)](https://github.com/t-webber/vim-buffer?tab=MIT-2-ov-file)
