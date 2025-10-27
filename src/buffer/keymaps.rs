@@ -46,6 +46,8 @@ pub enum GoToAction {
     Left,
     /// Find next occurrence of char and place cursor on it
     NextOccurrenceOf(char),
+    /// Move to the beginning of the next word
+    NextWord,
     /// Find previous occurrence of char and place cursor on it
     PreviousOccurrenceOf(char),
     /// Move the cursor right by one character

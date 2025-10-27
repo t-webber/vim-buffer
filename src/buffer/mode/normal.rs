@@ -29,6 +29,7 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('0') => GoToAction::Bol.into(),
             KeyCode::Char('^') => GoToAction::FirstNonSpace.into(),
             KeyCode::Char('$') => GoToAction::Eol.into(),
+            KeyCode::Char('w') => GoToAction::NextWord.into(),
             _ => Actions::default(),
         }
     }

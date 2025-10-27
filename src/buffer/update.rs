@@ -57,7 +57,7 @@ impl Buffer {
             GoToAction::Right => self.cursor.increment(),
             GoToAction::Left => self.cursor.decrement(),
             GoToAction::Bol => self.cursor.set(0),
-            GoToAction::Eol => self.cursor.set(self.len()),
+            GoToAction::Eol => self.cursor.set_to_max(),
             GoToAction::FirstNonSpace => {
                 let idx = self
                     .as_content()
@@ -94,6 +94,28 @@ impl Buffer {
                     self.cursor.set(idx);
                 } else {
                     return false;
+                }
+            }
+            GoToAction::NextWord => {
+                let mut chars =
+                    self.as_content().char_indices().skip(self.as_cursor());
+                if let Some((_, cursor_ch)) = chars.next()
+                    && let Some((idx, next_ch)) =
+                        chars.find(|(_idx, ch)| xor_ident_char(cursor_ch, *ch))
+                {
+                    if next_ch.is_whitespace() {
+                        if let Some((non_space_idx, _)) =
+                            chars.find(|(_idx, ch)| !ch.is_whitespace())
+                        {
+                            self.cursor.set(non_space_idx);
+                        } else {
+                            self.cursor.set_to_max();
+                        }
+                    } else {
+                        self.cursor.set(idx);
+                    }
+                } else {
+                    self.cursor.set_to_max();
                 }
             }
         }
@@ -172,12 +194,23 @@ impl Buffer {
                 take(&mut self.cursor);
                 true
             }
-            Action::GoTo(goto_action) => self.update_cursor(goto_action),
             Action::ReplaceWith(ch) => {
+                // PERF: string characters are copied twice.
                 self.content.remove(self.as_cursor());
                 self.content.insert(self.as_cursor(), ch);
                 true
             }
+            Action::GoTo(goto_action) => self.update_cursor(goto_action),
         }
     }
+}
+
+/// Checks that first or second is ident valid, but not both.
+const fn xor_ident_char(first: char, second: char) -> bool {
+    is_ident_char(first) ^ is_ident_char(second)
+}
+
+/// Returns `true` if the given char is valid for an identifier
+const fn is_ident_char(ch: char) -> bool {
+    matches!(ch, '0'..='9' | 'a'..='z' | 'A'..='Z' | '_')
 }

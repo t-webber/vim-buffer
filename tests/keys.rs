@@ -44,5 +44,8 @@ normal_cap_x: "iabcd<Esc>X<Left>X" => "bd",
 normal_s: "iabcd<Esc>se<Esc>hsf" => "abfe",
 normal_cap_s: "iabcdef<Esc>hhhSghij" => "ghij",
 normal_r: "iabcd<Esc>Fbre" => "aecd",
+normal_w: "iabc   def::(Bl<Esc>0wa.<Esc>lwa.<Esc>lwa.<Esc>lwa." => "abc   d.ef:.:(B.l.",
+normal_w_end_space: "iab <Esc>0wa." => "ab .",
+normal_w_end_symbol: "i)))<Esc>0wa." => "))).",
 
 );
