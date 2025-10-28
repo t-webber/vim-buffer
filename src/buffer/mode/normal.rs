@@ -46,6 +46,7 @@ impl HandleKeyPress for Normal {
                 vec![Action::DeleteLine, Mode::Insert.into()].into(),
             KeyCode::Char('F') => OPending::FindPrevious.into(),
             KeyCode::Char('T') => OPending::FindPreviousIncrement.into(),
+            KeyCode::Char('W') => GoToAction::NextWORD.into(),
             _ => Actions::default(),
         }
     }

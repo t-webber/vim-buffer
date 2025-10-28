@@ -47,5 +47,6 @@ normal_r: "iabcd<Esc>Fbre" => "aecd",
 normal_w: "iabc   def::(Bl<Esc>0wa.<Esc>lwa.<Esc>lwa.<Esc>lwa." => "abc   d.ef:.:(B.l.",
 normal_w_end_space: "iab <Esc>0wa." => "ab .",
 normal_w_end_symbol: "i)))<Esc>0wa." => "))).",
+normal_cap_w: "i  ab  cd<Esc>0Wiz<Esc>lWiz<Esc>lWaz" => "  zab  zcdz",
 
 );

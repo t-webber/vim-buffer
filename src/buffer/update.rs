@@ -118,6 +118,22 @@ impl Buffer {
                     self.cursor.set_to_max();
                 }
             }
+            GoToAction::NextWORD => {
+                let mut chars =
+                    self.as_content().char_indices().skip(self.as_cursor());
+                if let Some((_, cursor_ch)) = chars.next()
+                    && cursor_ch.is_whitespace()
+                    && let Some((idx, _)) =
+                        chars.find(|(_, ch)| !ch.is_whitespace())
+                {
+                    self.cursor.set(idx);
+                } else if self.update_cursor(GoToAction::NextOccurrenceOf(' '))
+                {
+                    return self.update_cursor(GoToAction::NextWORD);
+                } else {
+                    self.cursor.set_to_max();
+                }
+            }
         }
         true
     }
