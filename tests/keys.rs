@@ -7,7 +7,7 @@ macro_rules! buffer_tests {
             fn $name() {
                 let mut buffer = Buffer::default();
                 buffer.update_from_string($keymaps).unwrap();
-                assert_eq!(buffer.as_content(), $output);
+                assert_eq!(buffer.as_content(), $output, "Keys: \x1b[35m{}\x1b[0m", $keymaps);
             }
         )*
     };
@@ -44,9 +44,18 @@ normal_cap_x: "iabcd<Esc>X<Left>X" => "bd",
 normal_s: "iabcd<Esc>se<Esc>hsf" => "abfe",
 normal_cap_s: "iabcdef<Esc>hhhSghij" => "ghij",
 normal_r: "iabcd<Esc>Fbre" => "aecd",
+
 normal_w: "iabc   def::(Bl<Esc>0wa.<Esc>lwa.<Esc>lwa.<Esc>lwa." => "abc   d.ef:.:(B.l.",
 normal_w_end_space: "iab <Esc>0wa." => "ab .",
 normal_w_end_symbol: "i)))<Esc>0wa." => "))).",
 normal_cap_w: "i  ab  cd<Esc>0Wiz<Esc>lWiz<Esc>lWaz" => "  zab  zcdz",
+
+normal_b: "i)))) ef<Esc>biz<Esc>biz" => "z)))) zef",
+normal_b_word: "iab<Esc>biz" => "zab",
+normal_b_word_space: "iab <Esc>biz" => "zab ",
+normal_b_leading_space: "i ab <Esc>biz" => " zab ",
+normal_b_symbols: "iab(:) <Esc>biz" => "abz(:) ",
+normal_b_leading_symbols: "i(:)<Esc>biz" => "z(:)",
+normal_b_spaces: "i  <Esc>biz" => "z  ",
 
 );

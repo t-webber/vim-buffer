@@ -84,11 +84,12 @@ impl Buffer {
                     clippy::arithmetic_side_effects,
                     reason = "cursor <= len"
                 )]
+                let skip = self.len() - self.as_cursor();
                 if let Some((idx, _ch)) = self
                     .as_content()
                     .char_indices()
                     .rev()
-                    .skip(self.len() - self.as_cursor())
+                    .skip(skip)
                     .find(|&(_idx, next)| next == ch)
                 {
                     self.cursor.set(idx);
@@ -132,6 +133,33 @@ impl Buffer {
                     return self.update_cursor(GoToAction::NextWORD);
                 } else {
                     self.cursor.set_to_max();
+                }
+            }
+            GoToAction::PreviousWord => {
+                #[expect(
+                    clippy::arithmetic_side_effects,
+                    reason = "cursor <= len"
+                )]
+                let skip = self.len() - self.as_cursor();
+                let mut chars =
+                    self.as_content().char_indices().rev().skip(skip);
+                if let Some((_, cursor_ch)) = chars.next() {
+                    if cursor_ch.is_whitespace()
+                        && let Some((idx, _)) =
+                            chars.find(|(_, ch)| !ch.is_whitespace())
+                    {
+                        self.cursor.set(idx);
+                        return self.update_cursor(GoToAction::PreviousWord);
+                    }
+                    if let Some((idx, _)) =
+                        chars.find(|(_, ch)| xor_ident_char(cursor_ch, *ch))
+                        && idx < self.as_cursor()
+                    {
+                        self.cursor.set(idx);
+                        self.cursor.increment();
+                    } else {
+                        self.cursor.set(0);
+                    }
                 }
             }
         }
