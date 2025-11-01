@@ -7,6 +7,75 @@ use crate::buffer::keymaps::{Action, GoToAction};
 use crate::event_parser::{EventParsingError, parse_events};
 
 impl Buffer {
+    /// Returns the index of the cursor, starting from the end of the string.
+    #[expect(clippy::arithmetic_side_effects, reason = "cursor <= len")]
+    const fn as_end_index(&self) -> usize {
+        self.len() - self.as_cursor()
+    }
+
+    /// Moves the cursor to the beginning of the next WORD.
+    #[expect(non_snake_case, reason = "vim wording")]
+    fn goto_next_WORD(&mut self) {
+        let mut chars = self.as_content().char_indices().skip(self.as_cursor());
+        if let Some((_, cursor_ch)) = chars.next()
+            && cursor_ch.is_whitespace()
+            && let Some((idx, _)) = chars.find(|(_, ch)| !ch.is_whitespace())
+        {
+            self.cursor.set(idx);
+        } else if self.update_cursor(GoToAction::NextOccurrenceOf(' ')) {
+            self.goto_next_WORD();
+        } else {
+            self.cursor.set_to_max();
+        }
+    }
+
+    /// Moves the cursor to the beginning of the next word.
+    fn goto_next_word(&mut self) {
+        let mut chars = self.as_content().char_indices().skip(self.as_cursor());
+        if let Some((_, cursor_ch)) = chars.next()
+            && let Some((idx, next_ch)) =
+                chars.find(|(_idx, ch)| xor_ident_char(cursor_ch, *ch))
+        {
+            if next_ch.is_whitespace() {
+                if let Some((non_space_idx, _)) =
+                    chars.find(|(_idx, ch)| !ch.is_whitespace())
+                {
+                    self.cursor.set(non_space_idx);
+                } else {
+                    self.cursor.set_to_max();
+                }
+            } else {
+                self.cursor.set(idx);
+            }
+        } else {
+            self.cursor.set_to_max();
+        }
+    }
+
+    /// Moves the cursor to the beginning of the previous word.
+    fn goto_previous_word(&mut self) {
+        let mut chars =
+            self.as_content().char_indices().rev().skip(self.as_end_index());
+        if let Some((_, cursor_ch)) = chars.next() {
+            if cursor_ch.is_whitespace()
+                && let Some((idx, _)) =
+                    chars.find(|(_, ch)| !ch.is_whitespace())
+            {
+                self.cursor.set(idx);
+                return self.goto_previous_word();
+            }
+            if let Some((idx, _)) =
+                chars.find(|(_, ch)| xor_ident_char(cursor_ch, *ch))
+                && idx < self.as_cursor()
+            {
+                self.cursor.set(idx);
+                self.cursor.increment();
+            } else {
+                self.cursor.set(0);
+            }
+        }
+    }
+
     /// Updates the buffer with a terminal event
     ///
     /// # Returns
@@ -58,15 +127,13 @@ impl Buffer {
             GoToAction::Left => self.cursor.decrement(),
             GoToAction::Bol => self.cursor.set(0),
             GoToAction::Eol => self.cursor.set_to_max(),
-            GoToAction::FirstNonSpace => {
-                let idx = self
-                    .as_content()
+            GoToAction::FirstNonSpace => self.cursor.set(
+                self.as_content()
                     .char_indices()
                     .find(|(_idx, ch)| !ch.is_whitespace())
-                    .map_or_else(|| self.len(), |(idx, _ch)| idx);
-                self.cursor.set(idx);
-            }
-            GoToAction::NextOccurrenceOf(ch) => {
+                    .map_or_else(|| self.len(), |(idx, _ch)| idx),
+            ),
+            GoToAction::NextOccurrenceOf(ch) => self.cursor.set(
                 if let Some((idx, _ch)) = self
                     .as_content()
                     .char_indices()
@@ -74,94 +141,27 @@ impl Buffer {
                     .skip(1)
                     .find(|(_idx, next)| *next == ch)
                 {
-                    self.cursor.set(idx);
+                    idx
                 } else {
                     return false;
-                }
-            }
-            GoToAction::PreviousOccurrenceOf(ch) => {
-                #[expect(
-                    clippy::arithmetic_side_effects,
-                    reason = "cursor <= len"
-                )]
-                let skip = self.len() - self.as_cursor();
+                },
+            ),
+            GoToAction::PreviousOccurrenceOf(ch) => self.cursor.set(
                 if let Some((idx, _ch)) = self
                     .as_content()
                     .char_indices()
                     .rev()
-                    .skip(skip)
+                    .skip(self.as_end_index())
                     .find(|&(_idx, next)| next == ch)
                 {
-                    self.cursor.set(idx);
+                    idx
                 } else {
                     return false;
-                }
-            }
-            GoToAction::NextWord => {
-                let mut chars =
-                    self.as_content().char_indices().skip(self.as_cursor());
-                if let Some((_, cursor_ch)) = chars.next()
-                    && let Some((idx, next_ch)) =
-                        chars.find(|(_idx, ch)| xor_ident_char(cursor_ch, *ch))
-                {
-                    if next_ch.is_whitespace() {
-                        if let Some((non_space_idx, _)) =
-                            chars.find(|(_idx, ch)| !ch.is_whitespace())
-                        {
-                            self.cursor.set(non_space_idx);
-                        } else {
-                            self.cursor.set_to_max();
-                        }
-                    } else {
-                        self.cursor.set(idx);
-                    }
-                } else {
-                    self.cursor.set_to_max();
-                }
-            }
-            GoToAction::NextWORD => {
-                let mut chars =
-                    self.as_content().char_indices().skip(self.as_cursor());
-                if let Some((_, cursor_ch)) = chars.next()
-                    && cursor_ch.is_whitespace()
-                    && let Some((idx, _)) =
-                        chars.find(|(_, ch)| !ch.is_whitespace())
-                {
-                    self.cursor.set(idx);
-                } else if self.update_cursor(GoToAction::NextOccurrenceOf(' '))
-                {
-                    return self.update_cursor(GoToAction::NextWORD);
-                } else {
-                    self.cursor.set_to_max();
-                }
-            }
-            GoToAction::PreviousWord => {
-                #[expect(
-                    clippy::arithmetic_side_effects,
-                    reason = "cursor <= len"
-                )]
-                let skip = self.len() - self.as_cursor();
-                let mut chars =
-                    self.as_content().char_indices().rev().skip(skip);
-                if let Some((_, cursor_ch)) = chars.next() {
-                    if cursor_ch.is_whitespace()
-                        && let Some((idx, _)) =
-                            chars.find(|(_, ch)| !ch.is_whitespace())
-                    {
-                        self.cursor.set(idx);
-                        return self.update_cursor(GoToAction::PreviousWord);
-                    }
-                    if let Some((idx, _)) =
-                        chars.find(|(_, ch)| xor_ident_char(cursor_ch, *ch))
-                        && idx < self.as_cursor()
-                    {
-                        self.cursor.set(idx);
-                        self.cursor.increment();
-                    } else {
-                        self.cursor.set(0);
-                    }
-                }
-            }
+                },
+            ),
+            GoToAction::NextWORD => self.goto_next_WORD(),
+            GoToAction::NextWord => self.goto_next_word(),
+            GoToAction::PreviousWord => self.goto_previous_word(),
         }
         true
     }
