@@ -52,6 +52,27 @@ impl Buffer {
         }
     }
 
+    /// Moves the cursor to the beginning of the previous WORD.
+    #[expect(non_snake_case, reason = "vim wording")]
+    fn goto_previous_WORD(&mut self) {
+        let mut chars =
+            self.as_content().char_indices().rev().skip(self.as_end_index());
+        if let Some((_, cursor_ch)) = chars.next()
+            && cursor_ch.is_whitespace()
+        {
+            if let Some((idx, _)) = chars.find(|(_, ch)| !ch.is_whitespace()) {
+                self.cursor.set(idx);
+                self.goto_previous_WORD();
+            } else {
+                self.cursor.set(0);
+            }
+        } else if self.update_cursor(GoToAction::PreviousOccurrenceOf(' ')) {
+            self.cursor.increment();
+        } else {
+            self.cursor.set(0);
+        }
+    }
+
     /// Moves the cursor to the beginning of the previous word.
     fn goto_previous_word(&mut self) {
         let mut chars =
@@ -161,6 +182,7 @@ impl Buffer {
             ),
             GoToAction::NextWORD => self.goto_next_WORD(),
             GoToAction::NextWord => self.goto_next_word(),
+            GoToAction::PreviousWORD => self.goto_previous_WORD(),
             GoToAction::PreviousWord => self.goto_previous_word(),
         }
         true

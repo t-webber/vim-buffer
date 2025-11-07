@@ -49,6 +49,7 @@ normal_w: "iabc   def::(Bl<Esc>0wa.<Esc>lwa.<Esc>lwa.<Esc>lwa." => "abc   d.ef:.
 normal_w_end_space: "iab <Esc>0wa." => "ab .",
 normal_w_end_symbol: "i)))<Esc>0wa." => "))).",
 normal_cap_w: "i  ab  cd<Esc>0Wiz<Esc>lWiz<Esc>lWaz" => "  zab  zcdz",
+normal_cap_w_empty: "i    <Esc>0Waz" => "    z",
 
 normal_b: "i)))) ef<Esc>biz<Esc>biz" => "z)))) zef",
 normal_b_word: "iab<Esc>biz" => "zab",
@@ -57,5 +58,9 @@ normal_b_leading_space: "i ab <Esc>biz" => " zab ",
 normal_b_symbols: "iab(:) <Esc>biz" => "abz(:) ",
 normal_b_leading_symbols: "i(:)<Esc>biz" => "z(:)",
 normal_b_spaces: "i  <Esc>biz" => "z  ",
+
+normal_cap_b_empty: "i   <Esc>Biz" => "z   ",
+normal_cap_b_words: "iab cd  <Esc>Biz<Esc>Biy" => "yab zcd  ",
+normal_cap_b_symbols: "iab(:)cd  <Esc>Biz<Esc>Biy" => "yzab(:)cd  ",
 
 );

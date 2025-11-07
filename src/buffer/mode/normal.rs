@@ -48,6 +48,7 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('F') => OPending::FindPrevious.into(),
             KeyCode::Char('T') => OPending::FindPreviousIncrement.into(),
             KeyCode::Char('W') => GoToAction::NextWORD.into(),
+            KeyCode::Char('B') => GoToAction::PreviousWORD.into(),
             _ => Actions::default(),
         }
     }
