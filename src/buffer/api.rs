@@ -1,5 +1,6 @@
 use crate::Mode;
 use crate::buffer::bounded_usize::BoundedUsize;
+use crate::buffer::history::History;
 use crate::buffer::keymaps::OPending;
 
 /// Buffer that supports vim keymaps
@@ -30,6 +31,8 @@ pub struct Buffer {
     pub(super) content: String,
     /// Position of the cursor within the buffer
     pub(super) cursor: BoundedUsize,
+    /// Buffer history to restore old versions
+    pub(super) history: History,
     /// Vim mode of the buffer
     pub(super) mode: Mode,
     /// Pending actions that require more keymaps
@@ -123,6 +126,9 @@ impl From<String> for Buffer {
     fn from(value: String) -> Self {
         Self {
             cursor: BoundedUsize::with_capacity(value.len()),
+            history: History::with_initial_value(
+                value.clone().into_boxed_str(),
+            ),
             content: value,
             ..Default::default()
         }

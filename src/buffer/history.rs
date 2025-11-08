@@ -1,5 +1,3 @@
-#![allow(dead_code, reason = "dev in progress")]
-
 /// Holds the history of the buffer, with the following invariant: there are
 /// never 2 successive entries that are equal.
 #[derive(Debug)]

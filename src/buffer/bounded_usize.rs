@@ -49,6 +49,13 @@ impl BoundedUsize {
             if value < self.max_value { value } else { self.max_value };
     }
 
+    /// Changes the maximum value of the [`BoundedUsize`], and revalidates the
+    /// cursor to ensure it is still in bounds.
+    pub const fn set_max(&mut self, max: usize) {
+        self.max_value = max;
+        self.set(self.value);
+    }
+
     /// Sets the cursor to the maximum position, i.e. at the end of the buffer.
     pub const fn set_to_max(&mut self) {
         self.value = self.max_value;

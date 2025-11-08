@@ -18,6 +18,8 @@ pub enum Action {
     ReplaceWith(char),
     /// Switches to a new mode
     SelectMode(Mode),
+    /// Undo the last edition
+    Undo,
 }
 
 impl From<GoToAction> for Action {

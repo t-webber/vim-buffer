@@ -2,6 +2,7 @@ use core::mem::take;
 
 use crossterm::event::Event;
 
+use crate::Mode;
 use crate::buffer::api::Buffer;
 use crate::buffer::keymaps::{Action, GoToAction};
 use crate::event_parser::{EventParsingError, parse_events};
@@ -97,6 +98,25 @@ impl Buffer {
         }
     }
 
+    /// Pops from history the first different  buffer value
+    fn pop_from_history(&mut self) -> bool {
+        if let Some(previous) = self.history.pop_different_from(&self.content) {
+            self.content = previous.into_string();
+            self.cursor.set_max(self.len());
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Adds the current buffer to the history, if it is different from the last
+    /// entry.
+    fn save_to_history(&mut self) {
+        if matches!(self.as_mode(), Mode::Normal) {
+            self.history.push_if_different(&self.content);
+        }
+    }
+
     /// Updates the buffer with a terminal event
     ///
     /// # Returns
@@ -127,15 +147,9 @@ impl Buffer {
     /// buffer.update(&Event::Key(KeyEvent::from(KeyCode::Char('H'))));
     /// ```
     pub fn update(&mut self, event: &Event) -> bool {
-        let events = self.as_mode().handle_event(event, &mut self.pending);
-
-        for action in &events {
-            if !self.update_once(*action) {
-                return false;
-            }
-        }
-
-        !events.is_empty()
+        let success = self.update_no_save(event);
+        self.save_to_history();
+        success
     }
 
     /// Updates the cursor position with a [`GoToAction`]
@@ -219,9 +233,23 @@ impl Buffer {
         keymaps: &str,
     ) -> Result<(), EventParsingError> {
         for event in parse_events(keymaps)? {
-            self.update(&event);
+            self.update_no_save(&event);
         }
+        self.save_to_history();
         Ok(())
+    }
+
+    /// Same as [`Self::update`] but without updating the history.
+    fn update_no_save(&mut self, event: &Event) -> bool {
+        let events = self.as_mode().handle_event(event, &mut self.pending);
+
+        for action in &events {
+            if !self.update_once(*action) {
+                return false;
+            }
+        }
+
+        !events.is_empty()
     }
 
     /// Updates the buffer with one [`Action`]
@@ -266,6 +294,7 @@ impl Buffer {
                 self.content.insert(self.as_cursor(), ch);
                 true
             }
+            Action::Undo => self.pop_from_history(),
             Action::GoTo(goto_action) => self.update_cursor(goto_action),
         }
     }

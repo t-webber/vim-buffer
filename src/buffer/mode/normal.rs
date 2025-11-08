@@ -31,6 +31,7 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('$') => GoToAction::Eol.into(),
             KeyCode::Char('w') => GoToAction::NextWord.into(),
             KeyCode::Char('b') => GoToAction::PreviousWord.into(),
+            KeyCode::Char('u') => Action::Undo.into(),
             _ => Actions::default(),
         }
     }
