@@ -100,8 +100,8 @@ impl Buffer {
 
     /// Pops from history the first different  buffer value
     fn pop_from_history(&mut self) -> bool {
-        if let Some(previous) = self.history.pop_different_from(&self.content) {
-            self.content = previous.into_string();
+        if let Some(previous) = self.history.undo(&self.content) {
+            self.content = previous.to_owned();
             self.cursor.set_max(self.len());
             true
         } else {
@@ -113,7 +113,7 @@ impl Buffer {
     /// entry.
     fn save_to_history(&mut self) {
         if matches!(self.as_mode(), Mode::Normal) {
-            self.history.push_if_different(&self.content);
+            self.history.save(&self.content);
         }
     }
 
@@ -158,8 +158,8 @@ impl Buffer {
     #[must_use]
     fn update_cursor(&mut self, goto_action: GoToAction) -> bool {
         match goto_action {
-            GoToAction::Right => self.cursor.increment(),
-            GoToAction::Left => self.cursor.decrement(),
+            GoToAction::Right => drop(self.cursor.increment()),
+            GoToAction::Left => drop(self.cursor.decrement()),
             GoToAction::Bol => self.cursor.set(0),
             GoToAction::Eol => self.cursor.set_to_max(),
             GoToAction::FirstNonSpace => self.cursor.set(

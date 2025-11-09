@@ -51,3 +51,17 @@ fn normal_u_x() {
     do_evt!(buffer, 'u');
     assert_eq!(buffer.as_content(), "abcdefghijk");
 }
+
+#[test]
+fn normal_u_normal_u() {
+    let mut buffer = Buffer::from("");
+
+    buffer.update_from_string("iabc<Esc>").unwrap();
+    buffer.update_from_string("idef<Esc>").unwrap();
+    do_evt!(buffer, 'u');
+    assert_eq!(buffer.as_content(), "abc");
+
+    buffer.update_from_string("ighi<Esc>").unwrap();
+    do_evt!(buffer, 'u');
+    assert_eq!(buffer.as_content(), "abc");
+}

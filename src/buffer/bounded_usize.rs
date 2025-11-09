@@ -14,8 +14,10 @@ impl BoundedUsize {
     }
 
     /// Decrements the inner value and the maximum value.
-    pub const fn decrement(&mut self) {
+    pub const fn decrement(&mut self) -> bool {
+        let old = self.value;
         self.value = self.value.saturating_sub(1);
+        old != self.value
     }
 
     /// Decrements the inner value and the maximum value.
@@ -25,9 +27,11 @@ impl BoundedUsize {
     }
 
     /// Increments the inner value and the maximum value.
-    pub const fn increment(&mut self) {
+    pub const fn increment(&mut self) -> bool {
+        let old = self.value;
         let sum = self.value.saturating_add(1);
-        self.value = if sum < self.max_value { sum } else { self.max_value }
+        self.value = if sum < self.max_value { sum } else { self.max_value };
+        old != self.value
     }
 
     /// Increments the inner value and the maximum value.
