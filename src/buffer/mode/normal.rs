@@ -36,6 +36,13 @@ impl HandleKeyPress for Normal {
         }
     }
 
+    fn handle_ctrl_key_press(&self, code: KeyCode) -> Actions {
+        match code {
+            KeyCode::Char('r') => Action::Redo.into(),
+            _ => Actions::default(),
+        }
+    }
+
     fn handle_shift_key_press(&self, code: KeyCode) -> Actions {
         match code {
             KeyCode::Char('I') =>

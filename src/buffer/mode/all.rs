@@ -46,6 +46,8 @@ impl Mode {
                 match key_event.modifiers {
                     KeyModifiers::NONE =>
                         self.handle_blank_key_press(key_event.code),
+                    KeyModifiers::CONTROL =>
+                        self.handle_ctrl_key_press(key_event.code),
                     KeyModifiers::SHIFT =>
                         self.handle_shift_key_press(key_event.code),
                     _ => Actions::default(),
@@ -92,6 +94,13 @@ impl HandleKeyPress for Mode {
         match *self {
             Self::Insert => Insert.handle_blank_key_press(code),
             Self::Normal => Normal.handle_blank_key_press(code),
+        }
+    }
+
+    fn handle_ctrl_key_press(&self, code: KeyCode) -> Actions {
+        match *self {
+            Self::Insert => Insert.handle_ctrl_key_press(code),
+            Self::Normal => Normal.handle_ctrl_key_press(code),
         }
     }
 

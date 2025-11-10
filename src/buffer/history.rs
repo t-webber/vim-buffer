@@ -20,6 +20,12 @@ impl History {
         self.1.as_value() + 1 == self.0.len()
     }
 
+    /// Moves forward into the history
+    pub fn redo(&mut self, current: &str) -> Option<&str> {
+        assert_eq!(current, self.as_cursor_entry(), "invalid history");
+        self.1.increment().then(|| self.as_cursor_entry())
+    }
+
     /// Saves the current buffervalue in the history
     pub fn save(&mut self, entry: &str) {
         if self.is_cursor_at_end() {
@@ -30,13 +36,9 @@ impl History {
         if entry == self.as_cursor_entry() {
             return;
         }
-        let old = self.1.as_value();
-        self.1.increment_with_capacity_unchecked();
-        assert_eq!(self.1.as_value(), old.wrapping_add(1), "in range");
-        if self.as_cursor_entry() != entry {
-            self.0.truncate(self.1.as_value());
-            self.0.push(Box::from(entry));
-        }
+        self.1.increment();
+        self.0.truncate(self.1.as_value());
+        self.0.push(Box::from(entry));
     }
 
     /// Moves backward into the history

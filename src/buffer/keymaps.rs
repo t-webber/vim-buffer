@@ -14,6 +14,8 @@ pub enum Action {
     GoTo(GoToAction),
     /// Inserts a char in the buffer
     InsertChar(char),
+    /// Undo the last undo action
+    Redo,
     /// Replace the char under the cursor with
     ReplaceWith(char),
     /// Switches to a new mode

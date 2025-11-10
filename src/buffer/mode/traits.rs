@@ -48,10 +48,18 @@ impl From<GoToAction> for Actions {
 }
 
 /// Handle incoming terminal events, like keypresses.
+#[expect(unused_variables, reason = "trait default")]
 pub trait HandleKeyPress {
     /// Handle incoming terminal events that are keypresses with no modifiers.
     fn handle_blank_key_press(&self, code: KeyCode) -> Actions;
 
-    /// Handle incoming terminal events that are keypresses with no modifiers.
+    /// Handle incoming terminal events that are keypresses with the control
+    /// modifier.
+    fn handle_ctrl_key_press(&self, code: KeyCode) -> Actions {
+        Actions::default()
+    }
+
+    /// Handle incoming terminal events that are keypresses with the shift
+    /// modifier.
     fn handle_shift_key_press(&self, code: KeyCode) -> Actions;
 }

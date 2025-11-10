@@ -65,3 +65,43 @@ fn normal_u_normal_u() {
     do_evt!(buffer, 'u');
     assert_eq!(buffer.as_content(), "abc");
 }
+
+#[test]
+fn normal_c_r() {
+    let mut buffer = Buffer::default();
+    buffer.update_from_string("aabc<Esc>").unwrap();
+    buffer.update_from_string("adef<Esc>").unwrap();
+    do_evt!(buffer, 'u');
+    buffer.update_from_string("a<Esc>").unwrap();
+    buffer.update_from_string("<C-r>").unwrap();
+    assert_eq!(buffer.as_content(), "abcdef");
+}
+
+#[test]
+fn normal_c_r_invalid() {
+    let mut buffer = Buffer::default();
+    buffer.update_from_string("aabc<Esc>").unwrap();
+    buffer.update_from_string("adef<Esc>").unwrap();
+    do_evt!(buffer, 'u');
+    buffer.update_from_string("aghi<Esc>").unwrap();
+    assert_eq!(buffer.as_content(), "abcghi");
+    buffer.update_from_string("<C-r>").unwrap();
+    assert_eq!(buffer.as_content(), "abcghi");
+}
+
+#[test]
+fn undo_redo() {
+    let mut buffer = Buffer::default();
+    buffer.update_from_string("aabc<Esc>").unwrap();
+    buffer.update_from_string("adef<Esc>").unwrap();
+    buffer.update_from_string("aghi<Esc>").unwrap();
+    assert_eq!(buffer.as_content(), "abcdefghi");
+    buffer.update_from_string("u").unwrap();
+    assert_eq!(buffer.as_content(), "abcdef");
+    buffer.update_from_string("u").unwrap();
+    assert_eq!(buffer.as_content(), "abc");
+    buffer.update_from_string("<C-r>").unwrap();
+    assert_eq!(buffer.as_content(), "abcdef");
+    buffer.update_from_string("<C-r>").unwrap();
+    assert_eq!(buffer.as_content(), "abcdefghi");
+}

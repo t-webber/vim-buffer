@@ -98,9 +98,9 @@ impl Buffer {
         }
     }
 
-    /// Pops from history the first different  buffer value
-    fn pop_from_history(&mut self) -> bool {
-        if let Some(previous) = self.history.undo(&self.content) {
+    /// Undos the latest undo
+    fn redo(&mut self) -> bool {
+        if let Some(previous) = self.history.redo(&self.content) {
             self.content = previous.to_owned();
             self.cursor.set_max(self.len());
             true
@@ -114,6 +114,17 @@ impl Buffer {
     fn save_to_history(&mut self) {
         if matches!(self.as_mode(), Mode::Normal) {
             self.history.save(&self.content);
+        }
+    }
+
+    /// Pops from history the first different  buffer value
+    fn undo(&mut self) -> bool {
+        if let Some(previous) = self.history.undo(&self.content) {
+            self.content = previous.to_owned();
+            self.cursor.set_max(self.len());
+            true
+        } else {
+            false
         }
     }
 
@@ -294,7 +305,8 @@ impl Buffer {
                 self.content.insert(self.as_cursor(), ch);
                 true
             }
-            Action::Undo => self.pop_from_history(),
+            Action::Undo => self.undo(),
+            Action::Redo => self.redo(),
             Action::GoTo(goto_action) => self.update_cursor(goto_action),
         }
     }

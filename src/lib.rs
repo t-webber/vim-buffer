@@ -38,6 +38,7 @@
     clippy::question_mark_used,
     clippy::pattern_type_mismatch,
     clippy::enum_variant_names,
+    clippy::missing_trait_methods,
     reason = "chosen style"
 )]
 #![expect(clippy::missing_inline_in_public_items, reason = "bad lint")]
