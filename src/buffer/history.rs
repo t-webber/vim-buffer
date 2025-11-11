@@ -3,12 +3,12 @@ use crate::buffer::bounded_usize::BoundedUsize;
 /// Holds the history of the buffer, with the following invariant: there are
 /// never 2 successive entries that are equal.
 #[derive(Debug)]
-pub struct History(Vec<Box<str>>, BoundedUsize);
+pub struct History<T>(Vec<T>, BoundedUsize);
 
-impl History {
+impl<T> History<T> {
     /// Returns the entry at the current cursor.
     #[expect(clippy::indexing_slicing, reason = "usize bounded by len")]
-    fn as_cursor_entry(&self) -> &str {
+    fn as_cursor_entry(&self) -> &T {
         &self.0[self.1.as_value()]
     }
 
@@ -21,41 +21,53 @@ impl History {
     }
 
     /// Moves forward into the history
-    pub fn redo(&mut self, current: &str) -> Option<&str> {
-        assert_eq!(current, self.as_cursor_entry(), "invalid history");
+    pub fn redo(&mut self) -> Option<&T> {
         self.1.increment().then(|| self.as_cursor_entry())
     }
 
-    /// Saves the current buffervalue in the history
-    pub fn save(&mut self, entry: &str) {
+    /// Saves a clone if it is different.
+    #[expect(
+        clippy::else_if_without_else,
+        reason = "do nothing if entry is the same"
+    )]
+    fn save_clone<F: Fn() -> T>(
+        &mut self,
+        cloner: F,
+        is_entry_same_as_cursor: bool,
+    ) {
         if self.is_cursor_at_end() {
-            self.0.push(Box::from(entry));
+            self.0.push(cloner());
             self.1.increment_with_capacity_unchecked();
-            return;
+        } else if !is_entry_same_as_cursor {
+            self.1.increment();
+            self.0.truncate(self.1.as_value());
+            self.0.push(cloner());
         }
-        if entry == self.as_cursor_entry() {
-            return;
-        }
-        self.1.increment();
-        self.0.truncate(self.1.as_value());
-        self.0.push(Box::from(entry));
     }
 
     /// Moves backward into the history
-    pub fn undo(&mut self, current: &str) -> Option<&str> {
-        assert_eq!(current, self.as_cursor_entry(), "invalid history");
+    pub fn undo(&mut self) -> Option<&T> {
         self.1.decrement().then(|| self.as_cursor_entry())
     }
 
     /// Creates a new [`History`], starting with the given string.
-    pub fn with_initial_value(value: Box<str>) -> Self {
-        let len = value.len();
-        Self(vec![value], BoundedUsize::with_capacity(len))
+    pub fn with_initial_value(value: T) -> Self {
+        Self(vec![value], BoundedUsize::default())
     }
 }
 
-impl Default for History {
+impl History<Box<str>> {
+    /// Saves the current buffervalue in the history
+    pub fn save(&mut self, entry: &str) {
+        self.save_clone(
+            || Box::from(entry),
+            *entry == **self.as_cursor_entry(),
+        );
+    }
+}
+
+impl<T: Default> Default for History<T> {
     fn default() -> Self {
-        Self::with_initial_value(Box::default())
+        Self::with_initial_value(T::default())
     }
 }

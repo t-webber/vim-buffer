@@ -100,8 +100,8 @@ impl Buffer {
 
     /// Undos the latest undo
     fn redo(&mut self) -> bool {
-        if let Some(previous) = self.history.redo(&self.content) {
-            self.content = previous.to_owned();
+        if let Some(previous) = self.history.redo() {
+            self.content = previous.to_owned().into_string();
             self.cursor.set_max(self.len());
             true
         } else {
@@ -119,8 +119,8 @@ impl Buffer {
 
     /// Pops from history the first different  buffer value
     fn undo(&mut self) -> bool {
-        if let Some(previous) = self.history.undo(&self.content) {
-            self.content = previous.to_owned();
+        if let Some(previous) = self.history.undo() {
+            self.content = previous.to_owned().into_string();
             self.cursor.set_max(self.len());
             true
         } else {
@@ -244,9 +244,8 @@ impl Buffer {
         keymaps: &str,
     ) -> Result<(), EventParsingError> {
         for event in parse_events(keymaps)? {
-            self.update_no_save(&event);
+            self.update(&event);
         }
-        self.save_to_history();
         Ok(())
     }
 

@@ -32,7 +32,7 @@ pub struct Buffer {
     /// Position of the cursor within the buffer
     pub(super) cursor: BoundedUsize,
     /// Buffer history to restore old versions
-    pub(super) history: History,
+    pub(super) history: History<Box<str>>,
     /// Vim mode of the buffer
     pub(super) mode: Mode,
     /// Pending actions that require more keymaps
