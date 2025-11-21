@@ -63,4 +63,10 @@ normal_cap_b_empty: "i   <Esc>Biz" => "z   ",
 normal_cap_b_words: "iab cd  <Esc>Biz<Esc>Biy" => "yab zcd  ",
 normal_cap_b_symbols: "iab(:)cd  <Esc>Biz<Esc>Biy" => "yzab(:)cd  ",
 
+normal_dw_middle: "iabc def<Esc>0dw" => "def",
+normal_dw_leading_space: "i  abc def<Esc>0dw" => "abc def",
+normal_dw_single_char: "ia b<Esc>0dw" => "b",
+normal_dw_cursor_middle: "iabc def<Esc>Bldw" => "abc d",
+normal_dw_end: "iabc<Esc>0dw" => "",
+
 );

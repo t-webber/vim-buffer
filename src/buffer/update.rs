@@ -4,6 +4,7 @@ use crossterm::event::Event;
 
 use crate::Mode;
 use crate::buffer::api::Buffer;
+use crate::buffer::bounded_usize::BoundedUsize;
 use crate::buffer::keymaps::{Action, GoToAction};
 use crate::event_parser::{EventParsingError, parse_events};
 
@@ -12,6 +13,35 @@ impl Buffer {
     #[expect(clippy::arithmetic_side_effects, reason = "cursor <= len")]
     const fn as_end_index(&self) -> usize {
         self.len() - self.as_cursor()
+    }
+
+    /// Deletes the part of the buffer represented by a [`GoToAction`]
+    ///
+    /// The deleted part is from the current cursor to the cursor after the
+    /// [`GoToAction`].
+    fn delete(&mut self, goto_action: GoToAction) -> bool {
+        let (min_cursor, max_cursor) = {
+            let old_cursor = self.as_cursor();
+            if !self.update_cursor(goto_action) {
+                return false;
+            }
+            let new_cursor = self.as_cursor();
+            if new_cursor > old_cursor {
+                (old_cursor, new_cursor)
+            } else {
+                (new_cursor, old_cursor)
+            }
+        };
+        let old_content = take(&mut self.content);
+        self.content.reserve(old_content.len());
+        #[expect(clippy::string_slice, reason = "")]
+        {
+            self.content.push_str(&old_content[0..min_cursor]);
+            self.content.push_str(&old_content[max_cursor..]);
+        };
+        self.cursor = BoundedUsize::with_capacity(self.content.len());
+        self.cursor.set(min_cursor);
+        true
     }
 
     /// Moves the cursor to the beginning of the next WORD.
@@ -307,6 +337,7 @@ impl Buffer {
             Action::Undo => self.undo(),
             Action::Redo => self.redo(),
             Action::GoTo(goto_action) => self.update_cursor(goto_action),
+            Action::Delete(goto_action) => self.delete(goto_action),
         }
     }
 }

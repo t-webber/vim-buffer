@@ -4,6 +4,8 @@ use crate::Mode;
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Action {
+    /// Delete
+    Delete(GoToAction),
     /// Deletes the whole line
     DeleteLine,
     /// Deletes the char after the cursor
@@ -67,6 +69,8 @@ pub enum GoToAction {
 /// Action that is pending for another keypress
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum OPending {
+    /// Delete pending
+    Delete,
     /// Find next char that is equal to...
     FindNext,
     /// Find next char that is equal to... and decrement

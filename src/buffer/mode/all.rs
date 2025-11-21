@@ -76,6 +76,12 @@ impl Mode {
                     GoToAction::Right.into(),
                 ],
                 OPending::ReplaceOne => vec![Action::ReplaceWith(ch)],
+                OPending::Delete =>
+                    if ch == 'w' {
+                        vec![Action::Delete(GoToAction::NextWord)]
+                    } else {
+                        vec![]
+                    },
             }
         } else {
             vec![]
