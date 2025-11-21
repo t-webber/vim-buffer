@@ -77,4 +77,22 @@ normal_db_leading_space: "i  abc<Esc>db" => "  c",
 normal_db_single_char: "i a b<Esc>db" => " b",
 normal_db_single_char_end: "i a b <Esc>db" => " a  ",
 
+normal_d0_middle: "i abc def ghi<Esc>bbd0" => "def ghi",
+normal_d0_start: "iabc<Esc>0d0" => "abc",
+normal_d0_end: "iabc def <Esc>d0" => " ",
+normal_d0_empty: "d0" => "",
+
+normal_d_dollar_start: "iabc def<Esc>0d$" => "",
+normal_d_dollar_end: "iabc def<Esc>d$" => "abc de",
+normal_d_dollar_middle: "iabc def<Esc>hhhhd$" => "ab",
+normal_d_dollar_empty: "d$" => "",
+
+normal_dcaret_end: "i  abc<Esc>d^" => "  c",
+normal_dcaret_start: "iabc<Esc>0d^" => "abc",
+normal_dcaret_spaces_only: "i    <Esc>d^" => "   ",
+normal_dcaret_empty: "d^" => "",
+normal_dcarret_middle: "i abc def ghi<Esc>bbld^" => " ef ghi",
+
+normal_dinvalid: "d " => "",
+
 );
