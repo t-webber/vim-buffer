@@ -113,8 +113,13 @@ impl Buffer {
                 && let Some((idx, _)) =
                     chars.find(|(_, ch)| !ch.is_whitespace())
             {
+                let is_word_single_char =
+                    chars.next().is_none_or(|ch| ch.1.is_whitespace());
                 self.cursor.set(idx);
-                return self.goto_previous_word();
+                if !is_word_single_char {
+                    self.goto_previous_word();
+                }
+                return;
             }
             if let Some((idx, _)) =
                 chars.find(|(_, ch)| xor_ident_char(cursor_ch, *ch))

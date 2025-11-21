@@ -25,16 +25,16 @@ impl Mode {
         event: &Event,
         pending: &mut Option<OPending>,
     ) -> Vec<Action> {
-        take(pending).map_or_else(
-            || match self.handle_non_opending_event(event) {
-                Actions::List(actions) => actions,
-                Actions::OPending(opending) => {
-                    *pending = Some(opending);
-                    vec![]
-                }
-            },
-            |old_pending| Self::handle_opending_event(old_pending, event),
-        )
+        match take(pending).map_or_else(
+            || self.handle_non_opending_event(event),
+            |old_opending| self.handle_opending_event(old_opending, event),
+        ) {
+            Actions::List(actions) => actions,
+            Actions::OPending(opending) => {
+                *pending = Some(opending);
+                vec![]
+            }
+        }
     }
 
     /// Handles the terminal events when not in [`OPending`] mode
@@ -58,33 +58,43 @@ impl Mode {
 
     /// Handle a keypress when an [`OPending`] is in progress and waiting for
     /// keys.
-    fn handle_opending_event(opending: OPending, event: &Event) -> Vec<Action> {
+    fn handle_opending_event(
+        self,
+        opending: OPending,
+        event: &Event,
+    ) -> Actions {
         if let Some(key_event) = event.as_key_press_event()
             && let KeyCode::Char(ch) = key_event.code
         {
             match opending {
-                OPending::FindNext =>
-                    vec![GoToAction::NextOccurrenceOf(ch).into()],
+                OPending::FindNext => GoToAction::NextOccurrenceOf(ch).into(),
                 OPending::FindNextDecrement => vec![
                     GoToAction::NextOccurrenceOf(ch).into(),
                     GoToAction::Left.into(),
-                ],
+                ]
+                .into(),
                 OPending::FindPrevious =>
-                    vec![GoToAction::PreviousOccurrenceOf(ch).into()],
+                    GoToAction::PreviousOccurrenceOf(ch).into(),
                 OPending::FindPreviousIncrement => vec![
                     GoToAction::PreviousOccurrenceOf(ch).into(),
                     GoToAction::Right.into(),
-                ],
-                OPending::ReplaceOne => vec![Action::ReplaceWith(ch)],
-                OPending::Delete =>
-                    if ch == 'w' {
-                        vec![Action::Delete(GoToAction::NextWord)]
+                ]
+                .into(),
+                OPending::ReplaceOne => Action::ReplaceWith(ch).into(),
+                OPending::Delete => {
+                    let actions = self.handle_non_opending_event(event);
+                    if let Actions::List(list) = &actions
+                        && let &[action] = list.as_slice()
+                        && let Action::GoTo(goto_action) = action
+                    {
+                        Action::Delete(goto_action).into()
                     } else {
-                        vec![]
-                    },
+                        actions
+                    }
+                }
             }
         } else {
-            vec![]
+            Actions::default()
         }
     }
 }

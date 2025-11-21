@@ -48,6 +48,7 @@ normal_r: "iabcd<Esc>Fbre" => "aecd",
 normal_w: "iabc   def::(Bl<Esc>0wa.<Esc>lwa.<Esc>lwa.<Esc>lwa." => "abc   d.ef:.:(B.l.",
 normal_w_end_space: "iab <Esc>0wa." => "ab .",
 normal_w_end_symbol: "i)))<Esc>0wa." => "))).",
+
 normal_cap_w: "i  ab  cd<Esc>0Wiz<Esc>lWiz<Esc>lWaz" => "  zab  zcdz",
 normal_cap_w_empty: "i    <Esc>0Waz" => "    z",
 
@@ -58,6 +59,7 @@ normal_b_leading_space: "i ab <Esc>biz" => " zab ",
 normal_b_symbols: "iab(:) <Esc>biz" => "abz(:) ",
 normal_b_leading_symbols: "i(:)<Esc>biz" => "z(:)",
 normal_b_spaces: "i  <Esc>biz" => "z  ",
+normal_b_single_char: "i a b<Esc>biz" => " za b",
 
 normal_cap_b_empty: "i   <Esc>Biz" => "z   ",
 normal_cap_b_words: "iab cd  <Esc>Biz<Esc>Biy" => "yab zcd  ",
@@ -68,5 +70,11 @@ normal_dw_leading_space: "i  abc def<Esc>0dw" => "abc def",
 normal_dw_single_char: "ia b<Esc>0dw" => "b",
 normal_dw_cursor_middle: "iabc def<Esc>Bldw" => "abc d",
 normal_dw_end: "iabc<Esc>0dw" => "",
+
+normal_db_middle: "iabc def<Esc>db" => "abc f",
+normal_db_start: "iabc<Esc>0db" => "abc",
+normal_db_leading_space: "i  abc<Esc>db" => "  c",
+normal_db_single_char: "i a b<Esc>db" => " b",
+normal_db_single_char_end: "i a b <Esc>db" => " a  ",
 
 );
