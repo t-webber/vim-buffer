@@ -1,98 +1,111 @@
-use vim_buffer::Buffer;
+#![allow(non_snake_case)]
 
 macro_rules! buffer_tests {
-    ($($name:ident: $keymaps:literal => $output:literal,)*) => {
-        $(
-            #[test]
-            fn $name() {
-                let mut buffer = Buffer::default();
-                buffer.update_from_string($keymaps).unwrap();
-                assert_eq!(buffer.as_content(), $output, "Keys: \x1b[35m{}\x1b[0m", $keymaps);
-            }
-        )*
+    ($mod:ident, $($name:ident: $keymaps:literal => $output:literal,)*) => {
+        mod $mod {
+            use vim_buffer::Buffer;
+            $(
+                #[test]
+                fn $name() {
+                    let mut buffer = Buffer::default();
+                    buffer.update_from_string($keymaps).unwrap();
+                    assert_eq!(
+                        buffer.as_content(),
+                        $output,
+                        "Keys: \x1b[35m{}\x1b[0m",
+                        $keymaps
+                    );
+                }
+            )*
+        }
     };
 }
 
-buffer_tests!(
+buffer_tests!(insert,
 
-insert_backspace: "ia<BS><BS>bcd<BS>" => "bc",
-normal_backspace: "ia<Esc><BS><BS>ibcd<Esc><BS>ie" => "becda",
-normal_a: "ia<Esc>ab" => "ab",
-normal_i: "ia<Esc>ib" => "ba",
-normal_cap_i: "i  ab<Esc>Ic" => "  cab",
-normal_cap_i_no_space: "iab<Esc>Ic" => "cab",
-normal_cap_i_empty_line: "i   <Esc>Ia" => "   a",
-normal_cap_a: "iabc<Esc>Ad" => "abcd",
-normal_cap_a_empty_line: "i   <Esc>Aa" => "   a",
-insert_arrows: "iabc<Left>d<Right>e" => "abdce",
-normal_arrows: "iabc<Esc><Left>id<Esc><Right>ae" => "adbec",
-normal_h_l: "iabc<Esc>hid<Esc>lae" => "adbec",
-normal_0: "i  abc<Esc>0id" => "d  abc",
-normal_dollar: "i abc <Esc>0id<Esc>$ae" => "d abc e",
-normal_caret: "i  abc<Esc>^id" => "  dabc",
-normal_f_not_found: "iabc<Esc>0<Right>fzid" => "adbc",
-normal_t_not_found: "iabc<Esc>0<Right>tzid" => "adbc",
-normal_f: "iabcabc<Esc>0fcad<Esc>fcae" => "abcdabce",
-normal_t: "iabcabc<Esc>0tcad<Esc>ltcae" => "abdcabec",
-normal_cap_f_not_found: "iabc<Esc><Left>Fzad" => "abdc",
-normal_cap_t_not_found: "iabc<Esc><Left>Tzad" => "abdc",
-normal_cap_f: "iabcabc<Esc>Faad<Esc>hFaae" => "aebcadbc",
-normal_cap_t: "iabcabc<Esc>Taad<Esc>hhTaae" => "abecabdc",
-normal_x: "iabcd<Esc>x<Left>x" => "ac",
-normal_x_empty: "x" => "",
-normal_cap_x: "iabcd<Esc>X<Left>X" => "bd",
-normal_s: "iabcd<Esc>se<Esc>hsf" => "abfe",
-normal_cap_s: "iabcdef<Esc>hhhSghij" => "ghij",
-normal_r: "iabcd<Esc>Fbre" => "aecd",
+backspace: "ia<BS><BS>bcd<BS>" => "bc",
+arrows: "iabc<Left>d<Right>e" => "abdce",
 
-normal_w: "iabc   def::(Bl<Esc>0wa.<Esc>lwa.<Esc>lwa.<Esc>lwa." => "abc   d.ef:.:(B.l.",
-normal_w_end_space: "iab <Esc>0wa." => "ab .",
-normal_w_end_symbol: "i)))<Esc>0wa." => "))).",
+);
 
-normal_cap_w: "i  ab  cd<Esc>0Wiz<Esc>lWiz<Esc>lWaz" => "  zab  zcdz",
-normal_cap_w_empty: "i    <Esc>0Waz" => "    z",
+buffer_tests!(normal,
 
-normal_b: "i)))) ef<Esc>biz<Esc>biz" => "z)))) zef",
-normal_b_word: "iab<Esc>biz" => "zab",
-normal_b_word_space: "iab <Esc>biz" => "zab ",
-normal_b_leading_space: "i ab <Esc>biz" => " zab ",
-normal_b_symbols: "iab(:) <Esc>biz" => "abz(:) ",
-normal_b_leading_symbols: "i(:)<Esc>biz" => "z(:)",
-normal_b_spaces: "i  <Esc>biz" => "z  ",
-normal_b_single_char: "i a b<Esc>biz" => " za b",
+backspace: "ia<Esc><BS><BS>ibcd<Esc><BS>ie" => "becda",
+a: "ia<Esc>ab" => "ab",
+i: "ia<Esc>ib" => "ba",
+I: "i  ab<Esc>Ic" => "  cab",
+I_no_space: "iab<Esc>Ic" => "cab",
+I_empty_line: "i   <Esc>Ia" => "   a",
+A: "iabc<Esc>Ad" => "abcd",
+A_empty_line: "i   <Esc>Aa" => "   a",
+arrows: "iabc<Esc><Left>id<Esc><Right>ae" => "adbec",
+h_l: "iabc<Esc>hid<Esc>lae" => "adbec",
+_0: "i  abc<Esc>0id" => "d  abc",
+dollar: "i abc <Esc>0id<Esc>$ae" => "d abc e",
+caret: "i  abc<Esc>^id" => "  dabc",
+f_not_found: "iabc<Esc>0<Right>fzid" => "adbc",
+t_not_found: "iabc<Esc>0<Right>tzid" => "adbc",
+f: "iabcabc<Esc>0fcad<Esc>fcae" => "abcdabce",
+t: "iabcabc<Esc>0tcad<Esc>ltcae" => "abdcabec",
+F_not_found: "iabc<Esc><Left>Fzad" => "abdc",
+T_not_found: "iabc<Esc><Left>Tzad" => "abdc",
+F: "iabcabc<Esc>Faad<Esc>hFaae" => "aebcadbc",
+T: "iabcabc<Esc>Taad<Esc>hhTaae" => "abecabdc",
+x: "iabcd<Esc>x<Left>x" => "ac",
+x_empty: "x" => "",
+X: "iabcd<Esc>X<Left>X" => "bd",
+s: "iabcd<Esc>se<Esc>hsf" => "abfe",
+S: "iabcdef<Esc>hhhSghij" => "ghij",
+r: "iabcd<Esc>Fbre" => "aecd",
 
-normal_cap_b_empty: "i   <Esc>Biz" => "z   ",
-normal_cap_b_words: "iab cd  <Esc>Biz<Esc>Biy" => "yab zcd  ",
-normal_cap_b_symbols: "iab(:)cd  <Esc>Biz<Esc>Biy" => "yzab(:)cd  ",
+w: "ibc   def::(Bl<Esc>0wa.<Esc>lwa.<Esc>lwa.<Esc>lwa." => "bc   d.ef:.:(B.l.",
+w_end_space: "iab <Esc>0wa." => "ab .",
+w_end_symbol: "i)))<Esc>0wa." => "))).",
 
-normal_dw_middle: "iabc def<Esc>0dw" => "def",
-normal_dw_leading_space: "i  abc def<Esc>0dw" => "abc def",
-normal_dw_single_char: "ia b<Esc>0dw" => "b",
-normal_dw_cursor_middle: "iabc def<Esc>Bldw" => "abc d",
-normal_dw_end: "iabc<Esc>0dw" => "",
+W: "i  ab  cd<Esc>0Wiz<Esc>lWiz<Esc>lWaz" => "  zab  zcdz",
+W_empty: "i    <Esc>0Waz" => "    z",
 
-normal_db_middle: "iabc def<Esc>db" => "abc f",
-normal_db_start: "iabc<Esc>0db" => "abc",
-normal_db_leading_space: "i  abc<Esc>db" => "  c",
-normal_db_single_char: "i a b<Esc>db" => " b",
-normal_db_single_char_end: "i a b <Esc>db" => " a  ",
+b: "i)))) ef<Esc>biz<Esc>biz" => "z)))) zef",
+b_word: "iab<Esc>biz" => "zab",
+b_word_space: "iab <Esc>biz" => "zab ",
+b_leading_space: "i ab <Esc>biz" => " zab ",
+b_symbols: "iab(:) <Esc>biz" => "abz(:) ",
+b_leading_symbols: "i(:)<Esc>biz" => "z(:)",
+b_spaces: "i  <Esc>biz" => "z  ",
+b_single_char: "i a b<Esc>biz" => " za b",
 
-normal_d0_middle: "i abc def ghi<Esc>bbd0" => "def ghi",
-normal_d0_start: "iabc<Esc>0d0" => "abc",
-normal_d0_end: "iabc def <Esc>d0" => " ",
-normal_d0_empty: "d0" => "",
+B_empty: "i   <Esc>Biz" => "z   ",
+B_words: "iab cd  <Esc>Biz<Esc>Biy" => "yab zcd  ",
+B_symbols: "iab(:)cd  <Esc>Biz<Esc>Biy" => "yzab(:)cd  ",
 
-normal_d_dollar_start: "iabc def<Esc>0d$" => "",
-normal_d_dollar_end: "iabc def<Esc>d$" => "abc de",
-normal_d_dollar_middle: "iabc def<Esc>hhhhd$" => "ab",
-normal_d_dollar_empty: "d$" => "",
+dw_middle: "iabc def<Esc>0dw" => "def",
+dw_leading_space: "i  abc def<Esc>0dw" => "abc def",
+dw_single_char: "ia b<Esc>0dw" => "b",
+dw_cursor_middle: "iabc def<Esc>Bldw" => "abc d",
+dw_end: "iabc<Esc>0dw" => "",
 
-normal_dcaret_end: "i  abc<Esc>d^" => "  c",
-normal_dcaret_start: "iabc<Esc>0d^" => "abc",
-normal_dcaret_spaces_only: "i    <Esc>d^" => "   ",
-normal_dcaret_empty: "d^" => "",
-normal_dcarret_middle: "i abc def ghi<Esc>bbld^" => " ef ghi",
+db_middle: "iabc def<Esc>db" => "abc f",
+db_start: "iabc<Esc>0db" => "abc",
+db_leading_space: "i  abc<Esc>db" => "  c",
+db_single_char: "i a b<Esc>db" => " b",
+db_single_char_end: "i a b <Esc>db" => " a  ",
 
-normal_dinvalid: "d " => "",
+d0_middle: "i abc def ghi<Esc>bbd0" => "def ghi",
+d0_start: "iabc<Esc>0d0" => "abc",
+d0_end: "iabc def <Esc>d0" => " ",
+d0_empty: "d0" => "",
+
+ddollar_start: "iabc def<Esc>0d$" => "",
+ddollar_end: "iabc def<Esc>d$" => "abc de",
+ddollar_middle: "iabc def<Esc>hhhhd$" => "ab",
+ddollar_empty: "d$" => "",
+
+dcaret_end: "i  abc<Esc>d^" => "  c",
+dcaret_start: "iabc<Esc>0d^" => "abc",
+dcaret_spaces_only: "i    <Esc>d^" => "   ",
+dcaret_empty: "d^" => "",
+dcaret_middle: "i abc def ghi<Esc>bbld^" => " ef ghi",
+
+dinvalid: "d " => "",
 
 );
