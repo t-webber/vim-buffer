@@ -1,13 +1,12 @@
 use crate::Mode;
+use crate::buffer::mode::Actions;
 
 /// Action to be done on the buffer
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Action {
     /// Delete
-    Delete(GoToAction, Option<GoToAction>),
-    /// Deletes the whole line
-    DeleteLine,
+    Delete(OperatorScope),
     /// Deletes the char after the cursor
     DeleteNextChar,
     /// Deletes the char before the cursor
@@ -79,27 +78,78 @@ pub enum GoToAction {
 /// Action that is pending for another keypress
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum OPending {
-    /// Change pending (`c` pressed, waiting for go-to action)
-    Change,
-    /// Change pending and go-to action pending too (e.g. `cf` pressed).
-    ChangeAction(CombinablePending),
     /// Pending action that only requires 1 character to form a goto action.
     ///
-    /// Combinable with delete, see [`Self::DeleteAction`].
+    /// Combinable with an [`Operator`], see [`Self::OperatorAction`].
     CombinablePending(CombinablePending),
-    /// Delete pending (`d` pressed, waiting for go-to action)
-    Delete,
-    /// Delete pending and go-to action pending too (e.g. `df` pressed).
-    DeleteAction(CombinablePending),
     /// Applies a single char action to a motion.
     GoTo,
+    /// Operator action, like `d`, `c`, `g~`
+    Operator(Operator),
+    /// Operator action that has the motion pending, like `df`, `cf`, `g~f`
+    OperatorAction(Operator, CombinablePending),
     /// Replace one character
     ReplaceOne,
 }
 
+impl From<Operator> for OPending {
+    fn from(value: Operator) -> Self {
+        Self::Operator(value)
+    }
+}
+
+/// Operator actions that can contain a motion and applied a function to that
+/// motion (delete, yank, change, etc.)
+#[non_exhaustive]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub enum Operator {
+    /// Change content of motion
+    Change,
+    /// Delete content of motion
+    Delete,
+}
+
+impl Operator {
+    /// Char that represents this operator. It is the char needed to apply the
+    /// operator to the whole line.
+    pub(super) const fn as_char(self) -> char {
+        match self {
+            Self::Change => 'c',
+            Self::Delete => 'd',
+        }
+    }
+
+    /// Adds the 1 or 2 go-to actions to fully define the current operator.
+    pub(super) fn into_actions(self, scope: OperatorScope) -> Actions {
+        match self {
+            Self::Change =>
+                vec![Action::Delete(scope), Mode::Insert.into()].into(),
+            Self::Delete => Action::Delete(scope).into(),
+        }
+    }
+}
+
+/// Scope that an operator can be applied to, usually denotated by a list of
+/// goto actions. It can also be applied to a whole line.
+#[non_exhaustive]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum OperatorScope {
+    /// Apply the operator on simply those actions
+    Goto(GoToAction, Option<GoToAction>),
+    /// Apply operator on the whole line
+    WholeLine,
+}
+
+impl From<GoToAction> for OperatorScope {
+    fn from(value: GoToAction) -> Self {
+        Self::Goto(value, None)
+    }
+}
+
 /// Pending action that only requires 1 character to form a goto action.
 ///
-/// Combinable with delete, see [`OPending::DeleteAction`].
+/// Can be combined with an [`Operator`] (change, delete, toggle case, etc.),
+/// see [`OPending::OperatorAction`].
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum CombinablePending {
     /// Find next char that is equal to...

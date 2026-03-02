@@ -59,6 +59,7 @@ s: "iabcd<Esc>se<Esc>hsf" => "abfe",
 S: "iabcdef<Esc>hhhSghij" => "ghij",
 r: "iabcd<Esc>Fbre" => "aecd",
 r_empty: "rx" => "",
+r_end: "iabc<Esc>rx" => "abx",
 
 w: "ibc   def::(Bl<Esc>0wa.<Esc>lwa.<Esc>lwa.<Esc>lwa." => "bc   d.ef:.:(B.l.",
 w_end_space: "iab <Esc>0wa." => "ab .",

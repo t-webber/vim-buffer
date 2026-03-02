@@ -1,6 +1,8 @@
 use crossterm::event::KeyCode;
 
-use crate::buffer::keymaps::{Action, CombinablePending, GoToAction, OPending};
+use crate::buffer::keymaps::{
+    Action, CombinablePending, GoToAction, OPending, Operator, OperatorScope
+};
 use crate::buffer::mode::all::Mode;
 use crate::buffer::mode::traits::{Actions, HandleKeyPress};
 
@@ -17,8 +19,8 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('a') =>
                 vec![GoToAction::Right.into(), Mode::Insert.into()].into(),
             KeyCode::Char('b') => GoToAction::BeginningOfWord.into(),
-            KeyCode::Char('c') => OPending::Change.into(),
-            KeyCode::Char('d') => OPending::Delete.into(),
+            KeyCode::Char('c') => Operator::Change.into(),
+            KeyCode::Char('d') => Operator::Delete.into(),
             KeyCode::Char('e') => GoToAction::EndWord.into(),
             KeyCode::Char('f') => CombinablePending::FindNext.into(),
             KeyCode::Char('g') => OPending::GoTo.into(),
@@ -56,19 +58,22 @@ impl HandleKeyPress for Normal {
                 vec![GoToAction::EndOfLine.into(), Mode::Insert.into()].into(),
             KeyCode::Char('B') => GoToAction::BeginningOfWORD.into(),
             KeyCode::Char('C') => vec![
-                Action::Delete(GoToAction::EndOfLine, None),
+                Action::Delete(GoToAction::EndOfLine.into()),
                 Mode::Insert.into(),
             ]
             .into(),
             KeyCode::Char('D') =>
-                Action::Delete(GoToAction::EndOfLine, None).into(),
+                Action::Delete(GoToAction::EndOfLine.into()).into(),
             KeyCode::Char('E') => GoToAction::EndWORD.into(),
             KeyCode::Char('F') => CombinablePending::FindPrevious.into(),
             KeyCode::Char('I') =>
                 vec![GoToAction::FirstNonSpace.into(), Mode::Insert.into()]
                     .into(),
-            KeyCode::Char('S') =>
-                vec![Action::DeleteLine, Mode::Insert.into()].into(),
+            KeyCode::Char('S') => vec![
+                Action::Delete(OperatorScope::WholeLine),
+                Mode::Insert.into(),
+            ]
+            .into(),
             KeyCode::Char('T') =>
                 CombinablePending::FindPreviousIncrement.into(),
             KeyCode::Char('W') => GoToAction::NextWORD.into(),

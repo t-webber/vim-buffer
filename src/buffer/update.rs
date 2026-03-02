@@ -5,7 +5,7 @@ use crossterm::event::Event;
 use crate::Mode;
 use crate::buffer::api::Buffer;
 use crate::buffer::bounded_usize::BoundedUsize;
-use crate::buffer::keymaps::{Action, GoToAction};
+use crate::buffer::keymaps::{Action, GoToAction, OperatorScope};
 use crate::buffer::mode::Actions;
 use crate::event_parser::{EventParsingError, parse_events};
 
@@ -25,33 +25,10 @@ impl Buffer {
         first: GoToAction,
         maybe_second: Option<GoToAction>,
     ) -> bool {
-        if self.as_cursor() >= self.len() {
-            self.cursor.set(self.len().saturating_sub(1));
-        }
-
-        let is_inclusive =
-            matches!(first, GoToAction::EndWord | GoToAction::EndWORD);
-        let (min_cursor, max_cursor) = {
-            let old_cursor = self.as_cursor();
-            if !self.update_cursor(first) {
-                return false;
-            }
-            if let Some(second) = maybe_second
-                && !self.update_cursor(second)
-            {
-                return false;
-            }
-            let new_cursor = self.as_cursor();
-            let (min, max) = if new_cursor > old_cursor {
-                (old_cursor, new_cursor)
-            } else {
-                (new_cursor, old_cursor)
-            };
-            if is_inclusive {
-                (min, max.saturating_add(1).min(self.len()))
-            } else {
-                (min, max)
-            }
+        let Some((min_cursor, max_cursor)) =
+            self.get_motion_delimination(first, maybe_second)
+        else {
+            return false;
         };
         let old_content = take(&mut self.content);
         self.content.reserve(old_content.len());
@@ -63,6 +40,32 @@ impl Buffer {
         self.cursor = BoundedUsize::with_capacity(self.content.len());
         self.cursor.set(min_cursor);
         true
+    }
+
+    /// Get the cursor indices that describe the part of the buffer to be edited
+    /// by the motion of an operator.
+    fn get_motion_delimination(
+        &mut self,
+        first: GoToAction,
+        maybe_second: Option<GoToAction>,
+    ) -> Option<(usize, usize)> {
+        if self.as_cursor() >= self.len() {
+            self.cursor.set(self.len().saturating_sub(1));
+        }
+        let old_cursor = self.as_cursor();
+        if !self.update_cursor(first)
+            || maybe_second.is_some_and(|second| !self.update_cursor(second))
+        {
+            return None;
+        }
+        let new_cursor = self.as_cursor();
+        let max = new_cursor.max(old_cursor);
+        let min = new_cursor.min(old_cursor);
+        if matches!(first, GoToAction::EndWord | GoToAction::EndWORD) {
+            Some((min, max.saturating_add(1).min(self.len())))
+        } else {
+            Some((min, max))
+        }
     }
 
     /// Moves the cursor to the beginning of the previous WORD.
@@ -422,7 +425,7 @@ impl Buffer {
                 } else {
                     false
                 },
-            Action::DeleteLine => {
+            Action::Delete(OperatorScope::WholeLine) => {
                 self.content.clear();
                 take(&mut self.cursor);
                 true
@@ -431,7 +434,8 @@ impl Buffer {
             Action::Undo => self.undo(),
             Action::Redo => self.redo(),
             Action::GoTo(goto_action) => self.update_cursor(goto_action),
-            Action::Delete(first, second) => self.delete(first, second),
+            Action::Delete(OperatorScope::Goto(first, second)) =>
+                self.delete(first, second),
             Action::ToggleCapitalisation => self.replace_ch(|old| {
                 if old.is_ascii_lowercase() {
                     old.to_ascii_uppercase()

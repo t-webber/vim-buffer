@@ -1,7 +1,9 @@
 use crossterm::event::KeyCode;
 
 use crate::Mode;
-use crate::buffer::keymaps::{Action, CombinablePending, GoToAction, OPending};
+use crate::buffer::keymaps::{
+    Action, CombinablePending, GoToAction, OPending, Operator
+};
 
 /// Actions to be taken as a result of a keypress
 #[derive(Debug, PartialEq, Eq)]
@@ -27,6 +29,12 @@ impl From<Vec<Action>> for Actions {
 impl From<OPending> for Actions {
     fn from(opending: OPending) -> Self {
         Self::OPending(opending)
+    }
+}
+
+impl From<Operator> for Actions {
+    fn from(op: Operator) -> Self {
+        Self::OPending(op.into())
     }
 }
 

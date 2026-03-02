@@ -1,6 +1,8 @@
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
 
-use crate::buffer::keymaps::{Action, CombinablePending, GoToAction, OPending};
+use crate::buffer::keymaps::{
+    Action, CombinablePending, GoToAction, OPending, Operator, OperatorScope
+};
 use crate::buffer::mode::insert::Insert;
 use crate::buffer::mode::normal::Normal;
 use crate::buffer::mode::traits::{Actions, HandleKeyPress};
@@ -90,37 +92,9 @@ impl Mode {
                     )
                 }
                 OPending::ReplaceOne => Action::ReplaceWith(ch).into(),
-                OPending::DeleteAction(action) => {
-                    let (first, second) =
-                        Self::handle_operator_action(action, ch);
-                    Action::Delete(first, second).into()
-                }
-                OPending::ChangeAction(action) => {
-                    let (first, second) =
-                        Self::handle_operator_action(action, ch);
-                    vec![Action::Delete(first, second), Self::Insert.into()]
-                        .into()
-                }
-                OPending::Change => self.handle_operator(
-                    event,
-                    OPending::Change,
-                    vec![Action::DeleteLine, Self::Insert.into()].into(),
-                    OPending::ChangeAction,
-                    |goto_action| {
-                        vec![
-                            Action::Delete(goto_action, None),
-                            Self::Insert.into(),
-                        ]
-                        .into()
-                    },
-                ),
-                OPending::Delete => self.handle_operator(
-                    event,
-                    OPending::Delete,
-                    Action::DeleteLine.into(),
-                    OPending::DeleteAction,
-                    |goto_action| Action::Delete(goto_action, None).into(),
-                ),
+                OPending::OperatorAction(op, combinable) =>
+                    Self::handle_operator_action(op, combinable, ch),
+                OPending::Operator(op) => self.handle_operator(event, op, ch),
             }
         } else {
             Actions::default()
@@ -128,36 +102,31 @@ impl Mode {
     }
 
     /// Handle operator events (`d`, `c`, etc.)
-    fn handle_operator(
-        self,
-        event: &Event,
-        opending: OPending,
-        actions: Actions,
-        make_opending: impl Fn(CombinablePending) -> OPending,
-        make_action: impl Fn(GoToAction) -> Actions,
-    ) -> Actions {
+    fn handle_operator(self, event: &Event, op: Operator, ch: char) -> Actions {
+        if op.as_char() == ch {
+            return op.into_actions(OperatorScope::WholeLine);
+        }
         match self.handle_non_opending_event(event) {
-            Actions::List(list) => {
+            Actions::List(list) =>
                 if let &[list_action] = list.as_slice()
-                    && let Action::GoTo(goto_action) = list_action
+                    && let Action::GoTo(goto) = list_action
                 {
-                    make_action(goto_action)
+                    op.into_actions(goto.into())
                 } else {
                     list.into()
-                }
-            }
+                },
             Actions::OPending(OPending::CombinablePending(combinable)) =>
-                make_opending(combinable).into(),
-            Actions::OPending(pending) if pending == opending => actions,
+                OPending::OperatorAction(op, combinable).into(),
             Actions::OPending(_) => Actions::default(),
         }
     }
 
     /// Handle operator action events (`dw`, `cw`, etc.)
-    const fn handle_operator_action(
+    fn handle_operator_action(
+        op: Operator,
         action: CombinablePending,
         ch: char,
-    ) -> (GoToAction, Option<GoToAction>) {
+    ) -> Actions {
         let (first, maybe_second) =
             Self::handle_combinable_opending_char_event(action, ch);
         let second = match action {
@@ -166,7 +135,7 @@ impl Mode {
             CombinablePending::FindPrevious
             | CombinablePending::FindPreviousIncrement => maybe_second,
         };
-        (first, second)
+        op.into_actions(OperatorScope::Goto(first, second))
     }
 }
 
