@@ -1,4 +1,6 @@
+use core::iter::{Rev, Skip};
 use core::mem::take;
+use core::str::CharIndices;
 
 use crossterm::event::Event;
 
@@ -15,6 +17,18 @@ impl Buffer {
     #[expect(clippy::arithmetic_side_effects, reason = "cursor <= len")]
     const fn as_end_index(&self) -> usize {
         self.len() - self.as_cursor()
+    }
+
+    /// Returns [`CharIndices`] iterator for all chars located after the cursor
+    /// in the buffer.
+    fn chars_after_cursor(&self) -> Skip<CharIndices<'_>> {
+        self.as_content().char_indices().skip(self.as_cursor())
+    }
+
+    /// Returns [`CharIndices`] iterator for all chars located before the cursor
+    /// in the buffer, and this in a reverse order.
+    fn chars_before_cursor_rev(&self) -> Skip<Rev<CharIndices<'_>>> {
+        self.as_content().char_indices().rev().skip(self.as_end_index())
     }
 
     /// Deletes the part of the buffer represented by one or two [`GoToAction`]
@@ -72,8 +86,7 @@ impl Buffer {
     /// Moves the cursor to the beginning of the previous WORD.
     #[expect(non_snake_case, reason = "vim wording")]
     fn goto_beginning_of_WORD(&mut self) {
-        let mut chars =
-            self.as_content().char_indices().rev().skip(self.as_end_index());
+        let mut chars = self.chars_before_cursor_rev();
         if let Some(..) = chars.find(|(_, ch)| !ch.is_whitespace())
             && let Some((idx, _)) = chars.find(|(_, ch)| ch.is_whitespace())
         {
@@ -86,8 +99,7 @@ impl Buffer {
 
     /// Moves the cursor to the beginning of the previous word.
     fn goto_beginning_of_word(&mut self) {
-        let mut chars =
-            self.as_content().char_indices().rev().skip(self.as_end_index());
+        let mut chars = self.chars_before_cursor_rev();
         if let Some((_, word_ch)) = chars.find(|(_, ch)| !ch.is_whitespace())
             && let cursor = IsIdentChar::new(word_ch)
             && let Some((idx, _)) = chars.find(|(_, ch)| cursor.xor(*ch))
@@ -102,8 +114,7 @@ impl Buffer {
     /// Moves the cursor to the end of the current or next word.
     #[expect(non_snake_case, reason = "vim wording")]
     fn goto_end_WORD(&mut self) {
-        let mut chars =
-            self.as_content().char_indices().skip(self.as_cursor()).skip(1);
+        let mut chars = self.chars_after_cursor().skip(1);
         if let Some(..) = chars.find(|(_, ch)| !ch.is_whitespace())
             && let Some((idx, _)) = chars.find(|(_, ch)| ch.is_whitespace())
         {
@@ -154,8 +165,7 @@ impl Buffer {
 
     /// Moves the cursor to the end of the current or next word.
     fn goto_end_word(&mut self) {
-        let mut chars =
-            self.as_content().char_indices().skip(self.as_cursor()).skip(1);
+        let mut chars = self.chars_after_cursor().skip(1);
         if let Some((_, cursor_ch)) = chars.find(|(_, ch)| !ch.is_whitespace())
             && let cursor = IsIdentChar::new(cursor_ch)
             && let Some((idx, _)) = chars.find(|(_, ch)| cursor.xor(*ch))
@@ -170,7 +180,7 @@ impl Buffer {
     /// Moves the cursor to the beginning of the next WORD.
     #[expect(non_snake_case, reason = "vim wording")]
     fn goto_next_WORD(&mut self) {
-        let mut chars = self.as_content().char_indices().skip(self.as_cursor());
+        let mut chars = self.chars_after_cursor();
         if let Some(..) = chars.find(|(_, ch)| ch.is_whitespace())
             && let Some((idx, _)) = chars.find(|(_, ch)| !ch.is_whitespace())
         {
@@ -182,7 +192,7 @@ impl Buffer {
 
     /// Moves the cursor to the beginning of the next word.
     fn goto_next_word(&mut self) {
-        let mut chars = self.as_content().char_indices().skip(self.as_cursor());
+        let mut chars = self.chars_after_cursor();
         if let Some((_, cursor_ch)) = chars.next()
             && let cursor = IsIdentChar::new(cursor_ch)
             && let Some((idx, next_ch)) = chars.find(|(_, ch)| cursor.xor(*ch))
