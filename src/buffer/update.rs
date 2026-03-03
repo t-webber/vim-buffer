@@ -5,6 +5,7 @@ use crossterm::event::Event;
 use crate::Mode;
 use crate::buffer::api::Buffer;
 use crate::buffer::bounded_usize::BoundedUsize;
+use crate::buffer::is_indent::IsIdentChar;
 use crate::buffer::keymaps::{Action, GoToAction, OperatorScope};
 use crate::buffer::mode::Actions;
 use crate::event_parser::{EventParsingError, parse_events};
@@ -88,8 +89,8 @@ impl Buffer {
         let mut chars =
             self.as_content().char_indices().rev().skip(self.as_end_index());
         if let Some((_, word_ch)) = chars.find(|(_, ch)| !ch.is_whitespace())
-            && let Some((idx, _)) =
-                chars.find(|(_, ch)| xor_ident_char(word_ch, *ch))
+            && let cursor = IsIdentChar::new(word_ch)
+            && let Some((idx, _)) = chars.find(|(_, ch)| cursor.xor(*ch))
         {
             self.cursor.set(idx);
             self.cursor.increment();
@@ -138,7 +139,8 @@ impl Buffer {
             return self.cursor.set(0);
         };
         if !cursor_ch.is_whitespace() {
-            match chars.find(|(_, ch)| xor_ident_char(*ch, cursor_ch)) {
+            let cursor = IsIdentChar::new(cursor_ch);
+            match chars.find(|(_, ch)| cursor.xor(*ch)) {
                 None => return self.cursor.set(0),
                 Some((idx, ch)) if !ch.is_whitespace() =>
                     return self.cursor.set(idx),
@@ -155,8 +157,8 @@ impl Buffer {
         let mut chars =
             self.as_content().char_indices().skip(self.as_cursor()).skip(1);
         if let Some((_, cursor_ch)) = chars.find(|(_, ch)| !ch.is_whitespace())
-            && let Some((idx, _)) =
-                chars.find(|(_, ch)| xor_ident_char(*ch, cursor_ch))
+            && let cursor = IsIdentChar::new(cursor_ch)
+            && let Some((idx, _)) = chars.find(|(_, ch)| cursor.xor(*ch))
         {
             self.cursor.set(idx);
             self.cursor.decrement();
@@ -182,8 +184,8 @@ impl Buffer {
     fn goto_next_word(&mut self) {
         let mut chars = self.as_content().char_indices().skip(self.as_cursor());
         if let Some((_, cursor_ch)) = chars.next()
-            && let Some((idx, next_ch)) =
-                chars.find(|(_, ch)| xor_ident_char(cursor_ch, *ch))
+            && let cursor = IsIdentChar::new(cursor_ch)
+            && let Some((idx, next_ch)) = chars.find(|(_, ch)| cursor.xor(*ch))
         {
             if next_ch.is_whitespace() {
                 if let Some((non_space_idx, _)) =
@@ -445,16 +447,6 @@ impl Buffer {
             }),
         }
     }
-}
-
-/// Checks that first or second is ident valid, but not both.
-const fn xor_ident_char(first: char, second: char) -> bool {
-    is_ident_char(first) ^ is_ident_char(second)
-}
-
-/// Returns `true` if the given char is valid for an identifier
-const fn is_ident_char(ch: char) -> bool {
-    matches!(ch, '0'..='9' | 'a'..='z' | 'A'..='Z' | '_')
 }
 
 #[cfg(test)]

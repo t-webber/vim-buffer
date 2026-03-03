@@ -4,6 +4,8 @@ mod api;
 mod bounded_usize;
 /// Logic to hold the history of the buffer
 mod history;
+/// Handles the checks to delimitate a vim word.
+mod is_indent;
 /// Defines the actions that can be made on the buffer
 mod keymaps;
 /// Useful macros scoped with this module.
