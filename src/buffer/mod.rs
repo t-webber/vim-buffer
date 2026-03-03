@@ -6,12 +6,15 @@ mod bounded_usize;
 mod history;
 /// Defines the actions that can be made on the buffer
 mod keymaps;
+/// Useful macros scoped with this module.
+mod macros;
 /// Handles the vim modes and the keypresses on those modes
 mod mode;
-#[cfg(test)]
-mod tests;
 /// Methods to update the [`Buffer`] with keymaps.
 mod update;
 
 pub use api::Buffer;
 pub use mode::Mode;
+
+#[cfg(test)]
+mod tests;

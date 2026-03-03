@@ -1,4 +1,5 @@
 use crate::Mode;
+use crate::buffer::macros::actions;
 use crate::buffer::mode::Actions;
 
 /// Action to be done on the buffer
@@ -122,8 +123,7 @@ impl Operator {
     /// Adds the 1 or 2 go-to actions to fully define the current operator.
     pub(super) fn into_actions(self, scope: OperatorScope) -> Actions {
         match self {
-            Self::Change =>
-                vec![Action::Delete(scope), Mode::Insert.into()].into(),
+            Self::Change => actions![Action::Delete(scope), Mode::Insert],
             Self::Delete => Action::Delete(scope).into(),
         }
     }

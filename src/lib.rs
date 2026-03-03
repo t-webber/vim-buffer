@@ -32,6 +32,7 @@
     reason = "better API"
 )]
 #![expect(
+    clippy::pub_with_shorthand,
     clippy::implicit_return,
     clippy::mod_module_files,
     clippy::single_call_fn,

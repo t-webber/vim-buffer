@@ -3,6 +3,7 @@ use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
 use crate::buffer::keymaps::{
     Action, CombinablePending, GoToAction, OPending, Operator, OperatorScope
 };
+use crate::buffer::macros::actions;
 use crate::buffer::mode::insert::Insert;
 use crate::buffer::mode::normal::Normal;
 use crate::buffer::mode::traits::{Actions, HandleKeyPress};
@@ -88,7 +89,7 @@ impl Mode {
                         Self::handle_combinable_opending_char_event(action, ch);
                     maybe_second.map_or_else(
                         || first.into(),
-                        |second| vec![first.into(), second.into()].into(),
+                        |second| actions![first, second],
                     )
                 }
                 OPending::ReplaceOne => Action::ReplaceWith(ch).into(),
@@ -143,8 +144,8 @@ impl HandleKeyPress for Mode {
     fn handle_blank_key_press(&self, code: KeyCode) -> Actions {
         #[expect(clippy::wildcard_enum_match_arm, reason = "take only a few")]
         match code {
-            KeyCode::Left => return vec![GoToAction::Left.into()].into(),
-            KeyCode::Right => return vec![GoToAction::Right.into()].into(),
+            KeyCode::Left => return actions![GoToAction::Left],
+            KeyCode::Right => return actions![GoToAction::Right],
             _ => (),
         }
         match *self {

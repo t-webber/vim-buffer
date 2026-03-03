@@ -1,6 +1,7 @@
 use crossterm::event::KeyCode;
 
 use crate::buffer::keymaps::{Action, GoToAction};
+use crate::buffer::macros::actions;
 use crate::buffer::mode::all::Mode;
 use crate::buffer::mode::traits::{Actions, HandleKeyPress};
 
@@ -14,8 +15,7 @@ pub struct Insert;
 impl HandleKeyPress for Insert {
     fn handle_blank_key_press(&self, code: KeyCode) -> Actions {
         match code {
-            KeyCode::Esc =>
-                vec![GoToAction::Left.into(), Mode::Normal.into()].into(),
+            KeyCode::Esc => actions![GoToAction::Left, Mode::Normal],
             KeyCode::Char(ch) => Action::InsertChar(ch).into(),
             KeyCode::Backspace => Action::DeletePreviousChar.into(),
             _ => Actions::default(),

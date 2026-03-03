@@ -4,6 +4,7 @@ use crate::Mode;
 use crate::buffer::keymaps::{
     Action, CombinablePending, GoToAction, OPending, Operator
 };
+use crate::buffer::macros::actions;
 
 /// Actions to be taken as a result of a keypress
 #[derive(Debug, PartialEq, Eq)]
@@ -16,7 +17,7 @@ pub enum Actions {
 
 impl Default for Actions {
     fn default() -> Self {
-        vec![].into()
+        actions![]
     }
 }
 
@@ -40,7 +41,7 @@ impl From<Operator> for Actions {
 
 impl From<Action> for Actions {
     fn from(action: Action) -> Self {
-        vec![action].into()
+        actions![action]
     }
 }
 

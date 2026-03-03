@@ -3,6 +3,7 @@ use crossterm::event::KeyCode;
 use crate::buffer::keymaps::{
     Action, CombinablePending, GoToAction, OPending, Operator, OperatorScope
 };
+use crate::buffer::macros::actions;
 use crate::buffer::mode::all::Mode;
 use crate::buffer::mode::traits::{Actions, HandleKeyPress};
 
@@ -16,8 +17,7 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('$') => GoToAction::EndOfLine.into(),
             KeyCode::Char('0') => GoToAction::BeginningOfLine.into(),
             KeyCode::Char('^') => GoToAction::FirstNonSpace.into(),
-            KeyCode::Char('a') =>
-                vec![GoToAction::Right.into(), Mode::Insert.into()].into(),
+            KeyCode::Char('a') => actions![GoToAction::Right, Mode::Insert],
             KeyCode::Char('b') => GoToAction::BeginningOfWord.into(),
             KeyCode::Char('c') => Operator::Change.into(),
             KeyCode::Char('d') => Operator::Delete.into(),
@@ -29,18 +29,16 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('l') => GoToAction::Right.into(),
             KeyCode::Char('x') => Action::DeleteNextChar.into(),
             KeyCode::Char('r') => OPending::ReplaceOne.into(),
-            KeyCode::Char('s') => vec![
-                GoToAction::Right.into(),
+            KeyCode::Char('s') => actions![
+                GoToAction::Right,
                 Action::DeletePreviousChar,
-                Mode::Insert.into(),
-            ]
-            .into(),
+                Mode::Insert
+            ],
             KeyCode::Char('t') => CombinablePending::FindNextDecrement.into(),
             KeyCode::Char('u') => Action::Undo.into(),
             KeyCode::Char('w') => GoToAction::NextWord.into(),
             KeyCode::Char('~') =>
-                vec![Action::ToggleCapitalisation, GoToAction::Right.into()]
-                    .into(),
+                actions![Action::ToggleCapitalisation, GoToAction::Right],
             _ => Actions::default(),
         }
     }
@@ -54,26 +52,20 @@ impl HandleKeyPress for Normal {
 
     fn handle_shift_key_press(&self, code: KeyCode) -> Actions {
         match code {
-            KeyCode::Char('A') =>
-                vec![GoToAction::EndOfLine.into(), Mode::Insert.into()].into(),
+            KeyCode::Char('A') => actions![GoToAction::EndOfLine, Mode::Insert],
             KeyCode::Char('B') => GoToAction::BeginningOfWORD.into(),
-            KeyCode::Char('C') => vec![
+            KeyCode::Char('C') => actions![
                 Action::Delete(GoToAction::EndOfLine.into()),
-                Mode::Insert.into(),
-            ]
-            .into(),
+                Mode::Insert
+            ],
             KeyCode::Char('D') =>
                 Action::Delete(GoToAction::EndOfLine.into()).into(),
             KeyCode::Char('E') => GoToAction::EndWORD.into(),
             KeyCode::Char('F') => CombinablePending::FindPrevious.into(),
             KeyCode::Char('I') =>
-                vec![GoToAction::FirstNonSpace.into(), Mode::Insert.into()]
-                    .into(),
-            KeyCode::Char('S') => vec![
-                Action::Delete(OperatorScope::WholeLine),
-                Mode::Insert.into(),
-            ]
-            .into(),
+                actions![GoToAction::FirstNonSpace, Mode::Insert],
+            KeyCode::Char('S') =>
+                actions![Action::Delete(OperatorScope::WholeLine), Mode::Insert],
             KeyCode::Char('T') =>
                 CombinablePending::FindPreviousIncrement.into(),
             KeyCode::Char('W') => GoToAction::NextWORD.into(),
