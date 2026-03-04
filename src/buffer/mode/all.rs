@@ -84,6 +84,7 @@ impl Mode {
                 OPending::GoTo if ch == 'E' =>
                     GoToAction::EndOfPreviousWORD.into(),
                 OPending::GoTo if ch == 'U' => Operator::Capitalise.into(),
+                OPending::GoTo if ch == 'u' => Operator::LowerCase.into(),
                 OPending::GoTo => Actions::default(),
                 OPending::CombinablePending(action) => {
                     let (first, maybe_second) =

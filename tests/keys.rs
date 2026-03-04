@@ -272,4 +272,11 @@ gUf: "iabc.def<Esc>0gUfe" => "ABC.DEf",
 gU_fail: "iabc.def<Esc>0gUfz" => "abc.def",
 gUb: "iabcde.f<Esc>FcgUbiz" => "zABcde.f",
 
+guu: "iABC<Esc>hguuiZ" => "Zabc",
+guW: "iABC.DEF<Esc>0lguwiZ" => "AZbc.DEF",
+gu0: "iABC.DEF<Esc>gegu0iZ" => "Zabc.DEF",
+guF: "iABC.DEF<Esc>0gufE" => "abc.deF",
+gu_FAIL: "iABC.DEF<Esc>0gufZ" => "ABC.DEF",
+guB: "iABCDE.F<Esc>FCgubiZ" => "ZabCDE.F",
+
 );

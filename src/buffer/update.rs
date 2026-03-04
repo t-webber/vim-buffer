@@ -13,26 +13,25 @@ use crate::buffer::mode::Actions;
 use crate::event_parser::{EventParsingError, parse_events};
 
 impl Buffer {
+    /// Capitalise part of the buffer
+    fn apply<F>(&mut self, start: usize, end: usize, apply: F)
+    where F: Fn(&char) -> char {
+        self.content = self
+            .as_content()
+            .char_indices()
+            .map(
+                |(idx, ch)| {
+                    if idx < start || idx >= end { ch } else { apply(&ch) }
+                },
+            )
+            .collect();
+        self.cursor.set(start);
+    }
+
     /// Returns the index of the cursor, starting from the end of the string.
     #[expect(clippy::arithmetic_side_effects, reason = "cursor <= len")]
     const fn as_end_index(&self) -> usize {
         self.len() - self.as_cursor()
-    }
-
-    /// Capitalise part of the buffer
-    fn capitalise(&mut self, start: usize, end: usize) {
-        self.content = self
-            .content
-            .char_indices()
-            .map(|(idx, ch)| {
-                if idx < start || idx >= end {
-                    ch
-                } else {
-                    ch.to_ascii_uppercase()
-                }
-            })
-            .collect();
-        self.cursor.set(start);
     }
 
     /// Returns [`CharIndices`] iterator for all chars located after the cursor
@@ -451,14 +450,27 @@ impl Buffer {
                 }
             }),
             Action::Capitalise(OperatorScope::WholeLine) => {
-                self.capitalise(0, self.len());
+                self.apply(0, self.len(), char::to_ascii_uppercase);
                 true
             }
             Action::Capitalise(OperatorScope::Goto(first, second)) =>
                 if let Some((min, max)) =
                     self.get_motion_delimination(first, second)
                 {
-                    self.capitalise(min, max);
+                    self.apply(min, max, char::to_ascii_uppercase);
+                    true
+                } else {
+                    false
+                },
+            Action::LowerCase(OperatorScope::WholeLine) => {
+                self.apply(0, self.len(), char::to_ascii_lowercase);
+                true
+            }
+            Action::LowerCase(OperatorScope::Goto(first, second)) =>
+                if let Some((min, max)) =
+                    self.get_motion_delimination(first, second)
+                {
+                    self.apply(min, max, char::to_ascii_lowercase);
                     true
                 } else {
                     false

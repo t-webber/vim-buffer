@@ -14,6 +14,8 @@ pub enum Action {
     GoTo(GoToAction),
     /// Inserts a char in the buffer
     InsertChar(char),
+    /// Lowers the case of the text for the given scope
+    LowerCase(OperatorScope),
     /// Undo the last undo action
     Redo,
     /// Replace the char under the cursor with
@@ -113,6 +115,8 @@ pub enum Operator {
     Change,
     /// Delete content of motion
     Delete,
+    /// Lowers the case of content of motion
+    LowerCase,
 }
 
 impl Operator {
@@ -123,6 +127,7 @@ impl Operator {
             Self::Change => 'c',
             Self::Delete => 'd',
             Self::Capitalise => 'U',
+            Self::LowerCase => 'u',
         }
     }
 
@@ -132,6 +137,7 @@ impl Operator {
             Self::Change => actions![Action::Delete(scope), Mode::Insert],
             Self::Delete => Action::Delete(scope).into(),
             Self::Capitalise => Action::Capitalise(scope).into(),
+            Self::LowerCase => Action::LowerCase(scope).into(),
         }
     }
 }
