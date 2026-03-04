@@ -83,9 +83,8 @@ impl Mode {
                     GoToAction::EndOfPreviousWord.into(),
                 OPending::GoTo if ch == 'E' =>
                     GoToAction::EndOfPreviousWORD.into(),
-                OPending::GoTo if ch == 'U' => Operator::Capitalise.into(),
-                OPending::GoTo if ch == 'u' => Operator::LowerCase.into(),
-                OPending::GoTo => Actions::default(),
+                OPending::GoTo =>
+                    Operator::maybe_from(ch).map(Into::into).unwrap_or_default(),
                 OPending::CombinablePending(action) => {
                     let (first, maybe_second) =
                         Self::handle_combinable_opending_char_event(action, ch);
@@ -107,14 +106,14 @@ impl Mode {
     /// Handle operator events (`d`, `c`, etc.)
     fn handle_operator(self, event: &Event, op: Operator, ch: char) -> Actions {
         if op.as_char() == ch {
-            return op.into_actions(OperatorScope::WholeLine);
+            return actions![(op, OperatorScope::WholeLine)];
         }
         match self.handle_non_opending_event(event) {
             Actions::List(list) =>
                 if let &[list_action] = list.as_slice()
                     && let Action::GoTo(goto) = list_action
                 {
-                    op.into_actions(goto.into())
+                    actions![(op, goto.into())]
                 } else {
                     list.into()
                 },
@@ -138,7 +137,7 @@ impl Mode {
             CombinablePending::FindPrevious
             | CombinablePending::FindPreviousIncrement => maybe_second,
         };
-        op.into_actions(OperatorScope::Goto(first, second))
+        actions![(op, OperatorScope::Goto(first, second))]
     }
 }
 

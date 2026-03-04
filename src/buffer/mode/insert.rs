@@ -1,6 +1,6 @@
 use crossterm::event::KeyCode;
 
-use crate::buffer::keymaps::{Action, GoToAction, OperatorScope};
+use crate::buffer::keymaps::{Action, GoToAction, Operator};
 use crate::buffer::macros::actions;
 use crate::buffer::mode::all::Mode;
 use crate::buffer::mode::traits::{Actions, HandleKeyPress};
@@ -19,7 +19,7 @@ impl HandleKeyPress for Insert {
             KeyCode::Char(ch) => Action::InsertChar(ch).into(),
             KeyCode::Backspace => actions![
                 GoToAction::Left,
-                Action::Delete(OperatorScope::Goto(GoToAction::Right, None))
+                (Operator::Delete, GoToAction::Right.into())
             ],
             KeyCode::Left => GoToAction::Left.into(),
             KeyCode::Right => GoToAction::Right.into(),

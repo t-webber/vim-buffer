@@ -8,7 +8,7 @@ use crate::Mode;
 use crate::buffer::api::Buffer;
 use crate::buffer::bounded_usize::BoundedUsize;
 use crate::buffer::is_indent::IsIdentChar;
-use crate::buffer::keymaps::{Action, GoToAction, OperatorScope};
+use crate::buffer::keymaps::{Action, GoToAction, Operator, OperatorScope};
 use crate::buffer::mode::Actions;
 use crate::event_parser::{EventParsingError, parse_events};
 
@@ -431,17 +431,11 @@ impl Buffer {
                 self.mode = mode;
                 true
             }
-            Action::Delete(OperatorScope::WholeLine) => {
-                self.content.clear();
-                take(&mut self.cursor);
-                true
-            }
             Action::ReplaceWith(ch) => self.replace_ch(|_| ch),
             Action::Undo => self.undo(),
             Action::Redo => self.redo(),
             Action::GoTo(goto_action) => self.update_cursor(goto_action),
-            Action::Delete(OperatorScope::Goto(first, second)) =>
-                self.delete(first, second),
+            Action::Operator(op, scope) => self.update_with_operator(op, scope),
             Action::ToggleCapitalisation => self.replace_ch(|old| {
                 if old.is_ascii_lowercase() {
                     old.to_ascii_uppercase()
@@ -449,32 +443,42 @@ impl Buffer {
                     old.to_ascii_lowercase()
                 }
             }),
-            Action::Capitalise(OperatorScope::WholeLine) => {
-                self.apply(0, self.len(), char::to_ascii_uppercase);
+        }
+    }
+
+    /// Updates the buffer with an [`Operator`] action.
+    fn update_with_operator(
+        &mut self,
+        op: Operator,
+        scope: OperatorScope,
+    ) -> bool {
+        let fun = match op {
+            Operator::Delete => match scope {
+                OperatorScope::Goto(g1, g2) => return self.delete(g1, g2),
+                OperatorScope::WholeLine => {
+                    self.content.clear();
+                    self.cursor = BoundedUsize::default();
+                    return true;
+                }
+            },
+            Operator::Change =>
+                return self.update_with_operator(Operator::Delete, scope) && {
+                    self.mode = Mode::Insert;
+                    true
+                },
+            Operator::Capitalise => char::to_ascii_uppercase,
+            Operator::LowerCase => char::to_ascii_lowercase,
+        };
+        match match scope {
+            OperatorScope::WholeLine => Some((0, self.len())),
+            OperatorScope::Goto(first, second) =>
+                self.get_motion_delimination(first, second),
+        } {
+            None => false,
+            Some((min, max)) => {
+                self.apply(min, max, fun);
                 true
             }
-            Action::Capitalise(OperatorScope::Goto(first, second)) =>
-                if let Some((min, max)) =
-                    self.get_motion_delimination(first, second)
-                {
-                    self.apply(min, max, char::to_ascii_uppercase);
-                    true
-                } else {
-                    false
-                },
-            Action::LowerCase(OperatorScope::WholeLine) => {
-                self.apply(0, self.len(), char::to_ascii_lowercase);
-                true
-            }
-            Action::LowerCase(OperatorScope::Goto(first, second)) =>
-                if let Some((min, max)) =
-                    self.get_motion_delimination(first, second)
-                {
-                    self.apply(min, max, char::to_ascii_lowercase);
-                    true
-                } else {
-                    false
-                },
         }
     }
 }

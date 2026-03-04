@@ -29,13 +29,13 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('i') => Mode::Insert.into(),
             KeyCode::Char('l') | KeyCode::Right => GoToAction::NextChar.into(),
             KeyCode::Char('x') => actions![
-                Action::Delete(OperatorScope::Goto(GoToAction::Right, None)),
+                (Operator::Delete, GoToAction::Right.into()),
                 GoToAction::Right,
                 GoToAction::Left
             ],
             KeyCode::Char('r') => OPending::ReplaceOne.into(),
             KeyCode::Char('s') => actions![
-                Action::Delete(OperatorScope::Goto(GoToAction::Right, None)),
+                (Operator::Delete, GoToAction::Right.into()),
                 Mode::Insert
             ],
             KeyCode::Char('t') => CombinablePending::FindNextDecrement.into(),
@@ -59,23 +59,26 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('A') => actions![GoToAction::EndOfLine, Mode::Insert],
             KeyCode::Char('B') => GoToAction::BeginningOfWORD.into(),
             KeyCode::Char('C') => actions![
-                Action::Delete(GoToAction::EndOfLine.into()),
+                (Operator::Delete, GoToAction::EndOfLine.into()),
                 Mode::Insert
             ],
             KeyCode::Char('D') =>
-                Action::Delete(GoToAction::EndOfLine.into()).into(),
+                vec![(Operator::Delete, GoToAction::EndOfLine.into()).into()]
+                    .into(),
             KeyCode::Char('E') => GoToAction::EndWORD.into(),
             KeyCode::Char('F') => CombinablePending::FindPrevious.into(),
             KeyCode::Char('I') =>
                 actions![GoToAction::FirstNonSpace, Mode::Insert],
-            KeyCode::Char('S') =>
-                actions![Action::Delete(OperatorScope::WholeLine), Mode::Insert],
+            KeyCode::Char('S') => actions![
+                (Operator::Delete, OperatorScope::WholeLine),
+                Mode::Insert
+            ],
             KeyCode::Char('T') =>
                 CombinablePending::FindPreviousIncrement.into(),
             KeyCode::Char('W') => GoToAction::NextWORD.into(),
             KeyCode::Char('X') => actions![
                 GoToAction::Left,
-                Action::Delete(OperatorScope::Goto(GoToAction::Right, None))
+                (Operator::Delete, GoToAction::Right.into())
             ],
             _ => Actions::default(),
         }

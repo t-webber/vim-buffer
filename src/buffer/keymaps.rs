@@ -1,21 +1,35 @@
 use crate::Mode;
-use crate::buffer::macros::actions;
-use crate::buffer::mode::Actions;
+
+/// Defines functions
+macro_rules! operator_impl {
+    ($($t:tt: $c:tt,)*) => {
+        /// Char that represents this operator. It is the char needed to apply
+        /// the operator to the whole line.
+        pub(super) const fn as_char(self) -> char {
+            match self {
+                $(Self::$t => $c),*
+            }
+        }
+
+        pub (super) const fn maybe_from(ch: char) -> Option<Self> {
+            match ch {
+                $($c => Some(Self::$t),)*
+                _ => None
+            }
+        }
+    };
+}
 
 /// Action to be done on the buffer
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Action {
-    /// Capitalise the text for the given scope
-    Capitalise(OperatorScope),
-    /// Delete
-    Delete(OperatorScope),
     /// Action to move the cursor to a location denotated by a condition
     GoTo(GoToAction),
     /// Inserts a char in the buffer
     InsertChar(char),
-    /// Lowers the case of the text for the given scope
-    LowerCase(OperatorScope),
+    /// Applies an operator motion.
+    Operator(Operator, OperatorScope),
     /// Undo the last undo action
     Redo,
     /// Replace the char under the cursor with
@@ -26,6 +40,12 @@ pub enum Action {
     ToggleCapitalisation,
     /// Undo the last edition
     Undo,
+}
+
+impl From<(Operator, OperatorScope)> for Action {
+    fn from((op, scope): (Operator, OperatorScope)) -> Self {
+        Self::Operator(op, scope)
+    }
 }
 
 impl From<GoToAction> for Action {
@@ -120,25 +140,11 @@ pub enum Operator {
 }
 
 impl Operator {
-    /// Char that represents this operator. It is the char needed to apply the
-    /// operator to the whole line.
-    pub(super) const fn as_char(self) -> char {
-        match self {
-            Self::Change => 'c',
-            Self::Delete => 'd',
-            Self::Capitalise => 'U',
-            Self::LowerCase => 'u',
-        }
-    }
-
-    /// Adds the 1 or 2 go-to actions to fully define the current operator.
-    pub(super) fn into_actions(self, scope: OperatorScope) -> Actions {
-        match self {
-            Self::Change => actions![Action::Delete(scope), Mode::Insert],
-            Self::Delete => Action::Delete(scope).into(),
-            Self::Capitalise => Action::Capitalise(scope).into(),
-            Self::LowerCase => Action::LowerCase(scope).into(),
-        }
+    operator_impl! {
+        Capitalise: 'U',
+        Change: 'c',
+        Delete: 'd',
+        LowerCase: 'u',
     }
 }
 
