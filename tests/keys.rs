@@ -25,12 +25,18 @@ buffer_tests!(insert,
 
 backspace: "ia<BS><BS>bcd<BS>" => "bc",
 arrows: "iabc<Left>d<Right>e" => "abdce",
+right_end: "iabc<Right>d" => "abcd",
+left_start: "iabc<Esc>I<Left>d" => "dabc",
 
 );
 
 buffer_tests!(normal,
 
 backspace: "ia<Esc><BS><BS>ibcd<Esc><BS>ie" => "becda",
+arrows: "iabc<Esc><Left>id<Esc><Right>ae" => "adbec",
+right_end: "iabc<Esc><Right>ad" => "abcd",
+left_start: "iabc<Esc>0<Left>id" => "dabc",
+
 a: "ia<Esc>ab" => "ab",
 i: "ia<Esc>ib" => "ba",
 I: "i  ab<Esc>Ic" => "  cab",
@@ -38,7 +44,6 @@ I_no_space: "iab<Esc>Ic" => "cab",
 I_empty_line: "i   <Esc>Ia" => "   a",
 A: "iabc<Esc>Ad" => "abcd",
 A_empty_line: "i   <Esc>Aa" => "   a",
-arrows: "iabc<Esc><Left>id<Esc><Right>ae" => "adbec",
 h_l: "iabc<Esc>hid<Esc>lae" => "adbec",
 _0: "i  abc<Esc>0id" => "d  abc",
 dollar: "i abc <Esc>0id<Esc>$ae" => "d abc e",
