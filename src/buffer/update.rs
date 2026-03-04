@@ -296,6 +296,10 @@ impl Buffer {
     fn update_cursor(&mut self, goto_action: GoToAction) -> bool {
         match goto_action {
             GoToAction::Right => drop(self.cursor.increment()),
+            GoToAction::NextChar =>
+                if self.as_cursor().saturating_add(1) < self.len() {
+                    self.cursor.increment();
+                },
             GoToAction::Left => drop(self.cursor.decrement()),
             GoToAction::BeginningOfLine => self.cursor.set(0),
             GoToAction::EndOfLine => self.cursor.set_to_max(),
@@ -391,12 +395,6 @@ impl Buffer {
                     if !self.update_once(*action) {
                         return false;
                     }
-                }
-                if matches!(self.mode, Mode::Normal)
-                    && !self.content.is_empty()
-                    && self.as_cursor() >= self.content.len()
-                {
-                    self.cursor.set(self.content.len().saturating_sub(1));
                 }
                 !list.is_empty()
             }

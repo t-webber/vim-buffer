@@ -24,12 +24,15 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('e') => GoToAction::EndWord.into(),
             KeyCode::Char('f') => CombinablePending::FindNext.into(),
             KeyCode::Char('g') => OPending::GoTo.into(),
-            KeyCode::Char('h') | KeyCode::Backspace => GoToAction::Left.into(),
+            KeyCode::Char('h') | KeyCode::Backspace | KeyCode::Left =>
+                GoToAction::Left.into(),
             KeyCode::Char('i') => Mode::Insert.into(),
-            KeyCode::Char('l') => GoToAction::Right.into(),
-            KeyCode::Char('x') =>
-                Action::Delete(OperatorScope::Goto(GoToAction::Right, None))
-                    .into(),
+            KeyCode::Char('l') | KeyCode::Right => GoToAction::NextChar.into(),
+            KeyCode::Char('x') => actions![
+                Action::Delete(OperatorScope::Goto(GoToAction::Right, None)),
+                GoToAction::Right,
+                GoToAction::Left
+            ],
             KeyCode::Char('r') => OPending::ReplaceOne.into(),
             KeyCode::Char('s') => actions![
                 Action::Delete(OperatorScope::Goto(GoToAction::Right, None)),
@@ -39,7 +42,7 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('u') => Action::Undo.into(),
             KeyCode::Char('w') => GoToAction::NextWord.into(),
             KeyCode::Char('~') =>
-                actions![Action::ToggleCapitalisation, GoToAction::Right],
+                actions![Action::ToggleCapitalisation, GoToAction::NextChar],
             _ => Actions::default(),
         }
     }

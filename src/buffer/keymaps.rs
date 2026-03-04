@@ -60,6 +60,11 @@ pub enum GoToAction {
     FirstNonSpace,
     /// Move the cursor left by one character
     Left,
+    /// Move the cursor right by one character, stopping at the last character
+    ///
+    /// Differs from [`Self::Right`] as it will never go beyond the last
+    /// character.
+    NextChar,
     /// Find next occurrence of char and place cursor on it
     NextOccurrenceOf(char),
     /// Move to the beginning of the next WORD

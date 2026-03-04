@@ -21,6 +21,8 @@ impl HandleKeyPress for Insert {
                 GoToAction::Left,
                 Action::Delete(OperatorScope::Goto(GoToAction::Right, None))
             ],
+            KeyCode::Left => GoToAction::Left.into(),
+            KeyCode::Right => GoToAction::Right.into(),
             _ => Actions::default(),
         }
     }

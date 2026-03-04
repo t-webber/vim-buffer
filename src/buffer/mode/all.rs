@@ -142,12 +142,6 @@ impl Mode {
 
 impl HandleKeyPress for Mode {
     fn handle_blank_key_press(&self, code: KeyCode) -> Actions {
-        #[expect(clippy::wildcard_enum_match_arm, reason = "take only a few")]
-        match code {
-            KeyCode::Left => return actions![GoToAction::Left],
-            KeyCode::Right => return actions![GoToAction::Right],
-            _ => (),
-        }
         match *self {
             Self::Insert => Insert.handle_blank_key_press(code),
             Self::Normal => Normal.handle_blank_key_press(code),
