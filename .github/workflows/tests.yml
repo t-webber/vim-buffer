@@ -4,9 +4,13 @@ on:
   push:
     paths:
       - '**/*.rs'
+      - 'README.md'
+      - '.github/workflows/tests.yml'
   pull_request:
     paths:
       - '**/*.rs'
+      - 'README.md'
+      - '.github/workflows/tests.yml'
 
 env:
     CARGO_TERM_COLOR: always

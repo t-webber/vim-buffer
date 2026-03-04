@@ -4,9 +4,11 @@ on:
   push:
     paths:
       - '**/*.rs'
+      - '.github/workflows/rustfmt.yml'
   pull_request:
     paths:
       - '**/*.rs'
+      - '.github/workflows/rustfmt.yml'
 
 env:
     CARGO_TERM_COLOR: always

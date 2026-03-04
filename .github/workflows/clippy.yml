@@ -4,9 +4,12 @@ on:
   push:
     paths:
       - '**/*.rs'
+      - '.github/workflows/clippy.yml'
+      - 'Cargo.*'
   pull_request:
     paths:
       - '**/*.rs'
+      - 'Cargo.*'
 
 env:
     CARGO_TERM_COLOR: always
