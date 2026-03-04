@@ -131,8 +131,7 @@ impl Operator {
         match self {
             Self::Change => actions![Action::Delete(scope), Mode::Insert],
             Self::Delete => Action::Delete(scope).into(),
-            Self::Capitalise =>
-                actions![Action::Capitalise(scope), GoToAction::BeginningOfLine],
+            Self::Capitalise => Action::Capitalise(scope).into(),
         }
     }
 }

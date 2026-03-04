@@ -266,9 +266,10 @@ cF: "iabcabc<Esc>cFc" => "abc",
 cF_not_found: "iabc<Esc>cFz" => "abc",
 
 gUU: "iabc<Esc>hgUUiz" => "zABC",
-gUw: "iabc.def<Esc>0gUw" => "ABC.def",
-gU0: "iabc.def<Esc>gegU0" => "ABC.def",
+gUw: "iabc.def<Esc>0lgUwiz" => "azBC.def",
+gU0: "iabc.def<Esc>gegU0iz" => "zABC.def",
 gUf: "iabc.def<Esc>0gUfe" => "ABC.DEf",
 gU_fail: "iabc.def<Esc>0gUfz" => "abc.def",
+gUb: "iabcde.f<Esc>FcgUbiz" => "zABcde.f",
 
 );

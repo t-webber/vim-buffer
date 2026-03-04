@@ -32,6 +32,7 @@ impl Buffer {
                 }
             })
             .collect();
+        self.cursor.set(start);
     }
 
     /// Returns [`CharIndices`] iterator for all chars located after the cursor
