@@ -2,6 +2,18 @@
 name = "vim-buffer"
 version = "0.1.0"
 edition = "2024"
+authors = ["Tom Webber <t.c.w.webber@gmail.com>"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+categories = [
+  "parser(implementations",
+  "parsing",
+  "text-editors",
+  "text-processing",
+]
+keywords = ["buffer", "readline", "vim", "keymaps"]
+repository = "https://github.com/t-webber/vim"
+description = "A buffer that implements the vim keymaps, to add vim bindings to Rust-made apps"
 
 [dependencies]
 crossterm = { version = "0.29.0", default-features = false, features = [

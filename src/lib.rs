@@ -21,8 +21,9 @@
     clippy::correctness,
     clippy::restriction,
     clippy::nursery,
-    // clippy::cargo
+    clippy::cargo
 )]
+#![expect(clippy::multiple_crate_versions, reason = "needed by dependencies")]
 #![expect(clippy::doc_include_without_cfg, reason = "see issue #13918")]
 #![expect(clippy::blanket_clippy_restriction_lints, reason = "I want them all")]
 #![expect(
