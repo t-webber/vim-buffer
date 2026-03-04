@@ -265,4 +265,10 @@ cT_not_found: "iabc<Esc>cTz" => "abc",
 cF: "iabcabc<Esc>cFc" => "abc",
 cF_not_found: "iabc<Esc>cFz" => "abc",
 
+gUU: "iabc<Esc>hgUUiz" => "zABC",
+gUw: "iabc.def<Esc>0gUw" => "ABC.def",
+gU0: "iabc.def<Esc>gegU0" => "ABC.def",
+gUf: "iabc.def<Esc>0gUfe" => "ABC.DEf",
+gU_fail: "iabc.def<Esc>0gUfz" => "abc.def",
+
 );

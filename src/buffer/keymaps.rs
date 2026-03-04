@@ -6,6 +6,8 @@ use crate::buffer::mode::Actions;
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Action {
+    /// Capitalise the text for the given scope
+    Capitalise(OperatorScope),
     /// Delete
     Delete(OperatorScope),
     /// Action to move the cursor to a location denotated by a condition
@@ -105,6 +107,8 @@ impl From<Operator> for OPending {
 #[non_exhaustive]
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Operator {
+    /// Capitalise content of motion
+    Capitalise,
     /// Change content of motion
     Change,
     /// Delete content of motion
@@ -118,6 +122,7 @@ impl Operator {
         match self {
             Self::Change => 'c',
             Self::Delete => 'd',
+            Self::Capitalise => 'U',
         }
     }
 
@@ -126,6 +131,8 @@ impl Operator {
         match self {
             Self::Change => actions![Action::Delete(scope), Mode::Insert],
             Self::Delete => Action::Delete(scope).into(),
+            Self::Capitalise =>
+                actions![Action::Capitalise(scope), GoToAction::BeginningOfLine],
         }
     }
 }

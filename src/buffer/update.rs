@@ -19,6 +19,21 @@ impl Buffer {
         self.len() - self.as_cursor()
     }
 
+    /// Capitalise part of the buffer
+    fn capitalise(&mut self, start: usize, end: usize) {
+        self.content = self
+            .content
+            .char_indices()
+            .map(|(idx, ch)| {
+                if idx < start || idx >= end {
+                    ch
+                } else {
+                    ch.to_ascii_uppercase()
+                }
+            })
+            .collect();
+    }
+
     /// Returns [`CharIndices`] iterator for all chars located after the cursor
     /// in the buffer.
     fn chars_after_cursor(&self) -> Skip<CharIndices<'_>> {
@@ -434,6 +449,19 @@ impl Buffer {
                     old.to_ascii_lowercase()
                 }
             }),
+            Action::Capitalise(OperatorScope::WholeLine) => {
+                self.capitalise(0, self.len());
+                true
+            }
+            Action::Capitalise(OperatorScope::Goto(first, second)) =>
+                if let Some((min, max)) =
+                    self.get_motion_delimination(first, second)
+                {
+                    self.capitalise(min, max);
+                    true
+                } else {
+                    false
+                },
         }
     }
 }
