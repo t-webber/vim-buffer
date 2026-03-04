@@ -8,10 +8,6 @@ use crate::buffer::mode::Actions;
 pub enum Action {
     /// Delete
     Delete(OperatorScope),
-    /// Deletes the char after the cursor
-    DeleteNextChar,
-    /// Deletes the char before the cursor
-    DeletePreviousChar,
     /// Action to move the cursor to a location denotated by a condition
     GoTo(GoToAction),
     /// Inserts a char in the buffer

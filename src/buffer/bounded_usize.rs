@@ -20,12 +20,6 @@ impl BoundedUsize {
         old != self.value
     }
 
-    /// Decrements the inner value and the maximum value.
-    pub const fn decrement_with_capacity(&mut self) {
-        self.max_value = self.max_value.saturating_sub(1);
-        self.value = self.value.saturating_sub(1);
-    }
-
     /// Increments the inner value and the maximum value.
     pub const fn increment(&mut self) -> bool {
         let old = self.value;

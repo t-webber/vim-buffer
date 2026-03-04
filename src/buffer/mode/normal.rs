@@ -27,11 +27,12 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('h') | KeyCode::Backspace => GoToAction::Left.into(),
             KeyCode::Char('i') => Mode::Insert.into(),
             KeyCode::Char('l') => GoToAction::Right.into(),
-            KeyCode::Char('x') => Action::DeleteNextChar.into(),
+            KeyCode::Char('x') =>
+                Action::Delete(OperatorScope::Goto(GoToAction::Right, None))
+                    .into(),
             KeyCode::Char('r') => OPending::ReplaceOne.into(),
             KeyCode::Char('s') => actions![
-                GoToAction::Right,
-                Action::DeletePreviousChar,
+                Action::Delete(OperatorScope::Goto(GoToAction::Right, None)),
                 Mode::Insert
             ],
             KeyCode::Char('t') => CombinablePending::FindNextDecrement.into(),
@@ -69,7 +70,10 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('T') =>
                 CombinablePending::FindPreviousIncrement.into(),
             KeyCode::Char('W') => GoToAction::NextWORD.into(),
-            KeyCode::Char('X') => Action::DeletePreviousChar.into(),
+            KeyCode::Char('X') => actions![
+                GoToAction::Left,
+                Action::Delete(OperatorScope::Goto(GoToAction::Right, None))
+            ],
             _ => Actions::default(),
         }
     }

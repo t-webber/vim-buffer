@@ -64,9 +64,6 @@ impl Buffer {
         first: GoToAction,
         maybe_second: Option<GoToAction>,
     ) -> Option<(usize, usize)> {
-        if self.as_cursor() >= self.len() {
-            self.cursor.set(self.len().saturating_sub(1));
-        }
         let old_cursor = self.as_cursor();
         if !self.update_cursor(first)
             || maybe_second.is_some_and(|second| !self.update_cursor(second))
@@ -231,12 +228,7 @@ impl Buffer {
             false
         } else {
             // PERF: string characters are copied twice.
-            let cursor = self.as_cursor();
-            let last_char_idx = if cursor == self.len() {
-                cursor.saturating_sub(1)
-            } else {
-                cursor
-            };
+            let last_char_idx = self.as_cursor();
             let old = self.content.remove(last_char_idx);
             self.content.insert(last_char_idx, replace(old));
             true
@@ -374,7 +366,7 @@ impl Buffer {
     /// buffer.update_from_string("iHello, World!");
     /// assert_eq!(buffer.as_content(), "Hello, World!");
     ///
-    /// buffer.update_from_string("<Esc>F,xllrwFHrhf!x");
+    /// buffer.update_from_string("<Esc>F,xlrwFHrhf!x");
     /// assert_eq!(buffer.as_content(), "hello world");
     /// ```
     pub fn update_from_string(
@@ -400,7 +392,12 @@ impl Buffer {
                         return false;
                     }
                 }
-
+                if matches!(self.mode, Mode::Normal)
+                    && !self.content.is_empty()
+                    && self.as_cursor() >= self.content.len()
+                {
+                    self.cursor.set(self.content.len().saturating_sub(1));
+                }
                 !list.is_empty()
             }
         }
@@ -421,22 +418,6 @@ impl Buffer {
                 self.mode = mode;
                 true
             }
-            Action::DeleteNextChar =>
-                if self.is_empty() {
-                    false
-                } else {
-                    self.content.remove(self.as_cursor());
-                    self.cursor.decrement_with_capacity();
-                    true
-                },
-            Action::DeletePreviousChar =>
-                if self.as_cursor() != 0 {
-                    self.cursor.decrement_with_capacity();
-                    self.content.remove(self.as_cursor());
-                    true
-                } else {
-                    false
-                },
             Action::Delete(OperatorScope::WholeLine) => {
                 self.content.clear();
                 take(&mut self.cursor);
