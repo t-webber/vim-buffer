@@ -85,6 +85,8 @@ impl HandleKeyPress for Normal {
                 GoToAction::Left,
                 (Operator::Delete, GoToAction::Right.into())
             ],
+            KeyCode::Char('Y') =>
+                actions![(Operator::Yank, GoToAction::EndOfLine.into())],
             _ => Actions::default(),
         }
     }

@@ -290,5 +290,6 @@ dP: "iabc<Esc>0dfb$P" => "abc",
 
 y: "iabcdef<Esc>0yfcP" => "abcabcdef",
 y_fail: "iabcdef<Esc>0yfzP" => "abcdef",
+Y: "iabcdef<Esc>FdY0P" => "defabcdef",
 
 );
