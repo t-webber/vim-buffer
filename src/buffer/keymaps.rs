@@ -28,8 +28,10 @@ pub enum Action {
     GoTo(GoToAction),
     /// Inserts a char in the buffer
     InsertChar(char),
-    /// Applies an operator motion.
+    /// Applies an operator motion
     Operator(Operator, OperatorScope),
+    /// Pastes the content of the clipboard
+    Paste,
     /// Undo the last undo action
     Redo,
     /// Replace the char under the cursor with

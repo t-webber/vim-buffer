@@ -33,6 +33,7 @@ impl HandleKeyPress for Normal {
                 GoToAction::Right,
                 GoToAction::Left
             ],
+            KeyCode::Char('p') => Action::Paste.into(),
             KeyCode::Char('r') => OPending::ReplaceOne.into(),
             KeyCode::Char('s') => actions![
                 (Operator::Delete, GoToAction::Right.into()),

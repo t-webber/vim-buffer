@@ -62,11 +62,19 @@ impl Buffer {
         };
         let old_content = take(&mut self.content);
         self.content.reserve(old_content.len());
-        #[expect(clippy::string_slice, reason = "")]
+        #[expect(clippy::string_slice, reason = "non-ascii not yet supported")]
+        // TODO: add support for UTF-8
         {
             self.content.push_str(&old_content[0..min_cursor]);
             self.content.push_str(&old_content[max_cursor..]);
         };
+
+        #[expect(clippy::string_slice, reason = "non-ascii not yet supported")]
+        //         #[expect(clippy::arithmetic_side_effects, reason = "explicit
+        // check")]  TODO: add support for UTF-8
+        if max_cursor != min_cursor {
+            old_content[min_cursor..max_cursor].clone_into(&mut self.clipboard);
+        }
         self.cursor = BoundedUsize::with_capacity(self.content.len());
         self.cursor.set(min_cursor);
         true
@@ -436,6 +444,10 @@ impl Buffer {
             Action::Redo => self.redo(),
             Action::GoTo(goto_action) => self.update_cursor(goto_action),
             Action::Operator(op, scope) => self.update_with_operator(op, scope),
+            Action::Paste => {
+                self.content.insert_str(self.as_cursor(), &self.clipboard);
+                true
+            }
         }
     }
 

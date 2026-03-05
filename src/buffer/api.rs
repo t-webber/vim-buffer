@@ -27,6 +27,8 @@ use crate::buffer::keymaps::OPending;
 /// ```
 #[derive(Debug, Default)]
 pub struct Buffer {
+    /// Content of clipboard, from yanks and deletions, used by paste.
+    pub(super) clipboard: String,
     /// Content of the buffer
     pub(super) content: String,
     /// Position of the cursor within the buffer
