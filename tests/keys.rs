@@ -276,7 +276,11 @@ guu: "iABC<Esc>hguuiZ" => "Zabc",
 guW: "iABC.DEF<Esc>0lguwiZ" => "AZbc.DEF",
 gu0: "iABC.DEF<Esc>gegu0iZ" => "Zabc.DEF",
 guF: "iABC.DEF<Esc>0gufE" => "abc.deF",
-gu_FAIL: "iABC.DEF<Esc>0gufZ" => "ABC.DEF",
+gu_fail: "iABC.DEF<Esc>0gufZ" => "ABC.DEF",
 guB: "iABCDE.F<Esc>FCgubiZ" => "ZabCDE.F",
+
+g_tilde_w: "iaBc!d<Esc>0lg~wiz" => "azbC!d",
+g_tilde_0: "iaBc!D<Esc>g~0iz" => "zAbC!D",
+g_tilde_fail: "iaBc!<Esc>g~Fzaz" => "aBc!z",
 
 );

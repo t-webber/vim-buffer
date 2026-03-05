@@ -468,6 +468,7 @@ impl Buffer {
                 },
             Operator::Capitalise => char::to_ascii_uppercase,
             Operator::LowerCase => char::to_ascii_lowercase,
+            Operator::ToggleCase => toggle_case,
         };
         match match scope {
             OperatorScope::WholeLine => Some((0, self.len())),
@@ -480,6 +481,20 @@ impl Buffer {
                 true
             }
         }
+    }
+}
+
+/// Toggles the case of a char: capitals will be lowered and lower case letters
+/// will be capitalised.
+#[expect(
+    clippy::trivially_copy_pass_by_ref,
+    reason = "align with to_ascii_{upper,lower}case"
+)]
+const fn toggle_case(ch: &char) -> char {
+    if ch.is_ascii_uppercase() {
+        ch.to_ascii_lowercase()
+    } else {
+        ch.to_ascii_uppercase()
     }
 }
 

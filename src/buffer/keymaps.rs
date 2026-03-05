@@ -137,6 +137,8 @@ pub enum Operator {
     Delete,
     /// Lowers the case of content of motion
     LowerCase,
+    /// Lowers capitals and capitalises lower case letters
+    ToggleCase,
 }
 
 impl Operator {
@@ -145,6 +147,7 @@ impl Operator {
         Change: 'c',
         Delete: 'd',
         LowerCase: 'u',
+        ToggleCase: '~',
     }
 }
 
