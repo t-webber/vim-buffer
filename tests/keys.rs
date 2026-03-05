@@ -284,5 +284,7 @@ g_tilde_0: "iaBc!D<Esc>g~0iz" => "zAbC!D",
 g_tilde_fail: "iaBc!<Esc>g~Fzaz" => "aBc!z",
 
 dp: "iabc<Esc>0dfb$p" => "cab",
+dd_: "iabc<Esc>dd" => "",
+ddp: "iabc<Esc>ddp" => "abc",
 
 );

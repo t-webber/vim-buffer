@@ -50,16 +50,7 @@ impl Buffer {
     ///
     /// The deleted part is from the current cursor to the cursor after the
     /// [`GoToAction`].
-    fn delete(
-        &mut self,
-        first: GoToAction,
-        maybe_second: Option<GoToAction>,
-    ) -> bool {
-        let Some((min_cursor, max_cursor)) =
-            self.get_motion_delimination(first, maybe_second)
-        else {
-            return false;
-        };
+    fn delete(&mut self, min_cursor: usize, max_cursor: usize) -> bool {
         let old_content = take(&mut self.content);
         self.content.reserve(old_content.len());
         #[expect(clippy::string_slice, reason = "non-ascii not yet supported")]
@@ -457,17 +448,17 @@ impl Buffer {
         op: Operator,
         scope: OperatorScope,
     ) -> bool {
+        let Some((min, max)) = (match scope {
+            OperatorScope::WholeLine => Some((0, self.len())),
+            OperatorScope::Goto(first, second) =>
+                self.get_motion_delimination(first, second),
+        }) else {
+            return false;
+        };
         let fun = match op {
-            Operator::Delete => match scope {
-                OperatorScope::Goto(g1, g2) => return self.delete(g1, g2),
-                OperatorScope::WholeLine => {
-                    self.content.clear();
-                    self.cursor = BoundedUsize::default();
-                    return true;
-                }
-            },
+            Operator::Delete => return self.delete(min, max),
             Operator::Change =>
-                return self.update_with_operator(Operator::Delete, scope) && {
+                return self.delete(min, max) && {
                     self.mode = Mode::Insert;
                     true
                 },
@@ -475,17 +466,8 @@ impl Buffer {
             Operator::LowerCase => char::to_ascii_lowercase,
             Operator::ToggleCase => toggle_case,
         };
-        match match scope {
-            OperatorScope::WholeLine => Some((0, self.len())),
-            OperatorScope::Goto(first, second) =>
-                self.get_motion_delimination(first, second),
-        } {
-            None => false,
-            Some((min, max)) => {
-                self.apply(min, max, fun);
-                true
-            }
-        }
+        self.apply(min, max, fun);
+        true
     }
 }
 
@@ -500,20 +482,5 @@ const fn toggle_case(ch: &char) -> char {
         ch.to_ascii_lowercase()
     } else {
         ch.to_ascii_uppercase()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::Buffer;
-    use crate::buffer::keymaps::GoToAction;
-
-    #[test]
-    fn double_delete() {
-        let mut x = Buffer::from("abc");
-        x.delete(
-            GoToAction::NextOccurrenceOf('c'),
-            Some(GoToAction::NextOccurrenceOf('e')),
-        );
     }
 }
