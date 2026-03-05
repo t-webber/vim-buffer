@@ -25,7 +25,6 @@ impl Buffer {
                 },
             )
             .collect();
-        self.cursor.set(start);
     }
 
     /// Returns the index of the cursor, starting from the end of the string.
@@ -456,8 +455,14 @@ impl Buffer {
         }) else {
             return false;
         };
+        self.cursor.set(min);
         let fun = match op {
             Operator::Delete => return self.delete(min, max),
+            Operator::Yank => {
+                #[expect(clippy::string_slice, reason = "utf8 not supported")]
+                self.content[min..max].clone_into(&mut self.clipboard);
+                return true;
+            }
             Operator::Change =>
                 return self.delete(min, max) && {
                     self.mode = Mode::Insert;

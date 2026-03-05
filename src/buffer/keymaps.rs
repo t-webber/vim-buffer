@@ -141,6 +141,8 @@ pub enum Operator {
     LowerCase,
     /// Lowers capitals and capitalises lower case letters
     ToggleCase,
+    /// Copies the content of motion in clipboard
+    Yank,
 }
 
 impl Operator {
@@ -150,6 +152,7 @@ impl Operator {
         Delete: 'd',
         LowerCase: 'u',
         ToggleCase: '~',
+        Yank: 'y',
     }
 }
 
