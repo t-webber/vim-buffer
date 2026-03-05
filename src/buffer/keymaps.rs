@@ -36,8 +36,6 @@ pub enum Action {
     ReplaceWith(char),
     /// Switches to a new mode
     SelectMode(Mode),
-    /// Capitalises minuscules and lowers capitals
-    ToggleCapitalisation,
     /// Undo the last edition
     Undo,
 }

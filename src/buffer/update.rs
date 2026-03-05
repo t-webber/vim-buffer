@@ -436,13 +436,6 @@ impl Buffer {
             Action::Redo => self.redo(),
             Action::GoTo(goto_action) => self.update_cursor(goto_action),
             Action::Operator(op, scope) => self.update_with_operator(op, scope),
-            Action::ToggleCapitalisation => self.replace_ch(|old| {
-                if old.is_ascii_lowercase() {
-                    old.to_ascii_uppercase()
-                } else {
-                    old.to_ascii_lowercase()
-                }
-            }),
         }
     }
 
