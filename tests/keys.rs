@@ -286,5 +286,7 @@ g_tilde_fail: "iaBc!<Esc>g~Fzaz" => "aBc!z",
 dp: "iabc<Esc>0dfb$p" => "cab",
 dd_: "iabc<Esc>dd" => "",
 ddp: "iabc<Esc>ddp" => "abc",
+dP: "iabc<Esc>0dfb$P" => "abc",
+
 
 );

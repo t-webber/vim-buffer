@@ -30,8 +30,10 @@ pub enum Action {
     InsertChar(char),
     /// Applies an operator motion
     Operator(Operator, OperatorScope),
-    /// Pastes the content of the clipboard
-    Paste,
+    /// Pastes the content of the clipboard after the cursor
+    PasteAfter,
+    /// Pastes the content of the clipboard before the cursor
+    PasteBefore,
     /// Undo the last undo action
     Redo,
     /// Replace the char under the cursor with

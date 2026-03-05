@@ -33,7 +33,7 @@ impl HandleKeyPress for Normal {
                 GoToAction::Right,
                 GoToAction::Left
             ],
-            KeyCode::Char('p') => Action::Paste.into(),
+            KeyCode::Char('p') => Action::PasteAfter.into(),
             KeyCode::Char('r') => OPending::ReplaceOne.into(),
             KeyCode::Char('s') => actions![
                 (Operator::Delete, GoToAction::Right.into()),
@@ -72,6 +72,7 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('F') => CombinablePending::FindPrevious.into(),
             KeyCode::Char('I') =>
                 actions![GoToAction::FirstNonSpace, Mode::Insert],
+            KeyCode::Char('P') => Action::PasteBefore.into(),
             KeyCode::Char('S') => actions![
                 (Operator::Delete, OperatorScope::WholeLine),
                 Mode::Insert

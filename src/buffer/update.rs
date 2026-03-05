@@ -424,22 +424,23 @@ impl Buffer {
             Action::InsertChar(ch) => {
                 self.content.insert(self.as_cursor(), ch);
                 self.cursor.increment_with_capacity_unchecked();
-                true
             }
-            Action::SelectMode(mode) => {
-                self.mode = mode;
-                true
-            }
-            Action::ReplaceWith(ch) => self.replace_ch(|_| ch),
-            Action::Undo => self.undo(),
-            Action::Redo => self.redo(),
-            Action::GoTo(goto_action) => self.update_cursor(goto_action),
-            Action::Operator(op, scope) => self.update_with_operator(op, scope),
-            Action::Paste => {
-                self.content.insert_str(self.as_cursor(), &self.clipboard);
-                true
-            }
+            Action::SelectMode(mode) => self.mode = mode,
+            Action::ReplaceWith(ch) => return self.replace_ch(|_| ch),
+            Action::Undo => return self.undo(),
+            Action::Redo => return self.redo(),
+            Action::GoTo(goto_action) =>
+                return self.update_cursor(goto_action),
+            Action::Operator(op, scope) =>
+                return self.update_with_operator(op, scope),
+            Action::PasteAfter =>
+                self.content.insert_str(self.as_cursor(), &self.clipboard),
+            Action::PasteBefore => self.content.insert_str(
+                self.as_cursor().saturating_sub(1),
+                &self.clipboard,
+            ),
         }
+        true
     }
 
     /// Updates the buffer with an [`Operator`] action.
