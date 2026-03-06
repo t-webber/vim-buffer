@@ -33,4 +33,4 @@ jobs:
                 components: clippy
 
             - name: Cargo clippy
-              run: cargo clippy --all
+              run: cargo clippy --all --all-targets

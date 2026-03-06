@@ -33,5 +33,4 @@ jobs:
                 override: true
 
             - name: Cargo build
-              run: cargo build --release
-
+              run: cargo build --release --all-targets
