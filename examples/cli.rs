@@ -8,16 +8,12 @@ use crossterm::terminal::disable_raw_mode;
 use vim_buffer::crossterm::terminal::enable_raw_mode;
 use vim_buffer::{Buffer, Mode};
 
-pub const RESET_COLOUR: &str = "\x1b[0m";
-pub const RED: &str = "\x1b[31m";
-pub const GREEN: &str = "\x1b[32m";
-pub const CYAN: &str = "\x1b[36m";
+const RESET_COLOUR: &str = "\x1b[0m";
+const GREEN: &str = "\x1b[32m";
+const CYAN: &str = "\x1b[36m";
 
 const NORMAL: ModePrompt = ModePrompt { colour: CYAN, prompt: "normal >>> " };
 const INSERT: ModePrompt = ModePrompt { colour: GREEN, prompt: "insert >>> " };
-
-const _: () = assert!(NORMAL.prompt.len() == INSERT.prompt.len());
-const MODE_PROMPT_LEN: usize = NORMAL.prompt.len();
 
 /// Prompt displayed for a given vim mode.
 struct ModePrompt {
@@ -32,24 +28,31 @@ impl fmt::Display for ModePrompt {
     }
 }
 
+impl From<Mode> for ModePrompt {
+    fn from(mode: Mode) -> Self {
+        match mode {
+            Mode::Insert => INSERT,
+            Mode::Normal => NORMAL,
+            _ => unreachable!(),
+        }
+    }
+}
+
 /// Prints some spaces to clear the previous buffer, whose content was of length
 /// `previous_len`.
 fn clear_line(previous_len: usize) {
-    let nb_spaces = previous_len + MODE_PROMPT_LEN;
-    let spaces = repeat_n(' ', nb_spaces).collect::<String>();
+    let spaces = repeat_n(' ', previous_len).collect::<String>();
     print!("\r{spaces}\r")
 }
 
 /// Prints the [`Buffer`] with the mode it is in, and it's contents.
-fn print_buffer(buffer: &Buffer) {
-    let cursor = buffer.as_cursor() + MODE_PROMPT_LEN;
-    let mode = match buffer.as_mode() {
-        Mode::Insert => INSERT,
-        Mode::Normal => NORMAL,
-        _ => panic!("unsupported"),
-    };
+fn print_buffer(buffer: &Buffer) -> usize {
+    let mode = ModePrompt::from(buffer.as_mode());
+    let prompt_len = mode.prompt.len();
+    let cursor = buffer.as_cursor() + prompt_len;
     let content = buffer.as_content();
-    print!("{mode}{content}\r\x1b[{cursor}C",);
+    print!("{mode}{content}\r\x1b[{cursor}C");
+    prompt_len + buffer.len()
 }
 
 /// Checks whether the given event is `<C-c>` or not.
@@ -65,29 +68,34 @@ fn is_ctrl_c(event: &Event) -> bool {
     }
 }
 
-fn main() -> colour_eyre::Result<()> {
-    colour_eyre::install()?;
-    println!("Press <C-c> to exit");
-    enable_raw_mode()?;
-
+fn raw_main() -> colour_eyre::Result<()> {
     let mut previous_len = 0;
     let mut buffer = Buffer::default();
 
     loop {
         clear_line(previous_len);
-        print_buffer(&buffer);
+        previous_len = print_buffer(&buffer);
         stdout().flush()?;
 
         let event = event::read()?;
         if is_ctrl_c(&event) {
-            break;
+            break Ok(());
         }
 
-        previous_len = buffer.as_content().len();
         buffer.update(&event);
     }
+}
+
+fn main() -> colour_eyre::Result<()> {
+    colour_eyre::install()?;
+    println!("Press <C-c> to exit");
+
+    enable_raw_mode()?;
+
+    let res = raw_main();
 
     disable_raw_mode()?;
     println!();
-    Ok(())
+
+    res
 }
