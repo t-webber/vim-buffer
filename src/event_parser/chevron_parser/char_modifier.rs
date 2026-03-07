@@ -4,17 +4,17 @@ use crossterm::event::KeyModifiers;
 #[derive(Copy, Clone, Debug)]
 pub enum ChevronModifier {
     /// `'A'`
-    Alt,
+    Alt = 0,
     /// `'D'`
-    Command,
+    Command = 1,
     /// `'C'`
-    Control,
+    Control = 2,
     /// `'M'`
-    Meta,
+    Meta = 3,
     /// `'S'`
-    Shift,
+    Shift = 4,
     /// `'T'`
-    TrueMeta,
+    TrueMeta = 5,
 }
 impl ChevronModifier {
     /// Creates a new [`ChevronModifier`] from a `char`, if possible.

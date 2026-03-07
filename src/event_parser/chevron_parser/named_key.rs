@@ -130,12 +130,6 @@ pub struct Bounds {
 }
 
 /// Converts a keycode to a string
-pub fn build_named_key(name: &[u8]) -> Option<KeyCode> {
-    if let Ok(name_str) = str::from_utf8(name)
-        && let Some(event) = KEYS.get(name_str)
-    {
-        Some(*event)
-    } else {
-        None
-    }
+pub fn build_named_key(name: &str) -> Option<KeyCode> {
+    KEYS.get(name).copied()
 }

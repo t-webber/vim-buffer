@@ -109,7 +109,9 @@ impl EventParser for ChevronGroupParsingState {
                 modified_key.parse_char(ch).map_err(Self::Error::ModifiedKey),
             // Named key
             Self::NamedKey(buf, len) if ch == '>' =>
-                build_named_key(&buf[0..*len])
+                str::from_utf8(&buf[0..*len])
+                    .ok()
+                    .and_then(build_named_key)
                     .map_or(Err(Self::Error::InvalidNamedKey), |code| {
                         Ok(Some(Event::Key(KeyEvent::from(code))))
                     }),

@@ -56,6 +56,16 @@ fn missing_char_and_hyphen() {
 }
 
 #[test]
+fn key_name_too_long() {
+    assert_eq!(
+        parse_events("<C-aaaa>"),
+        Err(EventParsingError::ChevronGroup(ChevronGroupError::ModifiedKey(
+            ModifiedKeyError::InvalidKeyNamePrefix("aaa".into())
+        )))
+    );
+}
+
+#[test]
 fn missing_modifier_and_hyphen() {
     assert_eq!(
         parse_events("<c>"),
@@ -80,7 +90,7 @@ fn too_many_successive_chars() {
     assert_eq!(
         parse_events("<C-ab>"),
         Err(EventParsingError::ChevronGroup(ChevronGroupError::ModifiedKey(
-            ModifiedKeyError::ExpectedChevron { got: 'b' }
+            ModifiedKeyError::InvalidKeyName("ab".into()),
         )))
     );
 }
@@ -195,13 +205,37 @@ fn non_u8_char() {
 }
 
 #[test]
-fn to_many_letters() {
+fn too_many_letters() {
     assert_eq!(
         parse_events("<C-Cs>"),
         Err(EventParsingError::ChevronGroup(ChevronGroupError::ModifiedKey(
-            ModifiedKeyError::ExpectedChevronOrHyphen { got: 's' }
+            ModifiedKeyError::InvalidKeyName("Cs".into())
         ))),
     );
+}
+
+#[test]
+fn shift_backspace() {
+    let event = parse_events("<S-BS>")
+        .unwrap()
+        .first()
+        .unwrap()
+        .as_key_press_event()
+        .unwrap();
+    assert_eq!(event.modifiers, KeyModifiers::SHIFT);
+    assert_eq!(event.code, KeyCode::Backspace);
+}
+
+#[test]
+fn shift_enter() {
+    let event = parse_events("<S-CR>")
+        .unwrap()
+        .first()
+        .unwrap()
+        .as_key_press_event()
+        .unwrap();
+    assert_eq!(event.modifiers, KeyModifiers::SHIFT);
+    assert_eq!(event.code, KeyCode::Enter);
 }
 
 #[test]
