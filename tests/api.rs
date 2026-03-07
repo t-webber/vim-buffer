@@ -49,7 +49,6 @@ fn default() {
 fn sizes() {
     let mut buffer = Buffer::default();
     buffer.update_from_string("iabcdef<BS><Left>").unwrap();
-    dbg!(&buffer);
     assert_eq!(buffer.len(), 5);
     assert_eq!(buffer.as_cursor(), 4);
 }

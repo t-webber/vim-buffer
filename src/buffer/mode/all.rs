@@ -6,6 +6,7 @@ use crate::buffer::keymaps::{
 use crate::buffer::macros::actions;
 use crate::buffer::mode::insert::Insert;
 use crate::buffer::mode::normal::Normal;
+use crate::buffer::mode::replace::Replace;
 use crate::buffer::mode::traits::{Actions, HandleKeyPress};
 
 /// Represents the vim mode of the buffer.
@@ -17,6 +18,8 @@ pub enum Mode {
     /// Normal mode
     #[default]
     Normal,
+    /// Replace mode
+    Replace,
 }
 
 impl Mode {
@@ -146,6 +149,7 @@ impl HandleKeyPress for Mode {
         match *self {
             Self::Insert => Insert.handle_blank_key_press(code),
             Self::Normal => Normal.handle_blank_key_press(code),
+            Self::Replace => Replace.handle_blank_key_press(code),
         }
     }
 
@@ -153,6 +157,7 @@ impl HandleKeyPress for Mode {
         match *self {
             Self::Insert => Insert.handle_ctrl_key_press(code),
             Self::Normal => Normal.handle_ctrl_key_press(code),
+            Self::Replace => Replace.handle_ctrl_key_press(code),
         }
     }
 
@@ -160,6 +165,7 @@ impl HandleKeyPress for Mode {
         match *self {
             Self::Insert => Insert.handle_shift_key_press(code),
             Self::Normal => Normal.handle_shift_key_press(code),
+            Self::Replace => Replace.handle_shift_key_press(code),
         }
     }
 }

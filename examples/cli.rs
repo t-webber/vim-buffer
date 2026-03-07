@@ -10,10 +10,12 @@ use vim_buffer::{Buffer, Mode};
 
 const RESET_COLOUR: &str = "\x1b[0m";
 const GREEN: &str = "\x1b[32m";
+const MAG: &str = "\x1b[35m";
 const CYAN: &str = "\x1b[36m";
 
 const NORMAL: ModePrompt = ModePrompt { colour: CYAN, prompt: "normal >>> " };
 const INSERT: ModePrompt = ModePrompt { colour: GREEN, prompt: "insert >>> " };
+const REPLACE: ModePrompt = ModePrompt { colour: MAG, prompt: "replace >>> " };
 
 /// Prompt displayed for a given vim mode.
 struct ModePrompt {
@@ -33,6 +35,7 @@ impl From<Mode> for ModePrompt {
         match mode {
             Mode::Insert => INSERT,
             Mode::Normal => NORMAL,
+            Mode::Replace => REPLACE,
             _ => unreachable!(),
         }
     }

@@ -74,6 +74,7 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('I') =>
                 actions![GoToAction::FirstNonSpace, Mode::Insert],
             KeyCode::Char('P') => Action::PasteBefore.into(),
+            KeyCode::Char('R') => Mode::Replace.into(),
             KeyCode::Char('S') => actions![
                 (Operator::Delete, OperatorScope::WholeLine),
                 Mode::Insert

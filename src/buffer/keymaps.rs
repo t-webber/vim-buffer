@@ -24,9 +24,9 @@ macro_rules! operator_impl {
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Action {
-    /// Action to move the cursor to a location denotated by a condition
+    /// Moves the cursor
     GoTo(GoToAction),
-    /// Inserts a char in the buffer
+    /// Inserts a char at the current cursor
     InsertChar(char),
     /// Applies an operator motion
     Operator(Operator, OperatorScope),
@@ -34,13 +34,16 @@ pub enum Action {
     PasteAfter,
     /// Pastes the content of the clipboard before the cursor
     PasteBefore,
-    /// Undo the last undo action
+    /// Undoes the last undo action
     Redo,
-    /// Replace the char under the cursor with
+    /// Inserts the char if the cursor is at the end of the buffer, otherwise
+    /// replace the current char with the given one.
+    ReplaceOrInsert(char),
+    /// Replaces the char under the cursor with
     ReplaceWith(char),
     /// Switches to a new mode
     SelectMode(Mode),
-    /// Undo the last edition
+    /// Undoes the last edition
     Undo,
 }
 

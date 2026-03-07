@@ -292,4 +292,11 @@ y: "iabcdef<Esc>0yfcP" => "abcabcdef",
 y_fail: "iabcdef<Esc>0yfzP" => "abcdef",
 Y: "iabcdef<Esc>FdY0P" => "defabcdef",
 
+R: "ihell(!:zd:tqs. qflk z<Esc>F(Ro world<Esc>D" => "hello world",
+R_end: "iabcdef<Esc>0Rhello world" => "hello world",
+R_end_r: "iabcdef<Esc>0RHello WORLD!<Esc>r." => "Hello WORLD.",
+R_end_lr: "iabcdef<Esc>0Rhello world!<Esc>lr." => "hello world.",
+R_invalid: "R<C-a><S-CR><CR>" => "",
+R_empty: "Rabc" => "abc",
+
 );

@@ -4,6 +4,8 @@ mod all;
 mod insert;
 /// Handles keypresses in normal mode
 mod normal;
+/// Handles keypresses in replace mode
+mod replace;
 /// Defines the types and traits to organise modes and how the process events.
 mod traits;
 

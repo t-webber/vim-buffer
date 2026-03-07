@@ -236,16 +236,24 @@ impl Buffer {
 
     /// Remove the character under the current cursor and replace it by another
     /// one.
-    fn replace_ch<F: Fn(char) -> char>(&mut self, replace: F) -> bool {
-        if self.is_empty() {
-            false
+    fn replace_ch(&mut self, ch: char, can_insert: bool) -> bool {
+        // PERF: string characters are copied twice.
+        let last_char_idx = self.as_cursor();
+        if last_char_idx == self.len() {
+            if can_insert {
+                self.content.push(ch);
+                self.cursor.increment_with_capacity_unchecked();
+            } else if self.is_empty() {
+                return false;
+            } else {
+                self.content.pop();
+                self.content.push(ch);
+            }
         } else {
-            // PERF: string characters are copied twice.
-            let last_char_idx = self.as_cursor();
-            let old = self.content.remove(last_char_idx);
-            self.content.insert(last_char_idx, replace(old));
-            true
+            self.content.remove(last_char_idx);
+            self.content.insert(last_char_idx, ch);
         }
+        true
     }
 
     /// Adds the current buffer to the history, if it is different from the last
@@ -425,7 +433,8 @@ impl Buffer {
                 self.cursor.increment_with_capacity_unchecked();
             }
             Action::SelectMode(mode) => self.mode = mode,
-            Action::ReplaceWith(ch) => return self.replace_ch(|_| ch),
+            Action::ReplaceWith(ch) => return self.replace_ch(ch, false),
+            Action::ReplaceOrInsert(ch) => return self.replace_ch(ch, true),
             Action::Undo => return self.undo(),
             Action::Redo => return self.redo(),
             Action::GoTo(goto_action) =>
