@@ -275,3 +275,15 @@ fn named_keys() {
         ])
     );
 }
+
+#[test]
+fn double_alt() {
+    let event = parse_events("<A-S-A>")
+        .unwrap()
+        .first()
+        .unwrap()
+        .as_key_press_event()
+        .unwrap();
+    assert_eq!(event.modifiers, KeyModifiers::SHIFT | KeyModifiers::ALT);
+    assert_eq!(event.code, KeyCode::Char('A'));
+}
