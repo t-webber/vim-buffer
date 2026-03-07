@@ -1,4 +1,4 @@
-use crate::buffer::bounded_usize::BoundedUsize;
+use crate::utils::bounded_usize::BoundedUsize;
 
 /// Holds the history of the buffer, with the following invariant: there are
 /// never 2 successive entries that are equal.

@@ -1,7 +1,5 @@
 /// API to interact with the [`Buffer`]
 mod api;
-/// Defines a bounded usize newtype, to safely increment, decrement a cursor.
-mod bounded_usize;
 /// Logic to hold the history of the buffer
 mod history;
 /// Handles the checks to delimitate a vim word.

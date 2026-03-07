@@ -50,6 +50,8 @@
 mod buffer;
 /// Parser to convert a vim-like keymap string to a list of events
 mod event_parser;
+/// Common logic and data structures used throughout the code base
+pub(crate) mod utils;
 
 pub use buffer::{Buffer, Mode};
 pub use crossterm;

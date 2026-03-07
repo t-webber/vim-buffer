@@ -6,11 +6,11 @@ use crossterm::event::Event;
 
 use crate::Mode;
 use crate::buffer::api::Buffer;
-use crate::buffer::bounded_usize::BoundedUsize;
 use crate::buffer::is_indent::IsIdentChar;
 use crate::buffer::keymaps::{Action, GoToAction, Operator, OperatorScope};
 use crate::buffer::mode::Actions;
 use crate::event_parser::{EventParsingError, parse_events};
+use crate::utils::bounded_usize::BoundedUsize;
 
 impl Buffer {
     /// Capitalise part of the buffer

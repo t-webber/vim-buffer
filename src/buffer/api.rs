@@ -1,7 +1,7 @@
 use crate::Mode;
-use crate::buffer::bounded_usize::BoundedUsize;
 use crate::buffer::history::History;
 use crate::buffer::keymaps::OPending;
+use crate::utils::bounded_usize::BoundedUsize;
 
 /// Buffer that supports vim keymaps
 ///
