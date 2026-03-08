@@ -15,6 +15,8 @@ impl HandleKeyPress for Replace {
             KeyCode::Esc => Mode::Normal.into(),
             KeyCode::Char(ch) =>
                 actions![Action::ReplaceOrInsert(ch), GoToAction::Right],
+            KeyCode::Left => GoToAction::Left.into(),
+            KeyCode::Right => GoToAction::Right.into(),
             _ => Actions::default(),
         }
     }
