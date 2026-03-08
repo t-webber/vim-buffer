@@ -258,7 +258,7 @@ impl Buffer {
 
     /// Adds the current buffer to the history, if it is different from the last
     /// entry.
-    fn save_to_history(&mut self) {
+    pub(super) fn save_to_history(&mut self) {
         if matches!(self.as_mode(), Mode::Normal) {
             self.history.save(&self.content);
         }
@@ -405,19 +405,23 @@ impl Buffer {
     }
 
     /// Same as [`Self::update`] but without updating the history.
-    fn update_no_save(&mut self, event: &Event) -> bool {
+    pub fn update_no_save(&mut self, event: &Event) -> bool {
         match self.as_mode().handle_event(event, take(&mut self.pending)) {
             Actions::OPending(new_pending) => {
                 self.pending = Some(new_pending);
                 true
             }
             Actions::List(list) => {
+                if list.is_empty() {
+                    return false;
+                }
                 for action in &list {
                     if !self.update_once(*action) {
                         return false;
                     }
                 }
-                !list.is_empty()
+                self.last_action.update(list, self.as_mode());
+                true
             }
         }
     }
@@ -426,7 +430,7 @@ impl Buffer {
     ///
     /// Returns `true` iff the update was successful.
     #[must_use]
-    fn update_once(&mut self, action: Action) -> bool {
+    pub(super) fn update_once(&mut self, action: Action) -> bool {
         match action {
             Action::InsertChar(ch) => {
                 self.content.insert(self.as_cursor(), ch);
@@ -447,6 +451,12 @@ impl Buffer {
                 self.as_cursor().saturating_sub(1),
                 &self.clipboard,
             ),
+            Action::Repeat => {
+                let last = take(&mut self.last_action);
+                let ok = last.perform(self);
+                self.last_action = last;
+                return ok;
+            }
         }
         true
     }

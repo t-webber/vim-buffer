@@ -6,6 +6,8 @@ mod history;
 mod is_indent;
 /// Defines the actions that can be made on the buffer
 mod keymaps;
+/// Last action performed, kept in order to use `.`
+mod last_action;
 /// Useful macros scoped with this module.
 mod macros;
 /// Handles the vim modes and the keypresses on those modes

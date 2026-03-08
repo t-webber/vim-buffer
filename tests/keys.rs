@@ -292,6 +292,11 @@ y: "iabcdef<Esc>0yfcP" => "abcabcdef",
 y_fail: "iabcdef<Esc>0yfzP" => "abcdef",
 Y: "iabcdef<Esc>FdY0P" => "defabcdef",
 
+dot_i: "iabc def<Esc>." => "abc deabc deff",
+dot_dw: "iabc def ghi<Esc>0dw.." => "",
+dot_move: "iabc def ghi<Esc>0dww." => "def ",
+dot_invalid: "iabcdef<Esc>0dfc." => "def",
+
 );
 
 buffer_tests!(replace,

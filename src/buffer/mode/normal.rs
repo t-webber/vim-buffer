@@ -15,6 +15,7 @@ impl HandleKeyPress for Normal {
     fn handle_blank_key_press(&self, code: KeyCode) -> Actions {
         match code {
             KeyCode::Char('$') => GoToAction::EndOfLine.into(),
+            KeyCode::Char('.') => Action::Repeat.into(),
             KeyCode::Char('0') => GoToAction::BeginningOfLine.into(),
             KeyCode::Char('^') => GoToAction::FirstNonSpace.into(),
             KeyCode::Char('a') => actions![GoToAction::Right, Mode::Insert],

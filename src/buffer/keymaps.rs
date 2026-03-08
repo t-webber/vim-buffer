@@ -36,6 +36,8 @@ pub enum Action {
     PasteBefore,
     /// Undoes the last undo action
     Redo,
+    /// Repeats the last action
+    Repeat,
     /// Inserts the char if the cursor is at the end of the buffer, otherwise
     /// replace the current char with the given one.
     ReplaceOrInsert(char),

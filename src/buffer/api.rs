@@ -1,6 +1,7 @@
 use crate::Mode;
 use crate::buffer::history::History;
 use crate::buffer::keymaps::OPending;
+use crate::buffer::last_action::LastAction;
 use crate::utils::bounded_usize::BoundedUsize;
 
 /// Buffer that supports vim keymaps
@@ -35,6 +36,8 @@ pub struct Buffer {
     pub(super) cursor: BoundedUsize,
     /// Buffer history to restore old versions
     pub(super) history: History<Box<str>>,
+    /// Last performed action
+    pub(super) last_action: LastAction,
     /// Vim mode of the buffer
     pub(super) mode: Mode,
     /// Pending actions that require more keymaps
