@@ -4,18 +4,19 @@ use crossterm::event::KeyModifiers;
 #[derive(Copy, Clone, Debug)]
 pub enum ChevronModifier {
     /// `'A'`
-    Alt = 0,
+    Alt,
     /// `'D'`
-    Command = 1,
+    Command,
     /// `'C'`
-    Control = 2,
+    Control,
     /// `'M'`
-    Meta = 3,
+    Meta,
     /// `'S'`
-    Shift = 4,
+    Shift,
     /// `'T'`
-    TrueMeta = 5,
+    TrueMeta,
 }
+
 impl ChevronModifier {
     /// Creates a new [`ChevronModifier`] from a `char`, if possible.
     pub const fn maybe_from(ch: char) -> Option<Self> {

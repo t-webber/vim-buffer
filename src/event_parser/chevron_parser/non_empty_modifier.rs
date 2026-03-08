@@ -17,10 +17,18 @@ pub struct NonEmptyModifiers(Array<ChevronModifier, 5>);
 
 impl NonEmptyModifiers {
     /// Builds an [`Event`] from a [`NonEmptyModifiers`]
-    pub fn build_event(mut self) -> Result<Event> {
-        self.0.pop().map_or(Err(ModifiedKeyError::MissingChar), |ch| {
-            Ok(Self::fix_char_case(ch.to_char(), self.into_modifiers()))
-        })
+    ///
+    /// # Panics
+    ///
+    /// If the invariant 'modifier not empty' is true.
+    #[expect(clippy::unwrap_used, reason = "caller's responsibility")]
+    pub fn build_event_unchecked(mut self) -> Result<Event> {
+        let ch = self.0.pop().unwrap();
+        let data = match self.into_modifiers() {
+            Ok(mods) => Self::fix_char_case(ch.to_char(), mods),
+            Err(err) => return Err(err),
+        };
+        Ok(data)
     }
 
     /// Builds an [`Event`] from a [`NonEmptyModifiers`] and a [`Chars`]
@@ -31,17 +39,17 @@ impl NonEmptyModifiers {
         chars.as_lone().map_or_else(
             || {
                 let key_name = chars.concat();
-                build_named_key(&key_name).map_or(
-                    Err(ModifiedKeyError::InvalidKeyName(key_name)),
+                build_named_key(&key_name).map_or_else(
+                    || Err(ModifiedKeyError::InvalidKeyName(chars.concat())),
                     |code| {
                         Ok(Event::Key(KeyEvent::new(
                             code,
-                            self.into_modifiers(),
+                            self.into_modifiers()?,
                         )))
                     },
                 )
             },
-            |ch| Ok(Self::fix_char_case(ch, self.into_modifiers())),
+            |ch| Ok(Self::fix_char_case(ch, self.into_modifiers()?)),
         )
     }
 
@@ -57,12 +65,18 @@ impl NonEmptyModifiers {
     }
 
     /// Returns the [`KeyModifiers`] associated to the [`NonEmptyModifiers`]
-    fn into_modifiers(mut self) -> KeyModifiers {
+    const fn into_modifiers(mut self) -> Result<KeyModifiers> {
         let mut modifiers = KeyModifiers::NONE;
-        while let Some(modifier) = self.0.pop() {
-            modifiers |= modifier.to_modifier();
+        while let Some(next) = self.0.pop() {
+            let modifier = next.to_modifier();
+            if modifiers.contains(modifier) {
+                return Err(ModifiedKeyError::SameModifierUsedTwice(
+                    next.to_char(),
+                ));
+            }
+            modifiers = modifiers.union(modifier);
         }
-        modifiers
+        Ok(modifiers)
     }
 
     /// Creates a new [`NonEmptyModifiers`] from a `char`, if possible.
@@ -80,7 +94,7 @@ impl NonEmptyModifiers {
     ///
     /// # Panics
     ///
-    /// If the data structure is empty
+    /// If the invariant 'modifier not empty' is true.
     #[expect(clippy::unwrap_used, reason = "caller's responsibility")]
     pub const fn pop_unchecked(&mut self) -> char {
         self.0.pop().unwrap().to_char()

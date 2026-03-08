@@ -57,7 +57,8 @@ impl EventParser for ModifiedKeyParsingState {
                     Err(ModifiedKeyError::InvalidKeyNamePrefix(chars.concat()))
                 },
             // ReadLetter //
-            (Self::ReadLetter(mods), '>') => mods.build_event().map(Some),
+            (Self::ReadLetter(mods), '>') =>
+                mods.build_event_unchecked().map(Some),
             (Self::ReadLetter(mods), '-') => {
                 *self = Self::ReadHyphen(mods);
                 Ok(None)
@@ -111,4 +112,6 @@ pub enum ModifiedKeyError {
     MissingChar,
     /// The chevron group is missing a modifier.
     MissingModifier,
+    /// The given modifier is used multiple times, like in `<C-C-a>`
+    SameModifierUsedTwice(char),
 }

@@ -277,7 +277,7 @@ fn named_keys() {
 }
 
 #[test]
-fn double_alt() {
+fn alt_shift_a() {
     let event = parse_events("<A-S-A>")
         .unwrap()
         .first()
@@ -286,4 +286,14 @@ fn double_alt() {
         .unwrap();
     assert_eq!(event.modifiers, KeyModifiers::SHIFT | KeyModifiers::ALT);
     assert_eq!(event.code, KeyCode::Char('A'));
+}
+
+#[test]
+fn double_alt() {
+    assert_eq!(
+        parse_events("<A-A-S>"),
+        Err(EventParsingError::ChevronGroup(ChevronGroupError::ModifiedKey(
+            ModifiedKeyError::SameModifierUsedTwice('A')
+        )))
+    );
 }
