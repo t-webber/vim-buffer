@@ -8,7 +8,15 @@ use crate::buffer::mode::all::Mode;
 use crate::buffer::mode::traits::{Actions, HandleKeyPress};
 
 /// Struct to handle keypresses in normal mode
+#[derive(Debug, Default, Eq, PartialEq, Clone, Copy)]
 pub struct Normal;
+
+impl Normal {
+    /// Returns a default [`Normal`]
+    pub const fn new() -> Self {
+        Self
+    }
+}
 
 #[expect(clippy::wildcard_enum_match_arm, reason = "only support a few")]
 impl HandleKeyPress for Normal {

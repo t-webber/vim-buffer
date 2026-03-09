@@ -1,10 +1,13 @@
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
 use crate::buffer::keymaps::{Action, CombinablePending, GoToAction, OPending};
-use crate::buffer::mode::Actions;
 use crate::buffer::mode::all::Mode;
+use crate::buffer::mode::normal::Normal;
+use crate::buffer::mode::{Actions, BufferMode};
 
-fn expect_action(mode: Mode, event: Event, action: &[Action]) {
+const NORMAL: BufferMode = BufferMode::Normal(Normal::new());
+
+fn expect_action(mode: BufferMode, event: Event, action: &[Action]) {
     let real_actions = mode.handle_event(&event, None);
 
     assert_eq!(real_actions, action.to_vec().into());
@@ -28,7 +31,7 @@ fn event(
 
 fn test_insert_char(ch: char) {
     let event = code_event(KeyCode::Char(ch));
-    expect_action(Mode::Insert, event, &[Action::InsertChar(ch)]);
+    expect_action(BufferMode::Insert, event, &[Action::InsertChar(ch)]);
 }
 
 #[test]
@@ -43,7 +46,7 @@ fn insert_char() {
 #[test]
 fn escape() {
     let event = code_event(KeyCode::Esc);
-    expect_action(Mode::Insert, event, &[
+    expect_action(BufferMode::Insert, event, &[
         GoToAction::Left.into(),
         Mode::Normal.into(),
     ]);
@@ -52,20 +55,20 @@ fn escape() {
 #[test]
 fn insert() {
     let event = code_event(KeyCode::Char('i'));
-    expect_action(Mode::Normal, event, &[Mode::Insert.into()]);
+    expect_action(NORMAL, event, &[Mode::Insert.into()]);
 }
 
 #[test]
 fn unsupported_key() {
     let event = code_event(KeyCode::Down);
-    expect_action(Mode::Insert, event, &[]);
-    expect_action(Mode::Normal, event, &[]);
+    expect_action(BufferMode::Insert, event, &[]);
+    expect_action(NORMAL, event, &[]);
 }
 
 #[test]
 fn wrong_mode_key() {
-    expect_action(Mode::Normal, code_event(KeyCode::Char('z')), &[]);
-    expect_action(Mode::Normal, code_event(KeyCode::Esc), &[]);
+    expect_action(NORMAL, code_event(KeyCode::Char('z')), &[]);
+    expect_action(NORMAL, code_event(KeyCode::Esc), &[]);
 }
 
 #[test]
@@ -78,15 +81,15 @@ fn with_modifiers_char() {
         KeyModifiers::META,
     ] {
         let event = event(KeyCode::Char('i'), Some(modifier), None);
-        expect_action(Mode::Normal, event, &[]);
-        expect_action(Mode::Insert, event, &[]);
+        expect_action(NORMAL, event, &[]);
+        expect_action(BufferMode::Insert, event, &[]);
     }
     let event = event(KeyCode::Char('i'), Some(KeyModifiers::SHIFT), None);
-    expect_action(Mode::Normal, event, &[
+    expect_action(NORMAL, event, &[
         GoToAction::FirstNonSpace.into(),
         Mode::Insert.into(),
     ]);
-    expect_action(Mode::Insert, event, &[Action::InsertChar('I')]);
+    expect_action(BufferMode::Insert, event, &[Action::InsertChar('I')]);
 }
 
 #[test]
@@ -100,8 +103,8 @@ fn with_modifiers_esc() {
         KeyModifiers::SHIFT,
     ] {
         let event = event(KeyCode::Esc, Some(modifier), None);
-        expect_action(Mode::Normal, event, &[]);
-        expect_action(Mode::Insert, event, &[]);
+        expect_action(NORMAL, event, &[]);
+        expect_action(BufferMode::Insert, event, &[]);
     }
 }
 
@@ -109,7 +112,7 @@ fn with_modifiers_esc() {
 fn not_press() {
     for kind in [KeyEventKind::Release, KeyEventKind::Repeat] {
         let event = event(KeyCode::Char('x'), None, Some(kind));
-        expect_action(Mode::Insert, event, &[]);
+        expect_action(BufferMode::Insert, event, &[]);
     }
 }
 
@@ -118,7 +121,7 @@ fn combinable_pending_cancelled() {
     let pending =
         Some(OPending::CombinablePending(CombinablePending::FindNext));
     let event = code_event(KeyCode::Esc);
-    let actions = Mode::Normal.handle_event(&event, pending);
+    let actions = NORMAL.handle_event(&event, pending);
     assert_eq!(actions, Actions::default());
 }
 
@@ -126,6 +129,6 @@ fn combinable_pending_cancelled() {
 fn pending_cancelled() {
     let pending = Some(OPending::ReplaceOne);
     let event = code_event(KeyCode::Esc);
-    let actions = Mode::Normal.handle_event(&event, pending);
+    let actions = NORMAL.handle_event(&event, pending);
     assert_eq!(actions, Actions::default());
 }

@@ -1,4 +1,4 @@
-/// Handles all the keypresses, dispatching them to the appropriate mode.
+/// Defines the types for the different modes.
 mod all;
 /// Handles keypresses in insert mode
 mod insert;
@@ -8,8 +8,10 @@ mod normal;
 mod replace;
 /// Defines the types and traits to organise modes and how the process events.
 mod traits;
+/// Handles all the keypresses, dispatching them to the appropriate mode.
+mod update;
 
-pub use all::Mode;
+pub use all::{BufferMode, Mode};
 pub use traits::Actions;
 
 #[cfg(test)]

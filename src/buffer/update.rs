@@ -406,7 +406,7 @@ impl Buffer {
 
     /// Same as [`Self::update`] but without updating the history.
     pub fn update_no_save(&mut self, event: &Event) -> bool {
-        match self.as_mode().handle_event(event, take(&mut self.pending)) {
+        match self.mode.handle_event(event, take(&mut self.pending)) {
             Actions::OPending(new_pending) => {
                 self.pending = Some(new_pending);
                 true
@@ -436,7 +436,7 @@ impl Buffer {
                 self.content.insert(self.as_cursor(), ch);
                 self.cursor.increment_with_capacity_unchecked();
             }
-            Action::SelectMode(mode) => self.mode = mode,
+            Action::SelectMode(mode) => self.mode.switch_to(mode),
             Action::ReplaceWith(ch) => return self.replace_ch(ch, false),
             Action::ReplaceOrInsert(ch) => return self.replace_ch(ch, true),
             Action::Undo => return self.undo(),
@@ -484,7 +484,7 @@ impl Buffer {
             }
             Operator::Change =>
                 return self.delete(min, max) && {
-                    self.mode = Mode::Insert;
+                    self.mode.switch_to(Mode::Insert);
                     true
                 },
             Operator::Capitalise => char::to_ascii_uppercase,
