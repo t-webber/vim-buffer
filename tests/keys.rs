@@ -65,6 +65,7 @@ S: "iabcdef<Esc>hhhSghij" => "ghij",
 r: "iabcd<Esc>Fbre" => "aecd",
 r_empty: "rx" => "",
 r_end: "iabc<Esc>rx" => "abx",
+r_dollar_end: "iabc<Esc>$rx" => "abx",
 
 w: "ibc   def::(Bl<Esc>0wa.<Esc>lwa.<Esc>lwa.<Esc>lwa." => "bc   d.ef:.:(B.l.",
 w_end_space: "iab <Esc>0wa." => "ab .",
@@ -296,17 +297,19 @@ dot_i: "iabc def<Esc>." => "abc deabc deff",
 dot_dw: "iabc def ghi<Esc>0dw.." => "",
 dot_move: "iabc def ghi<Esc>0dww." => "def ",
 dot_invalid: "iabcdef<Esc>0dfc." => "def",
+dot_replace: "iabcdef<Esc>0Rklm<Esc>." =>"klklmf",
 
 );
 
 buffer_tests!(replace,
 
-simple: "ihell(!:zd:tqs. qflk z<Esc>F(Ro world<Esc>D" => "hello world",
+simple: "ihell(!:zd:tqs. qflk z<Esc>F(Ro world<Esc>lD" => "hello world",
 end: "iabcdef<Esc>0Rhello world" => "hello world",
 end_r: "iabcdef<Esc>0RHello WORLD!<Esc>r." => "Hello WORLD.",
 end_lr: "iabcdef<Esc>0Rhello world!<Esc>lr." => "hello world.",
 invalid: "R<C-a><S-CR><CR>" => "",
 empty: "Rabc" => "abc",
 arrows: "iabcdef<Esc>0Rghi<Left>j<Right>k<Right>l" => "ghjdkfl",
+esc_replace: "iabcdef<Esc>0Rklm<Esc>Rklm" =>"klklmf",
 
 );
