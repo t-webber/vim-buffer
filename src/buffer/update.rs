@@ -406,15 +406,9 @@ impl Buffer {
 
     /// Same as [`Self::update`] but without updating the history.
     pub fn update_no_save(&mut self, event: &Event) -> bool {
-        match self.mode.handle_event(event, take(&mut self.pending)) {
-            Actions::OPending(new_pending) => {
-                self.pending = Some(new_pending);
-                true
-            }
+        match self.mode.handle_event(event) {
+            Actions::Unsupported => false,
             Actions::List(list) => {
-                if list.is_empty() {
-                    return false;
-                }
                 for action in &list {
                     if !self.update_once(*action) {
                         return false;

@@ -115,7 +115,8 @@ dcaret_spaces_only: "i    <Esc>d^" => "   ",
 dcaret_empty: "d^" => "",
 dcaret_middle: "i abc def ghi<Esc>bbld^" => " ef ghi",
 
-dinvalid: "d " => "",
+dnone: "d " => "",
+dinvalid: "iabc<Esc>0dAdl" => "bc",
 
 dW: "iab  cd ef<Esc>0dW" => "cd ef",
 dW_middle_no_right: "iab  cd ef<Esc>dW" => "ab  cd e",

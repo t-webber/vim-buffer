@@ -10,22 +10,26 @@ pub struct Replace;
 
 #[expect(clippy::wildcard_enum_match_arm, reason = "only support a few")]
 impl HandleKeyPress for Replace {
-    fn handle_blank_key_press(&self, code: KeyCode) -> Actions {
+    fn handle_blank_key_press(&mut self, code: KeyCode) -> Actions {
         match code {
             KeyCode::Esc => actions![Mode::Normal, GoToAction::Left],
             KeyCode::Char(ch) =>
                 actions![Action::ReplaceOrInsert(ch), GoToAction::Right],
             KeyCode::Left => GoToAction::Left.into(),
             KeyCode::Right => GoToAction::Right.into(),
-            _ => Actions::default(),
+            _ => Actions::Unsupported,
         }
     }
 
-    fn handle_shift_key_press(&self, code: KeyCode) -> Actions {
+    fn handle_ctrl_key_press(&mut self, _: KeyCode) -> Actions {
+        Actions::Unsupported
+    }
+
+    fn handle_shift_key_press(&mut self, code: KeyCode) -> Actions {
         match code {
             KeyCode::Char(ch) =>
                 actions![Action::ReplaceOrInsert(ch), GoToAction::Right],
-            _ => Actions::default(),
+            _ => Actions::Unsupported,
         }
     }
 }

@@ -1,9 +1,9 @@
-use crossterm::event::KeyCode;
+use crossterm::event::Event;
 
 use crate::buffer::mode::insert::Insert;
 use crate::buffer::mode::normal::Normal;
 use crate::buffer::mode::replace::Replace;
-use crate::buffer::mode::traits::{Actions, HandleKeyPress};
+use crate::buffer::mode::traits::{Actions, HandleKeyPress as _};
 
 /// Represents the vim mode of the buffer.
 #[non_exhaustive]
@@ -37,6 +37,15 @@ impl Default for BufferMode {
 }
 
 impl BufferMode {
+    /// Handle incoming terminal events off any kind.
+    pub fn handle_event(&mut self, event: &Event) -> Actions {
+        match self {
+            Self::Insert => Insert.handle_key(event),
+            Self::Normal(normal) => normal.handle_key(event),
+            Self::Replace => Replace.handle_key(event),
+        }
+    }
+
     /// Edits the current [`BufferMode`] for it to be of mode `mode`. All states
     /// will be lost, even if the new mode is the same as the last one.
     pub const fn switch_to(&mut self, mode: Mode) {
@@ -53,32 +62,6 @@ impl BufferMode {
             Self::Insert => Mode::Insert,
             Self::Normal(_) => Mode::Normal,
             Self::Replace => Mode::Replace,
-        }
-    }
-}
-
-impl HandleKeyPress for BufferMode {
-    fn handle_blank_key_press(&self, code: KeyCode) -> Actions {
-        match *self {
-            Self::Insert => Insert.handle_blank_key_press(code),
-            Self::Normal(normal) => normal.handle_blank_key_press(code),
-            Self::Replace => Replace.handle_blank_key_press(code),
-        }
-    }
-
-    fn handle_ctrl_key_press(&self, code: KeyCode) -> Actions {
-        match *self {
-            Self::Insert => Insert.handle_ctrl_key_press(code),
-            Self::Normal(normal) => normal.handle_ctrl_key_press(code),
-            Self::Replace => Replace.handle_ctrl_key_press(code),
-        }
-    }
-
-    fn handle_shift_key_press(&self, code: KeyCode) -> Actions {
-        match *self {
-            Self::Insert => Insert.handle_shift_key_press(code),
-            Self::Normal(normal) => normal.handle_shift_key_press(code),
-            Self::Replace => Replace.handle_shift_key_press(code),
         }
     }
 }

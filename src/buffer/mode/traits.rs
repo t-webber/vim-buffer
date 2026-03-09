@@ -1,9 +1,7 @@
-use crossterm::event::KeyCode;
+use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
 
 use crate::Mode;
-use crate::buffer::keymaps::{
-    Action, CombinablePending, GoToAction, OPending, Operator
-};
+use crate::buffer::keymaps::{Action, GoToAction};
 use crate::buffer::macros::actions;
 
 /// Actions to be taken as a result of a keypress
@@ -11,31 +9,13 @@ use crate::buffer::macros::actions;
 pub enum Actions {
     /// List of buffer actions to be followed
     List(Vec<Action>),
-    /// New opending state to use
-    OPending(OPending),
-}
-
-impl Default for Actions {
-    fn default() -> Self {
-        actions![]
-    }
+    /// The given keycode is not supported or has no meaning
+    Unsupported,
 }
 
 impl From<Vec<Action>> for Actions {
     fn from(list: Vec<Action>) -> Self {
         Self::List(list)
-    }
-}
-
-impl From<OPending> for Actions {
-    fn from(opending: OPending) -> Self {
-        Self::OPending(opending)
-    }
-}
-
-impl From<Operator> for Actions {
-    fn from(op: Operator) -> Self {
-        Self::OPending(op.into())
     }
 }
 
@@ -57,25 +37,56 @@ impl From<GoToAction> for Actions {
     }
 }
 
-impl From<CombinablePending> for Actions {
-    fn from(action: CombinablePending) -> Self {
-        Self::OPending(OPending::CombinablePending(action))
-    }
-}
-
 /// Handle incoming terminal events, like keypresses.
-#[expect(unused_variables, reason = "trait default")]
 pub trait HandleKeyPress {
+    /// Handle incoming terminal events off any kind.
+    fn default_handle_key(&mut self, event: &Event) -> Actions {
+        event.as_key_press_event().map_or(
+            Actions::Unsupported,
+            |mut key_event| {
+                fix_shift_modifier(&mut key_event);
+                self.dispatch_on_modifiers(&key_event)
+            },
+        )
+    }
+
+    /// Dispatch to the right handler depending on the modifiers of the event.
+    fn dispatch_on_modifiers(&mut self, key_event: &KeyEvent) -> Actions {
+        match key_event.modifiers {
+            KeyModifiers::NONE => self.handle_blank_key_press(key_event.code),
+            KeyModifiers::CONTROL => self.handle_ctrl_key_press(key_event.code),
+            KeyModifiers::SHIFT => self.handle_shift_key_press(key_event.code),
+            _ => Actions::Unsupported,
+        }
+    }
+
     /// Handle incoming terminal events that are keypresses with no modifiers.
-    fn handle_blank_key_press(&self, code: KeyCode) -> Actions;
+    fn handle_blank_key_press(&mut self, code: KeyCode) -> Actions;
 
     /// Handle incoming terminal events that are keypresses with the control
     /// modifier.
-    fn handle_ctrl_key_press(&self, code: KeyCode) -> Actions {
-        Actions::default()
+    fn handle_ctrl_key_press(&mut self, code: KeyCode) -> Actions;
+
+    /// Handle incoming terminal events off any kind.
+    fn handle_key(&mut self, event: &Event) -> Actions {
+        self.default_handle_key(event)
     }
 
     /// Handle incoming terminal events that are keypresses with the shift
     /// modifier.
-    fn handle_shift_key_press(&self, code: KeyCode) -> Actions;
+    fn handle_shift_key_press(&mut self, code: KeyCode) -> Actions;
+}
+
+/// Adds [`KeyModifiers::SHIFT`] if the event is a capital char, and capitalises
+/// the char if the modifiers contain shift.
+const fn fix_shift_modifier(key_event: &mut KeyEvent) {
+    #[expect(clippy::else_if_without_else, reason = "checked")]
+    if let KeyCode::Char(ch) = &mut key_event.code {
+        if ch.is_ascii_uppercase() {
+            key_event.modifiers =
+                key_event.modifiers.union(KeyModifiers::SHIFT);
+        } else if key_event.modifiers.contains(KeyModifiers::SHIFT) {
+            *ch = ch.to_ascii_uppercase();
+        }
+    }
 }

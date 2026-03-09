@@ -131,6 +131,12 @@ impl From<Operator> for OPending {
     }
 }
 
+impl From<CombinablePending> for OPending {
+    fn from(value: CombinablePending) -> Self {
+        Self::CombinablePending(value)
+    }
+}
+
 /// Operator actions that can contain a motion and applied a function to that
 /// motion (delete, yank, change, etc.)
 #[non_exhaustive]

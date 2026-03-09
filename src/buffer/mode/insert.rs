@@ -13,7 +13,7 @@ pub struct Insert;
     reason = "partially implement events"
 )]
 impl HandleKeyPress for Insert {
-    fn handle_blank_key_press(&self, code: KeyCode) -> Actions {
+    fn handle_blank_key_press(&mut self, code: KeyCode) -> Actions {
         match code {
             KeyCode::Esc => actions![GoToAction::Left, Mode::Normal],
             KeyCode::Char(ch) => Action::InsertChar(ch).into(),
@@ -23,15 +23,19 @@ impl HandleKeyPress for Insert {
             ],
             KeyCode::Left => GoToAction::Left.into(),
             KeyCode::Right => GoToAction::Right.into(),
-            _ => Actions::default(),
+            _ => Actions::Unsupported,
         }
     }
 
-    fn handle_shift_key_press(&self, code: KeyCode) -> Actions {
+    fn handle_ctrl_key_press(&mut self, _: KeyCode) -> Actions {
+        Actions::Unsupported
+    }
+
+    fn handle_shift_key_press(&mut self, code: KeyCode) -> Actions {
         if let KeyCode::Char(ch) = code {
             Action::InsertChar(ch.to_ascii_uppercase()).into()
         } else {
-            Actions::default()
+            Actions::Unsupported
         }
     }
 }

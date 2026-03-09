@@ -7,10 +7,12 @@ use crate::buffer::mode::{Actions, BufferMode};
 
 const NORMAL: BufferMode = BufferMode::Normal(Normal::new());
 
-fn expect_action(mode: BufferMode, event: Event, action: &[Action]) {
-    let real_actions = mode.handle_event(&event, None);
+fn expect_action(mut mode: BufferMode, event: Event, action: &[Action]) {
+    assert_eq!(mode.handle_event(&event), action.to_vec().into());
+}
 
-    assert_eq!(real_actions, action.to_vec().into());
+fn expect_no_action(mut mode: BufferMode, event: Event) {
+    assert_eq!(mode.handle_event(&event), Actions::Unsupported);
 }
 
 fn code_event(code: KeyCode) -> Event {
@@ -61,14 +63,14 @@ fn insert() {
 #[test]
 fn unsupported_key() {
     let event = code_event(KeyCode::Down);
-    expect_action(BufferMode::Insert, event, &[]);
-    expect_action(NORMAL, event, &[]);
+    expect_no_action(BufferMode::Insert, event);
+    expect_no_action(NORMAL, event);
 }
 
 #[test]
 fn wrong_mode_key() {
-    expect_action(NORMAL, code_event(KeyCode::Char('z')), &[]);
-    expect_action(NORMAL, code_event(KeyCode::Esc), &[]);
+    expect_no_action(NORMAL, code_event(KeyCode::Char('z')));
+    expect_no_action(NORMAL, code_event(KeyCode::Esc));
 }
 
 #[test]
@@ -81,8 +83,8 @@ fn with_modifiers_char() {
         KeyModifiers::META,
     ] {
         let event = event(KeyCode::Char('i'), Some(modifier), None);
-        expect_action(NORMAL, event, &[]);
-        expect_action(BufferMode::Insert, event, &[]);
+        expect_no_action(NORMAL, event);
+        expect_no_action(BufferMode::Insert, event);
     }
     let event = event(KeyCode::Char('i'), Some(KeyModifiers::SHIFT), None);
     expect_action(NORMAL, event, &[
@@ -103,8 +105,8 @@ fn with_modifiers_esc() {
         KeyModifiers::SHIFT,
     ] {
         let event = event(KeyCode::Esc, Some(modifier), None);
-        expect_action(NORMAL, event, &[]);
-        expect_action(BufferMode::Insert, event, &[]);
+        expect_no_action(NORMAL, event);
+        expect_no_action(BufferMode::Insert, event);
     }
 }
 
@@ -112,23 +114,26 @@ fn with_modifiers_esc() {
 fn not_press() {
     for kind in [KeyEventKind::Release, KeyEventKind::Repeat] {
         let event = event(KeyCode::Char('x'), None, Some(kind));
-        expect_action(BufferMode::Insert, event, &[]);
+        expect_no_action(BufferMode::Insert, event);
     }
 }
 
 #[test]
 fn combinable_pending_cancelled() {
-    let pending =
-        Some(OPending::CombinablePending(CombinablePending::FindNext));
+    let mut mode = BufferMode::Normal(Normal::Pending(
+        OPending::CombinablePending(CombinablePending::FindNext),
+    ));
     let event = code_event(KeyCode::Esc);
-    let actions = NORMAL.handle_event(&event, pending);
-    assert_eq!(actions, Actions::default());
+    let actions = mode.handle_event(&event);
+    assert_eq!(actions, Actions::Unsupported);
+    assert_eq!(mode, NORMAL);
 }
 
 #[test]
 fn pending_cancelled() {
-    let pending = Some(OPending::ReplaceOne);
+    let mut mode = BufferMode::Normal(Normal::Pending(OPending::ReplaceOne));
     let event = code_event(KeyCode::Esc);
-    let actions = NORMAL.handle_event(&event, pending);
-    assert_eq!(actions, Actions::default());
+    let actions = mode.handle_event(&event);
+    assert_eq!(actions, Actions::Unsupported);
+    assert_eq!(mode, NORMAL);
 }

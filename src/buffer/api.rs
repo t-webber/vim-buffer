@@ -1,6 +1,5 @@
 use crate::Mode;
 use crate::buffer::history::History;
-use crate::buffer::keymaps::OPending;
 use crate::buffer::last_action::LastAction;
 use crate::buffer::mode::BufferMode;
 use crate::utils::bounded_usize::BoundedUsize;
@@ -41,8 +40,6 @@ pub struct Buffer {
     pub(super) last_action: LastAction,
     /// Vim mode of the buffer
     pub(super) mode: BufferMode,
-    /// Pending actions that require more keymaps
-    pub(super) pending: Option<OPending>,
 }
 
 impl Buffer {

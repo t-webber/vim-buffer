@@ -1,4 +1,6 @@
-use crossterm::event::KeyCode;
+use core::mem::take;
+
+use crossterm::event::{Event, KeyCode};
 
 use crate::buffer::keymaps::{
     Action, CombinablePending, GoToAction, OPending, Operator, OperatorScope
@@ -9,18 +11,131 @@ use crate::buffer::mode::traits::{Actions, HandleKeyPress};
 
 /// Struct to handle keypresses in normal mode
 #[derive(Debug, Default, Eq, PartialEq, Clone, Copy)]
-pub struct Normal;
+pub enum Normal {
+    /// Normal mode but no operations are pending
+    #[default]
+    None,
+    /// Pending keymaps that wait for further keypresses
+    Pending(OPending),
+}
 
 impl Normal {
     /// Returns a default [`Normal`]
     pub const fn new() -> Self {
-        Self
+        Self::None
+    }
+
+    /// Triggers a new pending action.
+    fn pend(&mut self, pending: impl Into<OPending>) -> Actions {
+        *self = Self::Pending(pending.into());
+        Actions::List(vec![])
+    }
+}
+
+impl Normal {
+    /// Handles opending event for [`CombinablePending`]
+    const fn handle_combinable_opending_char_event(
+        combinable_pending: CombinablePending,
+        ch: char,
+    ) -> (GoToAction, Option<GoToAction>) {
+        match combinable_pending {
+            CombinablePending::FindNext =>
+                (GoToAction::NextOccurrenceOf(ch), None),
+            CombinablePending::FindNextDecrement =>
+                (GoToAction::NextOccurrenceOf(ch), Some(GoToAction::Left)),
+            CombinablePending::FindPrevious =>
+                (GoToAction::PreviousOccurrenceOf(ch), None),
+            CombinablePending::FindPreviousIncrement =>
+                (GoToAction::PreviousOccurrenceOf(ch), Some(GoToAction::Right)),
+        }
+    }
+
+    /// Handle a keypress when an [`OPending`] is in progress and waiting for
+    /// keys.
+    fn handle_opending_event(
+        &mut self,
+        opending: OPending,
+        event: &Event,
+    ) -> Actions {
+        if let Some(key_event) = event.as_key_press_event()
+            && let KeyCode::Char(ch) = key_event.code
+        {
+            match opending {
+                OPending::GoTo if ch == 'e' =>
+                    GoToAction::EndOfPreviousWord.into(),
+                OPending::GoTo if ch == 'E' =>
+                    GoToAction::EndOfPreviousWORD.into(),
+                OPending::GoTo => Operator::maybe_from(ch)
+                    .map_or(Actions::Unsupported, |op| self.pend(op)),
+                OPending::CombinablePending(action) => {
+                    let (first, maybe_second) =
+                        Self::handle_combinable_opending_char_event(action, ch);
+                    maybe_second.map_or_else(
+                        || first.into(),
+                        |second| actions![first, second],
+                    )
+                }
+                OPending::ReplaceOne => Action::ReplaceWith(ch).into(),
+                OPending::OperatorAction(op, combinable) =>
+                    Self::handle_operator_action(op, combinable, ch),
+                OPending::Operator(op) => self.handle_operator(event, op, ch),
+            }
+        } else {
+            Actions::Unsupported
+        }
+    }
+
+    /// Handle operator events (`d`, `c`, etc.)
+    fn handle_operator(
+        &mut self,
+        event: &Event,
+        op: Operator,
+        ch: char,
+    ) -> Actions {
+        if op.as_char() == ch {
+            return actions![(op, OperatorScope::WholeLine)];
+        }
+        let mut normal = Self::default();
+        match normal.handle_key(event) {
+            Actions::List(list) =>
+                if list.is_empty()
+                    && let Self::Pending(OPending::CombinablePending(
+                        combinable,
+                    )) = normal
+                {
+                    self.pend(OPending::OperatorAction(op, combinable))
+                } else if let &[list_action] = list.as_slice()
+                    && let Action::GoTo(goto) = list_action
+                {
+                    actions![(op, goto.into())]
+                } else {
+                    Actions::Unsupported
+                },
+            Actions::Unsupported => Actions::Unsupported,
+        }
+    }
+
+    /// Handle operator action events (`dw`, `cw`, etc.)
+    fn handle_operator_action(
+        op: Operator,
+        action: CombinablePending,
+        ch: char,
+    ) -> Actions {
+        let (first, maybe_second) =
+            Self::handle_combinable_opending_char_event(action, ch);
+        let second = match action {
+            CombinablePending::FindNext => Some(GoToAction::Right),
+            CombinablePending::FindNextDecrement => None,
+            CombinablePending::FindPrevious
+            | CombinablePending::FindPreviousIncrement => maybe_second,
+        };
+        actions![(op, OperatorScope::Goto(first, second))]
     }
 }
 
 #[expect(clippy::wildcard_enum_match_arm, reason = "only support a few")]
 impl HandleKeyPress for Normal {
-    fn handle_blank_key_press(&self, code: KeyCode) -> Actions {
+    fn handle_blank_key_press(&mut self, code: KeyCode) -> Actions {
         match code {
             KeyCode::Char('$') => GoToAction::EndOfLine.into(),
             KeyCode::Char('.') => Action::Repeat.into(),
@@ -28,11 +143,11 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('^') => GoToAction::FirstNonSpace.into(),
             KeyCode::Char('a') => actions![GoToAction::Right, Mode::Insert],
             KeyCode::Char('b') => GoToAction::BeginningOfWord.into(),
-            KeyCode::Char('c') => Operator::Change.into(),
-            KeyCode::Char('d') => Operator::Delete.into(),
+            KeyCode::Char('c') => self.pend(Operator::Change),
+            KeyCode::Char('d') => self.pend(Operator::Delete),
             KeyCode::Char('e') => GoToAction::EndWord.into(),
-            KeyCode::Char('f') => CombinablePending::FindNext.into(),
-            KeyCode::Char('g') => OPending::GoTo.into(),
+            KeyCode::Char('f') => self.pend(CombinablePending::FindNext),
+            KeyCode::Char('g') => self.pend(OPending::GoTo),
             KeyCode::Char('h') | KeyCode::Backspace | KeyCode::Left =>
                 GoToAction::Left.into(),
             KeyCode::Char('i') => Mode::Insert.into(),
@@ -43,31 +158,40 @@ impl HandleKeyPress for Normal {
                 GoToAction::Left
             ],
             KeyCode::Char('p') => Action::PasteAfter.into(),
-            KeyCode::Char('r') => OPending::ReplaceOne.into(),
+            KeyCode::Char('r') => self.pend(OPending::ReplaceOne),
             KeyCode::Char('s') => actions![
                 (Operator::Delete, GoToAction::Right.into()),
                 Mode::Insert
             ],
-            KeyCode::Char('t') => CombinablePending::FindNextDecrement.into(),
+            KeyCode::Char('t') =>
+                self.pend(CombinablePending::FindNextDecrement),
             KeyCode::Char('u') => Action::Undo.into(),
             KeyCode::Char('w') => GoToAction::NextWord.into(),
-            KeyCode::Char('y') => Operator::Yank.into(),
+            KeyCode::Char('y') => self.pend(Operator::Yank),
             KeyCode::Char('~') => actions![
                 (Operator::ToggleCase, GoToAction::Right.into()),
                 GoToAction::NextChar
             ],
-            _ => Actions::default(),
+            _ => Actions::Unsupported,
         }
     }
 
-    fn handle_ctrl_key_press(&self, code: KeyCode) -> Actions {
+    fn handle_ctrl_key_press(&mut self, code: KeyCode) -> Actions {
         match code {
             KeyCode::Char('r') => Action::Redo.into(),
-            _ => Actions::default(),
+            _ => Actions::Unsupported,
         }
     }
 
-    fn handle_shift_key_press(&self, code: KeyCode) -> Actions {
+    fn handle_key(&mut self, event: &Event) -> Actions {
+        match take(self) {
+            Self::None => self.default_handle_key(event),
+            Self::Pending(opending) =>
+                self.handle_opending_event(opending, event),
+        }
+    }
+
+    fn handle_shift_key_press(&mut self, code: KeyCode) -> Actions {
         match code {
             KeyCode::Char('A') => actions![GoToAction::EndOfLine, Mode::Insert],
             KeyCode::Char('B') => GoToAction::BeginningOfWORD.into(),
@@ -79,7 +203,7 @@ impl HandleKeyPress for Normal {
                 vec![(Operator::Delete, GoToAction::EndOfLine.into()).into()]
                     .into(),
             KeyCode::Char('E') => GoToAction::EndWORD.into(),
-            KeyCode::Char('F') => CombinablePending::FindPrevious.into(),
+            KeyCode::Char('F') => self.pend(CombinablePending::FindPrevious),
             KeyCode::Char('I') =>
                 actions![GoToAction::FirstNonSpace, Mode::Insert],
             KeyCode::Char('P') => Action::PasteBefore.into(),
@@ -89,7 +213,7 @@ impl HandleKeyPress for Normal {
                 Mode::Insert
             ],
             KeyCode::Char('T') =>
-                CombinablePending::FindPreviousIncrement.into(),
+                self.pend(CombinablePending::FindPreviousIncrement),
             KeyCode::Char('W') => GoToAction::NextWORD.into(),
             KeyCode::Char('X') => actions![
                 GoToAction::Left,
@@ -97,7 +221,7 @@ impl HandleKeyPress for Normal {
             ],
             KeyCode::Char('Y') =>
                 actions![(Operator::Yank, GoToAction::EndOfLine.into())],
-            _ => Actions::default(),
+            _ => Actions::Unsupported,
         }
     }
 }
