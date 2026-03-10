@@ -32,7 +32,7 @@ impl Normal {
         } else {
             *self = Self::NumberPending(num);
         }
-        Actions::List(vec![])
+        Actions::NONE
     }
 
     /// Triggers a new pending action.
@@ -41,7 +41,7 @@ impl Normal {
             Self::Pending(..) | Self::None => Self::Pending(1, pending.into()),
             Self::NumberPending(num) => Self::Pending(*num, pending.into()),
         };
-        Actions::List(vec![])
+        Actions::NONE
     }
 }
 
@@ -209,7 +209,7 @@ impl HandleKeyPress for Normal {
             Self::Pending(num, opending) =>
                 self.handle_opending_event(opending, event).repeat(num),
         };
-        if actions != Actions::List(vec![]) {
+        if actions != Actions::NONE {
             *self = Self::None;
         }
         actions

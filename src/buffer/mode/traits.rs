@@ -14,6 +14,11 @@ pub enum Actions {
 }
 
 impl Actions {
+    /// Constant that represents no actions.
+    ///
+    /// This can happen when an event is swallowed by a pending operation.
+    pub const NONE: Self = Self::List(Vec::new());
+
     /// Repeats the action `occurrences` times, if possible.
     pub fn repeat(self, occurrences: usize) -> Self {
         match self {
