@@ -1,5 +1,3 @@
-use core::mem::take;
-
 use crossterm::event::{Event, KeyCode};
 
 use crate::buffer::keymaps::{
@@ -15,8 +13,10 @@ pub enum Normal {
     /// Normal mode but no operations are pending
     #[default]
     None,
+    /// A digit was pressed, and is pending for a action.
+    NumberPending(usize),
     /// Pending keymaps that wait for further keypresses
-    Pending(OPending),
+    Pending(usize, OPending),
 }
 
 impl Normal {
@@ -25,9 +25,22 @@ impl Normal {
         Self::None
     }
 
+    /// Triggers a new number pending.
+    const fn num(&mut self, num: usize) -> Actions {
+        if let Self::NumberPending(old) = self {
+            *old = old.saturating_mul(10).saturating_add(num);
+        } else {
+            *self = Self::NumberPending(num);
+        }
+        Actions::List(vec![])
+    }
+
     /// Triggers a new pending action.
     fn pend(&mut self, pending: impl Into<OPending>) -> Actions {
-        *self = Self::Pending(pending.into());
+        *self = match self {
+            Self::Pending(..) | Self::None => Self::Pending(1, pending.into()),
+            Self::NumberPending(num) => Self::Pending(*num, pending.into()),
+        };
         Actions::List(vec![])
     }
 }
@@ -99,9 +112,10 @@ impl Normal {
         match normal.handle_key(event) {
             Actions::List(list) =>
                 if list.is_empty()
-                    && let Self::Pending(OPending::CombinablePending(
-                        combinable,
-                    )) = normal
+                    && let Self::Pending(
+                        _,
+                        OPending::CombinablePending(combinable),
+                    ) = normal
                 {
                     self.pend(OPending::OperatorAction(op, combinable))
                 } else if let &[list_action] = list.as_slice()
@@ -139,7 +153,6 @@ impl HandleKeyPress for Normal {
         match code {
             KeyCode::Char('$') => GoToAction::EndOfLine.into(),
             KeyCode::Char('.') => Action::Repeat.into(),
-            KeyCode::Char('0') => GoToAction::BeginningOfLine.into(),
             KeyCode::Char('^') => GoToAction::FirstNonSpace.into(),
             KeyCode::Char('a') => actions![GoToAction::Right, Mode::Insert],
             KeyCode::Char('b') => GoToAction::BeginningOfWord.into(),
@@ -172,6 +185,11 @@ impl HandleKeyPress for Normal {
                 (Operator::ToggleCase, GoToAction::Right.into()),
                 GoToAction::NextChar
             ],
+            KeyCode::Char('0') if !matches!(self, Self::NumberPending(_)) =>
+                GoToAction::BeginningOfLine.into(),
+            KeyCode::Char(ch @ '0'..='9') =>
+                usize::try_from(u32::from(ch).saturating_sub(u32::from('0')))
+                    .map_or(Actions::Unsupported, |num| self.num(num)),
             _ => Actions::Unsupported,
         }
     }
@@ -184,11 +202,17 @@ impl HandleKeyPress for Normal {
     }
 
     fn handle_key(&mut self, event: &Event) -> Actions {
-        match take(self) {
+        let actions = match *self {
             Self::None => self.default_handle_key(event),
-            Self::Pending(opending) =>
-                self.handle_opending_event(opending, event),
+            Self::NumberPending(num) =>
+                self.default_handle_key(event).repeat(num),
+            Self::Pending(num, opending) =>
+                self.handle_opending_event(opending, event).repeat(num),
+        };
+        if actions != Actions::List(vec![]) {
+            *self = Self::None;
         }
+        actions
     }
 
     fn handle_shift_key_press(&mut self, code: KeyCode) -> Actions {

@@ -13,6 +13,16 @@ pub enum Actions {
     Unsupported,
 }
 
+impl Actions {
+    /// Repeats the action `occurrences` times, if possible.
+    pub fn repeat(self, occurrences: usize) -> Self {
+        match self {
+            Self::List(actions) => Self::List(actions.repeat(occurrences)),
+            Self::Unsupported => Self::Unsupported,
+        }
+    }
+}
+
 impl From<Vec<Action>> for Actions {
     fn from(list: Vec<Action>) -> Self {
         Self::List(list)

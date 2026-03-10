@@ -300,6 +300,11 @@ dot_move: "iabc def ghi<Esc>0dww." => "def ",
 dot_invalid: "iabcdef<Esc>0dfc." => "def",
 dot_replace: "iabcdef<Esc>0Rklm<Esc>." =>"klklmf",
 
+nb_f: "iabc defc ghic<Esc>02fca." => "abc defc. ghic",
+nb_f_nb: "iab1 def1 ghi1<Esc>03f1i." => "ab1 def1 ghi.1",
+nb_multiple_f: "icccccccccccccccccccc<Esc>013fci." => "ccccccccccccc.ccccccc",
+nb_too_many: "iabc abc<Esc>09999wa." => "abc abc.",
+
 );
 
 buffer_tests!(replace,
