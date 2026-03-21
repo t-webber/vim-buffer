@@ -4,10 +4,12 @@ on:
   push:
     paths:
       - '**/*.rs'
+      - '**/rustfmt.toml'
       - '.github/workflows/rustfmt.yml'
   pull_request:
     paths:
       - '**/*.rs'
+      - '**/rustfmt.toml'
       - '.github/workflows/rustfmt.yml'
 
 env:
