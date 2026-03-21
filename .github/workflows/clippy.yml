@@ -25,6 +25,15 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v4
 
+            - name: Restore target
+              uses: actions/cache@v5
+              with:
+                path: |
+                  target
+                  ~/.cargo
+                key: clippy-target-${{ matrix.rust }}
+                restore-keys: clippy-target-${{ matrix.rust }}
+
             - name: Install Rust
               uses: actions-rs/toolchain@v1
               with:
