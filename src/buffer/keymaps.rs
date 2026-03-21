@@ -24,6 +24,8 @@ macro_rules! operator_impl {
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Action {
+    /// Clears the undo history for replace mode
+    ClearUndoReplace,
     /// Moves the cursor
     GoTo(GoToAction),
     /// Inserts a char at the current cursor

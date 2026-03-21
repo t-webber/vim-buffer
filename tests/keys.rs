@@ -320,5 +320,6 @@ esc_replace: "iabcdef<Esc>0Rklm<Esc>Rklm" =>"klklmf",
 bs: "iabcdef<Esc>0fdRghi<BS><BS><BS><BS><BS><BS>jk" => "jkcdef",
 bs_start: "iabc<Esc>0Rdef<BS><BS><BS><BS>." => ".bc",
 bs_too_far: "iabc<Esc>0Rdefghi<BS><BS>k" => "defgk",
+arrows_bs: "iabc<Esc>0Rx<Right>y<BS><BS><BS><BS>" => "xbc",
 
 );

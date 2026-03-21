@@ -12,11 +12,17 @@ pub struct Replace;
 impl HandleKeyPress for Replace {
     fn handle_blank_key_press(&mut self, code: KeyCode) -> Actions {
         match code {
-            KeyCode::Esc => actions![Mode::Normal, GoToAction::Left],
+            KeyCode::Esc => actions![
+                Mode::Normal,
+                GoToAction::Left,
+                Action::ClearUndoReplace
+            ],
             KeyCode::Char(ch) =>
                 actions![Action::ReplaceOrInsert(ch), GoToAction::Right],
-            KeyCode::Left => GoToAction::Left.into(),
-            KeyCode::Right => GoToAction::Right.into(),
+            KeyCode::Left =>
+                actions![GoToAction::Left, Action::ClearUndoReplace],
+            KeyCode::Right =>
+                actions![GoToAction::Right, Action::ClearUndoReplace],
             KeyCode::Backspace => Action::UndoReplace.into(),
             _ => Actions::Unsupported,
         }

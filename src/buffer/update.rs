@@ -441,6 +441,7 @@ impl Buffer {
                 return self.replace_ch(ch, false, false),
             Action::ReplaceOrInsert(ch) =>
                 return self.replace_ch(ch, true, true),
+            Action::ClearUndoReplace => self.pre_replace_content.clear(),
             Action::UndoReplace =>
                 return match self.pre_replace_content.pop() {
                     Some(Some(ch)) =>

@@ -29,7 +29,12 @@ impl LastAction {
     pub fn update(&mut self, actions: Vec<Action>, mode: Mode) {
         if actions == [Action::Repeat]
             || actions.iter().all(|action| {
-                matches!(action, Action::GoTo(_) | Action::SelectMode(_))
+                matches!(
+                    action,
+                    Action::GoTo(_)
+                        | Action::SelectMode(_)
+                        | Action::ClearUndoReplace
+                )
             })
         {
             return;
