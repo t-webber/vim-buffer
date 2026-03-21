@@ -317,5 +317,8 @@ invalid: "R<C-a><S-CR><CR>" => "",
 empty: "Rabc" => "abc",
 arrows: "iabcdef<Esc>0Rghi<Left>j<Right>k<Right>l" => "ghjdkfl",
 esc_replace: "iabcdef<Esc>0Rklm<Esc>Rklm" =>"klklmf",
+bs: "iabcdef<Esc>0fdRghi<BS><BS><BS><BS><BS><BS>jk" => "jkcdef",
+bs_start: "iabc<Esc>0Rdef<BS><BS><BS><BS>." => ".bc",
+bs_too_far: "iabc<Esc>0Rdefghi<BS><BS>k" => "defgk",
 
 );

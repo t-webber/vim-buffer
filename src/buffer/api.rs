@@ -40,6 +40,8 @@ pub struct Buffer {
     pub(super) last_action: LastAction,
     /// Vim mode of the buffer
     pub(super) mode: BufferMode,
+    /// Removed charracters when writing in replace mode
+    pub(super) pre_replace_content: Vec<Option<char>>,
 }
 
 impl Buffer {

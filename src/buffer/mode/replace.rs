@@ -17,6 +17,7 @@ impl HandleKeyPress for Replace {
                 actions![Action::ReplaceOrInsert(ch), GoToAction::Right],
             KeyCode::Left => GoToAction::Left.into(),
             KeyCode::Right => GoToAction::Right.into(),
+            KeyCode::Backspace => Action::UndoReplace.into(),
             _ => Actions::Unsupported,
         }
     }

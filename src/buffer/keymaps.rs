@@ -47,6 +47,8 @@ pub enum Action {
     SelectMode(Mode),
     /// Undoes the last edition
     Undo,
+    /// Undoes the last replace action from replace mode
+    UndoReplace,
 }
 
 impl From<(Operator, OperatorScope)> for Action {

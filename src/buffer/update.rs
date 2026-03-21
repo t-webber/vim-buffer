@@ -236,22 +236,28 @@ impl Buffer {
 
     /// Remove the character under the current cursor and replace it by another
     /// one.
-    fn replace_ch(&mut self, ch: char, can_insert: bool) -> bool {
+    fn replace_ch(&mut self, ch: char, can_insert: bool, save: bool) -> bool {
         // PERF: string characters are copied twice.
         let last_char_idx = self.as_cursor();
-        if last_char_idx == self.len() {
+        let old = if last_char_idx == self.len() {
             if can_insert {
                 self.content.push(ch);
                 self.cursor.increment_with_capacity_unchecked();
+                None
             } else if self.is_empty() {
                 return false;
             } else {
-                self.content.pop();
+                let old = self.content.pop();
                 self.content.push(ch);
+                old
             }
         } else {
-            self.content.remove(last_char_idx);
+            let old = self.content.remove(last_char_idx);
             self.content.insert(last_char_idx, ch);
+            Some(old)
+        };
+        if save {
+            self.pre_replace_content.push(old);
         }
         true
     }
@@ -431,8 +437,22 @@ impl Buffer {
                 self.cursor.increment_with_capacity_unchecked();
             }
             Action::SelectMode(mode) => self.mode.switch_to(mode),
-            Action::ReplaceWith(ch) => return self.replace_ch(ch, false),
-            Action::ReplaceOrInsert(ch) => return self.replace_ch(ch, true),
+            Action::ReplaceWith(ch) =>
+                return self.replace_ch(ch, false, false),
+            Action::ReplaceOrInsert(ch) =>
+                return self.replace_ch(ch, true, true),
+            Action::UndoReplace =>
+                return match self.pre_replace_content.pop() {
+                    Some(Some(ch)) =>
+                        self.cursor.decrement()
+                            && self.replace_ch(ch, false, false),
+                    Some(None) => {
+                        let hadsome = self.content.pop().is_none();
+                        self.cursor.set_max(self.content.len());
+                        hadsome
+                    }
+                    None => self.cursor.decrement(),
+                },
             Action::Undo => return self.undo(),
             Action::Redo => return self.redo(),
             Action::GoTo(goto_action) =>
