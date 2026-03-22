@@ -5,7 +5,7 @@ use crossterm::event::KeyCode;
 
 /// Defines the key interface
 macro_rules! key {
-    ($($name:ident: $code:ident,)*) => {
+    ($($name:ident: $code:expr,)*) => {
         /// Minimum and maximum length of the string representation of a key
         pub const LENGTHS:Bounds = {
 
@@ -40,7 +40,7 @@ macro_rules! key {
             $(
              map.insert(
                  stringify!($name),
-                 KeyCode::$code
+                 $code
                 );
             )*
 
@@ -50,26 +50,27 @@ macro_rules! key {
 
 key! {
 // Nul,
-BS: Backspace,
-Tab: Tab,
+BS: KeyCode::Backspace,
+Tab: KeyCode::Tab,
 // NL,
-CR: Enter,
-Return: Enter,
-Enter: Enter,
-Esc: Esc,
+CR: KeyCode::Enter,
+Return: KeyCode::Enter,
+Enter: KeyCode::Enter,
+Esc: KeyCode::Esc,
 // Space,
-// lt,
+lt: KeyCode::Char('<'),
+gt: KeyCode::Char('>'),
 // Bslash,
 // Bar,
- Del: Delete,
+ Del: KeyCode::Delete,
 // CSI,
 // EOL,
 // Ignore,
 // NOP,
-Up: Up,
-Down: Down,
-Left: Left,
-Right: Right,
+Up: KeyCode::Up,
+Down: KeyCode::Down,
+Left: KeyCode::Left,
+Right: KeyCode::Right,
 // F1,
 // F2,
 // F3,
@@ -87,10 +88,10 @@ Right: Right,
 // Find,
 // Select,
 // Insert,
-Home: Home,
-End: End,
-PageUp: PageUp,
-PageDown: PageDown,
+Home: KeyCode::Home,
+End: KeyCode::End,
+PageUp: KeyCode::PageUp,
+PageDown: KeyCode::PageDown,
 // kUp,
 // kDown,
 // kLeft,

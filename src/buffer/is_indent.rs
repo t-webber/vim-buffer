@@ -9,42 +9,70 @@
 /// ```ignore
 /// let x = IsIdentChar::new('a');
 /// assert!(x.xor('.'));
-/// assert!(!x.xor('.'));
+/// assert!(!x.xor('_'));
+/// assert!(!x.xor(' '));
+/// ```
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
-pub struct IsIdentChar(Type);
+pub struct Classifier<T>(T);
 
-impl IsIdentChar {
-    /// Returns `true` if the given char is valid for an identifier
-    const fn is(ch: char) -> Type {
-        if matches!(ch, '0'..='9' | 'a'..='z' | 'A'..='Z' | '_') {
-            Type::AlphaNum
-        } else if ch.is_whitespace() {
-            Type::Space
-        } else {
-            Type::Symbol
-        }
-    }
+/// Trait for all checkers that can be used to classify and regroup chars
+pub trait Checker: PartialEq + From<char> {}
 
+impl<T: Checker> Classifier<T> {
     /// Creates a new [`IsIdentChar`] checker from the given char. This is the
     /// char that will be compared to the others given through
     /// [`Self::xor`].
-    pub const fn new(ch: char) -> Self {
-        Self(Self::is(ch))
+    pub fn new(ch: char) -> Self {
+        Self(T::from(ch))
     }
 
     /// Checks that first or second is ident valid, but not both.
     pub fn xor(self, other: char) -> bool {
-        self.0 != Self::is(other)
+        self.0 != T::from(other)
     }
 }
 
 /// Type of the char, to indicate to what group of characters it belongs
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
-enum Type {
-    /// Alphanumeric character
-    AlphaNum,
+pub enum IdentCharSpaceOrSymbol {
+    /// Character valid for identifi$ers
+    IdentChar,
     /// Whitespace
     Space,
     /// Non alphanumeric and non space character
     Symbol,
 }
+
+impl From<char> for IdentCharSpaceOrSymbol {
+    fn from(ch: char) -> Self {
+        if matches!(ch, '0'..='9' | 'a'..='z' | 'A'..='Z' | '_') {
+            Self::IdentChar
+        } else if ch.is_whitespace() {
+            Self::Space
+        } else {
+            Self::Symbol
+        }
+    }
+}
+
+impl Checker for IdentCharSpaceOrSymbol {}
+
+/// Groups chars into two categories: spaces and non spaces
+#[derive(PartialEq, Eq, Debug, Clone, Copy)]
+pub struct SpaceOrNot(bool);
+
+impl From<char> for SpaceOrNot {
+    fn from(ch: char) -> Self {
+        Self(ch.is_whitespace())
+    }
+}
+
+impl Checker for SpaceOrNot {}
+
+/// Compares on char to others, to check if they are in the same group. There
+/// are 3 groups: ident chars, spaces, and symbols.
+pub type IsIdentChar = Classifier<IdentCharSpaceOrSymbol>;
+
+/// Compares on char to others, to check if they are in the same group. There
+/// are 3 groups: ident chars, spaces, and symbols.
+pub type IsSpace = Classifier<SpaceOrNot>;

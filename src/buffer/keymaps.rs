@@ -191,10 +191,13 @@ pub enum OperatorScope {
 }
 
 /// Delimitations for scoping operators (e.g. `)`, `w`)
+#[expect(clippy::upper_case_acronyms, reason = "vim wording")]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Delimitation {
-    /// Between a `(` and a `)`
-    Parenthesis,
+    /// Between a `{,[,v,(` group
+    Group(char, char),
+    /// Represents a vim WORD
+    WORD,
     /// Represents a vim word
     Word,
 }
@@ -203,7 +206,11 @@ impl Delimitation {
     /// Tries to return the [`Delimitation`] triggered by this char
     pub const fn maybe_from(value: char) -> Option<Self> {
         Some(match value {
-            '(' | ')' => Self::Parenthesis,
+            '(' | ')' => Self::Group('(', ')'),
+            '[' | ']' => Self::Group('[', ']'),
+            '{' | '}' => Self::Group('{', '}'),
+            '<' | '>' => Self::Group('<', '>'),
+            'W' => Self::WORD,
             'w' => Self::Word,
             _ => return None,
         })

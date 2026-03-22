@@ -318,6 +318,15 @@ di_parens_before: "iabc( :d ff:k)s!<Esc>0di)i." => "abc(.)s!",
 di_parens_before_swaped: "iabc) :d ff:k(s!<Esc>0di)i." => ".abc) :d ff:k(s!",
 di_parens_after: "iabc( :d ff:k)s!<Esc>di)i." => "abc( :d ff:k)s.!",
 
+ciW_basic: "iabc def ghi<Esc>FeciWjk" => "abc jk ghi",
+ciW_spaces: "iabc   def ghi<Esc>F ciWjk" => "abc   defjkghi",
+ciW_symbols: "iabc (:def ghi<Esc>F(ciWjk" => "abc jk ghi",
+ciW_end: "iabc def ghi<Esc>0ciWjk" => "jk def ghi",
+
+di_bracket: "iabc[ :d ff:k]s!<Esc>F:di[i." => "abc[.]s!",
+di_brace: "iabc{ :d ff:k}s!<Esc>F:di{i." => "abc{.}s!",
+di_chevron: "iabc<lt> :d ff:k<gt>s!<Esc>F:di<lt>i." => "abc<.>s!",
+
 );
 
 buffer_tests!(replace,

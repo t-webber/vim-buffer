@@ -6,7 +6,7 @@ use crossterm::event::Event;
 
 use crate::Mode;
 use crate::buffer::api::Buffer;
-use crate::buffer::is_indent::IsIdentChar;
+use crate::buffer::is_indent::{IsIdentChar, IsSpace};
 use crate::buffer::keymaps::{
     Action, Delimitation, GoToAction, Operator, OperatorScope
 };
@@ -27,6 +27,12 @@ impl Buffer {
                 },
             )
             .collect();
+    }
+
+    /// Returns the char pointed by the cursor
+    #[expect(clippy::unwrap_used, reason = "in bound")]
+    fn as_char(&self) -> char {
+        self.content.chars().nth(self.as_cursor()).unwrap()
     }
 
     /// Returns the index of the cursor, starting from the end of the string.
@@ -77,20 +83,19 @@ impl Buffer {
         delimitation: Delimitation,
     ) -> Option<(usize, usize)> {
         match delimitation {
-            Delimitation::Parenthesis => self.get_delimitation_indices_fn(
-                |ch| ch == '(',
-                |ch| ch == ')',
-                false,
-            ),
+            Delimitation::Group(open, close) => self
+                .get_delimitation_indices_fn(
+                    |ch| ch == open,
+                    |ch| ch == close,
+                    false,
+                ),
             Delimitation::Word => {
-                #[expect(
-                    clippy::unwrap_in_result,
-                    clippy::unwrap_used,
-                    reason = "in bound"
-                )]
-                let cursor = IsIdentChar::new(
-                    self.content.chars().nth(self.as_cursor()).unwrap(),
-                );
+                let cursor = IsIdentChar::new(self.as_char());
+                let good = |ch| cursor.xor(ch);
+                self.get_delimitation_indices_fn(good, good, true)
+            }
+            Delimitation::WORD => {
+                let cursor = IsSpace::new(self.as_char());
                 let good = |ch| cursor.xor(ch);
                 self.get_delimitation_indices_fn(good, good, true)
             }
@@ -122,6 +127,7 @@ impl Buffer {
             (Some(start), Some(end)) => Some((start, end)),
             (None | Some(_), None) => None,
             (None, Some(end)) =>
+            // PERF: iterating for the second time
                 if let Some((start, _)) =
                     self.chars_after_cursor().find(|(_, ch)| is_start(*ch))
                     && start <= end
