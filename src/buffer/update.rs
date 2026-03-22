@@ -6,7 +6,7 @@ use crossterm::event::Event;
 
 use crate::Mode;
 use crate::buffer::api::Buffer;
-use crate::buffer::is_indent::{Classifier, IsIdentChar};
+use crate::buffer::is_indent::IsIdentChar;
 use crate::buffer::keymaps::{
     Action, Delimitation, GoToAction, Operator, OperatorScope
 };
@@ -76,7 +76,7 @@ impl Buffer {
         let mut after = self.chars_after_cursor();
         let mut before = self.chars_before_cursor_rev();
         #[expect(clippy::unwrap_used, reason = "in bound")]
-        let cursor = Classifier::new(after.next().unwrap().1);
+        let cursor = IsIdentChar::new(after.next().unwrap().1);
         #[expect(clippy::arithmetic_side_effects, reason = "in bound")]
         (
             before
