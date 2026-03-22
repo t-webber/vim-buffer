@@ -11,6 +11,10 @@ pub use crate::event_parser::chevron_parser::{
 use crate::event_parser::state::EventParserState;
 pub use crate::event_parser::state::EventParsingError;
 
+/// Can be contain an event if the parsing finished parsing it, or `None` if the
+/// given char was used to continue building the event
+type MaybeEvent = Option<Event>;
+
 /// Trait to define a parsing methodology
 trait EventParser {
     /// Errors that can be returned by the parsing
@@ -22,7 +26,7 @@ trait EventParser {
     ///
     /// Returns an error if the parsing failed, due to a meaningless succession
     /// of characters.
-    fn parse_char(&mut self, ch: char) -> Result<Option<Event>, Self::Error>;
+    fn parse_char(&mut self, ch: char) -> Result<MaybeEvent, Self::Error>;
 }
 
 /// Transforms a string input of keymaps into a list of events.

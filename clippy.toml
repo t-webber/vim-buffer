@@ -14,3 +14,10 @@ check-private-items = true
 disallowed-names = []
 enum-variant-name-threshold = 1
 excessive-nesting-threshold = 4
+lint-commented-code = true
+max-suggested-slice-pattern-length = 20
+max-trait-bounds = 1
+standard-macro-braces = [{ name = "actions", brace = "[" }]
+too-many-arguments-threshold = 4
+too-many-lines-threshold = 50
+type-complexity-threshold = 100
