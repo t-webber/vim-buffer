@@ -219,7 +219,7 @@ impl Buffer {
             .skip(self.as_end_index().saturating_sub(1))
             .skip_while(|(_, ch)| !ch.is_whitespace())
             .find(|(_, ch)| !ch.is_whitespace())
-            .map_or(0, |(i, _)| i);
+            .map_or(0, |(idx, _)| idx);
         self.cursor.set(idx);
     }
 
@@ -243,7 +243,7 @@ impl Buffer {
             }
         }
         let idx =
-            chars.find(|(_, ch)| !ch.is_whitespace()).map_or(0, |(i, _)| i);
+            chars.find(|(_, ch)| !ch.is_whitespace()).map_or(0, |(idx, _)| idx);
         self.cursor.set(idx);
     }
 
@@ -423,9 +423,7 @@ impl Buffer {
             ),
             GoToAction::NextOccurrenceOf(ch) => self.cursor.set(
                 if let Some((idx, _ch)) = self
-                    .as_content()
-                    .char_indices()
-                    .skip(self.as_cursor())
+                    .chars_after_cursor()
                     .skip(1)
                     .find(|(_idx, next)| *next == ch)
                 {
@@ -436,10 +434,7 @@ impl Buffer {
             ),
             GoToAction::PreviousOccurrenceOf(ch) => self.cursor.set(
                 if let Some((idx, _ch)) = self
-                    .as_content()
-                    .char_indices()
-                    .rev()
-                    .skip(self.as_end_index())
+                    .chars_before_cursor_rev()
                     .find(|&(_idx, next)| next == ch)
                 {
                     idx

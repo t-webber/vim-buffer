@@ -73,7 +73,7 @@ impl<T: Copy, const N: usize> Array<T, N> {
 impl<const N: usize> Array<char, N> {
     /// Concatenates the chars of the array into a string
     pub fn concat(&self) -> String {
-        self.0.iter().filter_map(|x| *x).collect::<String>()
+        self.0.iter().filter_map(|var| *var).collect::<String>()
     }
 }
 

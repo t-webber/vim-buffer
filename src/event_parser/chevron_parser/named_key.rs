@@ -17,17 +17,17 @@ macro_rules! key {
 
             let mut min = keys[0].len();
             let mut max = min;
-            let mut i = 1;
+            let mut idx = 1;
             #[expect(clippy::indexing_slicing, reason="compile time")]
             #[expect(clippy::else_if_without_else, reason="useless here")]
-            while i < keys.len() {
-                let len = keys[i].len();
+            while idx < keys.len() {
+                let len = keys[idx].len();
                 if len > max {
                     max = len;
                 } else if len < min {
                     min = len
                 };
-                i += 1;
+                idx += 1;
             }
 
             Bounds { max, min }
