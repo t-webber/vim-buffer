@@ -193,8 +193,21 @@ pub enum OperatorScope {
 /// Delimitations for scoping operators (e.g. `)`, `w`)
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Delimitation {
+    /// Between a `(` and a `)`
+    Parenthesis,
     /// Represents a vim word
     Word,
+}
+
+impl Delimitation {
+    /// Tries to return the [`Delimitation`] triggered by this char
+    pub const fn maybe_from(value: char) -> Option<Self> {
+        Some(match value {
+            '(' | ')' => Self::Parenthesis,
+            'w' => Self::Word,
+            _ => return None,
+        })
+    }
 }
 
 impl From<GoToAction> for OperatorScope {

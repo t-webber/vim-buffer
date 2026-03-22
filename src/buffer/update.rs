@@ -72,20 +72,65 @@ impl Buffer {
     }
 
     /// Returns the indices that bound the [`Delimitation`]
-    fn get_delimitation_indices(&self) -> (usize, usize) {
+    fn get_delimitation_indices(
+        &self,
+        delimitation: Delimitation,
+    ) -> Option<(usize, usize)> {
+        match delimitation {
+            Delimitation::Parenthesis => self.get_delimitation_indices_fn(
+                |ch| ch == '(',
+                |ch| ch == ')',
+                false,
+            ),
+            Delimitation::Word => {
+                #[expect(
+                    clippy::unwrap_in_result,
+                    clippy::unwrap_used,
+                    reason = "in bound"
+                )]
+                let cursor = IsIdentChar::new(
+                    self.content.chars().nth(self.as_cursor()).unwrap(),
+                );
+                let good = |ch| cursor.xor(ch);
+                self.get_delimitation_indices_fn(good, good, true)
+            }
+        }
+    }
+
+    /// Returns the indices that bound some chars, delimited by a function
+    #[expect(clippy::arithmetic_side_effects, reason = "in bound")]
+    fn get_delimitation_indices_fn(
+        &self,
+        is_start: impl Fn(char) -> bool,
+        is_end: impl Fn(char) -> bool,
+        aggressive: bool,
+    ) -> Option<(usize, usize)> {
         let mut after = self.chars_after_cursor();
         let mut before = self.chars_before_cursor_rev();
-        #[expect(clippy::unwrap_used, reason = "in bound")]
-        let cursor = IsIdentChar::new(after.next().unwrap().1);
-        #[expect(clippy::arithmetic_side_effects, reason = "in bound")]
-        (
-            before
-                .find(|(_, ch)| cursor.xor(*ch))
-                .map_or(0, |(idx, _)| idx + 1),
-            after
-                .find(|(_, ch)| cursor.xor(*ch))
-                .map_or(self.len(), |(idx, _)| idx),
-        )
+
+        let maybe_start = before.find(|ch| is_start(ch.1)).map(|ch| ch.0 + 1);
+        let maybe_end = after.find(|(_, ch)| is_end(*ch)).map(|(idx, _)| idx);
+
+        if aggressive {
+            return Some((
+                maybe_start.unwrap_or(0),
+                maybe_end.unwrap_or(self.len()),
+            ));
+        }
+
+        match (maybe_start, maybe_end) {
+            (Some(start), Some(end)) => Some((start, end)),
+            (None | Some(_), None) => None,
+            (None, Some(end)) =>
+                if let Some((start, _)) =
+                    self.chars_after_cursor().find(|(_, ch)| is_start(*ch))
+                    && start <= end
+                {
+                    Some((start + 1, end))
+                } else {
+                    None
+                },
+        }
     }
 
     /// Get the cursor indices that describe the part of the buffer to be edited
@@ -504,8 +549,8 @@ impl Buffer {
             OperatorScope::WholeLine => Some((0, self.len())),
             OperatorScope::Goto(first, second) =>
                 self.get_motion_delimination_indices(first, second),
-            OperatorScope::Delimitation(Delimitation::Word) =>
-                Some(self.get_delimitation_indices()),
+            OperatorScope::Delimitation(delim) =>
+                self.get_delimitation_indices(delim),
         }) else {
             return false;
         };

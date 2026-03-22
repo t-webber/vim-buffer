@@ -312,6 +312,12 @@ diw_symbols_right: "iabc (:def<Esc>F:diw" => "abc def",
 dii: "iabc def<Esc>Fediia." => "abc de.f",
 di_invalid: "iabc def<Esc>Fedifbi." => "abc .def",
 
+di_open_parens: "iabc( :d ff:k)s!<Esc>F:di(i." => "abc(.)s!",
+di_close_parens: "iabc( :d ff:k)s!<Esc>F:di)i." => "abc(.)s!",
+di_parens_before: "iabc( :d ff:k)s!<Esc>0di)i." => "abc(.)s!",
+di_parens_before_swaped: "iabc) :d ff:k(s!<Esc>0di)i." => ".abc) :d ff:k(s!",
+di_parens_after: "iabc( :d ff:k)s!<Esc>di)i." => "abc( :d ff:k)s.!",
+
 );
 
 buffer_tests!(replace,

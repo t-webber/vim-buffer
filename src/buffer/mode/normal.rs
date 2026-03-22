@@ -99,11 +99,10 @@ impl Normal {
                     actions![(op, OperatorScope::WholeLine)],
                 OPending::Operator(op, false) =>
                     self.handle_operator(event, op),
-                OPending::Operator(op, true) if ch == 'w' => actions![(
-                    op,
-                    OperatorScope::Delimitation(Delimitation::Word)
-                )],
-                OPending::Operator(_, true) => Actions::Unsupported,
+                OPending::Operator(op, true) => Delimitation::maybe_from(ch)
+                    .map_or(Actions::Unsupported, |delim| {
+                        actions![(op, OperatorScope::Delimitation(delim))]
+                    }),
             }
         } else {
             Actions::Unsupported
