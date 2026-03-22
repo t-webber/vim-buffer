@@ -20,3 +20,23 @@ macro_rules! do_evt {
         $buffer.update(&evt!($name))
     };
 }
+
+#[macro_export]
+macro_rules! buffer_tests {
+    ($($name:ident: $keymaps:literal => $output:literal,)*) => {
+            use vim_buffer::Buffer;
+            $(
+                #[test]
+                fn $name() {
+                    let mut buffer = Buffer::default();
+                    buffer.update_from_string($keymaps).unwrap();
+                    assert_eq!(
+                        buffer.as_content(),
+                        $output,
+                        "Keys: \x1b[35m{}\x1b[0m",
+                        $keymaps
+                    );
+                }
+            )*
+    };
+}

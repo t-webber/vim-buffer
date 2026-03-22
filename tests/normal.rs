@@ -1,36 +1,8 @@
 #![allow(non_snake_case)]
 
-macro_rules! buffer_tests {
-    ($mod:ident, $($name:ident: $keymaps:literal => $output:literal,)*) => {
-        mod $mod {
-            use vim_buffer::Buffer;
-            $(
-                #[test]
-                fn $name() {
-                    let mut buffer = Buffer::default();
-                    buffer.update_from_string($keymaps).unwrap();
-                    assert_eq!(
-                        buffer.as_content(),
-                        $output,
-                        "Keys: \x1b[35m{}\x1b[0m",
-                        $keymaps
-                    );
-                }
-            )*
-        }
-    };
-}
+mod common;
 
-buffer_tests!(insert,
-
-backspace: "ia<BS><BS>bcd<BS>" => "bc",
-arrows: "iabc<Left>d<Right>e" => "abdce",
-right_end: "iabc<Right>d" => "abcd",
-left_start: "iabc<Esc>I<Left>d" => "dabc",
-
-);
-
-buffer_tests!(normal,
+buffer_tests!(
 
 backspace: "ia<Esc><BS><BS>ibcd<Esc><BS>ie" => "becda",
 arrows: "iabc<Esc><Left>id<Esc><Right>ae" => "adbec",
@@ -333,22 +305,5 @@ yi_bracket_before: "iabc [def] ghi<Esc>0yi[p" => "abc [ddefef] ghi",
 yi_bracket_after: "iabc [def] ghi<Esc>yi[p" => "abc [def] ghi",
 
 ca_parens: "iabc(d:e)<Esc>F:ca(.<Esc>p)" => "abc.(d:e)",
-
-);
-
-buffer_tests!(replace,
-
-simple: "ihell(!:zd:tqs. qflk z<Esc>F(Ro world<Esc>lD" => "hello world",
-end: "iabcdef<Esc>0Rhello world" => "hello world",
-end_r: "iabcdef<Esc>0RHello WORLD!<Esc>r." => "Hello WORLD.",
-end_lr: "iabcdef<Esc>0Rhello world!<Esc>lr." => "hello world.",
-invalid: "R<C-a><S-CR><CR>" => "",
-empty: "Rabc" => "abc",
-arrows: "iabcdef<Esc>0Rghi<Left>j<Right>k<Right>l" => "ghjdkfl",
-esc_replace: "iabcdef<Esc>0Rklm<Esc>Rklm" =>"klklmf",
-bs: "iabcdef<Esc>0fdRghi<BS><BS><BS><BS><BS><BS>jk" => "jkcdef",
-bs_start: "iabc<Esc>0Rdef<BS><BS><BS><BS>." => ".bc",
-bs_too_far: "iabc<Esc>0Rdefghi<BS><BS>k" => "defgk",
-arrows_bs: "iabc<Esc>0Rx<Right>y<BS><BS><BS><BS>" => "xbc",
 
 );

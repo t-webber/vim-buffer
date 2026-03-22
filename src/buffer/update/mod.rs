@@ -11,7 +11,7 @@ use core::mem::take;
 
 use crossterm::event::Event;
 
-use crate::buffer::api::Buffer;
+use crate::Buffer;
 use crate::buffer::keymaps::Action;
 use crate::buffer::mode::Actions;
 use crate::event_parser::{EventParsingError, parse_events};
