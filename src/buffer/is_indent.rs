@@ -44,10 +44,10 @@ pub enum IdentCharSpaceOrSymbol {
 }
 
 impl From<char> for IdentCharSpaceOrSymbol {
-    fn from(ch: char) -> Self {
-        if matches!(ch, '0'..='9' | 'a'..='z' | 'A'..='Z' | '_') {
+    fn from(value: char) -> Self {
+        if matches!(value, '0'..='9' | 'a'..='z' | 'A'..='Z' | '_') {
             Self::IdentChar
-        } else if ch.is_whitespace() {
+        } else if value.is_whitespace() {
             Self::Space
         } else {
             Self::Symbol
@@ -62,8 +62,8 @@ impl Checker for IdentCharSpaceOrSymbol {}
 pub struct SpaceOrNot(bool);
 
 impl From<char> for SpaceOrNot {
-    fn from(ch: char) -> Self {
-        Self(ch.is_whitespace())
+    fn from(value: char) -> Self {
+        Self(value.is_whitespace())
     }
 }
 

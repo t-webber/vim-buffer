@@ -1,1 +1,9 @@
 allowed-idents-below-min-chars = []
+allow-expect-in-consts = false
+allow-expect-in-tests = true
+allow-indexing-slicing-in-tests = true
+allow-mixed-uninlined-format-args = false
+allow-panic-in-tests = true
+allow-renamed-params-for = []
+allow-unwrap-in-consts = false
+allow-unwrap-in-tests = true

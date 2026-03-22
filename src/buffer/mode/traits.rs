@@ -29,26 +29,26 @@ impl Actions {
 }
 
 impl From<Vec<Action>> for Actions {
-    fn from(list: Vec<Action>) -> Self {
-        Self::List(list)
+    fn from(value: Vec<Action>) -> Self {
+        Self::List(value)
     }
 }
 
 impl From<Action> for Actions {
-    fn from(action: Action) -> Self {
-        actions![action]
+    fn from(value: Action) -> Self {
+        actions![value]
     }
 }
 
 impl From<Mode> for Actions {
-    fn from(action: Mode) -> Self {
-        Action::from(action).into()
+    fn from(value: Mode) -> Self {
+        Action::from(value).into()
     }
 }
 
 impl From<GoToAction> for Actions {
-    fn from(action: GoToAction) -> Self {
-        Action::from(action).into()
+    fn from(value: GoToAction) -> Self {
+        Action::from(value).into()
     }
 }
 
