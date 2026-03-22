@@ -1,7 +1,7 @@
 use crossterm::event::{Event, KeyCode};
 
 use crate::buffer::keymaps::{
-    Action, CombinablePending, GoToAction, OPending, Operator, OperatorScope
+    Action, CombinablePending, Delimitation, GoToAction, OPending, Operator, OperatorScope
 };
 use crate::buffer::macros::actions;
 use crate::buffer::mode::all::Mode;
@@ -91,7 +91,19 @@ impl Normal {
                 OPending::ReplaceOne => Action::ReplaceWith(ch).into(),
                 OPending::OperatorAction(op, combinable) =>
                     Self::handle_operator_action(op, combinable, ch),
-                OPending::Operator(op) => self.handle_operator(event, op, ch),
+                OPending::Operator(_, true) if ch == 'i' =>
+                    Actions::Unsupported,
+                OPending::Operator(op, false) if ch == 'i' =>
+                    self.pend(OPending::Operator(op, true)),
+                OPending::Operator(op, false) if ch == op.as_char() =>
+                    actions![(op, OperatorScope::WholeLine)],
+                OPending::Operator(op, false) =>
+                    self.handle_operator(event, op),
+                OPending::Operator(op, true) if ch == 'w' => actions![(
+                    op,
+                    OperatorScope::Delimitation(Delimitation::Word)
+                )],
+                OPending::Operator(_, true) => Actions::Unsupported,
             }
         } else {
             Actions::Unsupported
@@ -99,15 +111,7 @@ impl Normal {
     }
 
     /// Handle operator events (`d`, `c`, etc.)
-    fn handle_operator(
-        &mut self,
-        event: &Event,
-        op: Operator,
-        ch: char,
-    ) -> Actions {
-        if op.as_char() == ch {
-            return actions![(op, OperatorScope::WholeLine)];
-        }
+    fn handle_operator(&mut self, event: &Event, op: Operator) -> Actions {
         let mut normal = Self::default();
         match normal.handle_key(event) {
             Actions::List(list) =>

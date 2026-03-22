@@ -122,8 +122,14 @@ pub enum OPending {
     /// Applies a single char action to a motion.
     GoTo,
     /// Operator action, like `d`, `c`, `g~`
-    Operator(Operator),
+    ///
+    /// The boolean is here to indicate if the operator should be applied on the
+    /// 'inner' (`i`)
+    Operator(Operator, bool),
     /// Operator action that has the motion pending, like `df`, `cf`, `g~f`
+    ///
+    /// The boolean is here to indicate if the operator should be applied on the
+    /// 'inner' (`i`)
     OperatorAction(Operator, CombinablePending),
     /// Replace one character
     ReplaceOne,
@@ -131,7 +137,7 @@ pub enum OPending {
 
 impl From<Operator> for OPending {
     fn from(value: Operator) -> Self {
-        Self::Operator(value)
+        Self::Operator(value, false)
     }
 }
 
@@ -176,10 +182,19 @@ impl Operator {
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum OperatorScope {
+    /// Apply operator on the inner of an operation (e.g., `iw`)
+    Delimitation(Delimitation),
     /// Apply the operator on simply those actions
     Goto(GoToAction, Option<GoToAction>),
     /// Apply operator on the whole line
     WholeLine,
+}
+
+/// Delimitations for scoping operators (e.g. `)`, `w`)
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Delimitation {
+    /// Represents a vim word
+    Word,
 }
 
 impl From<GoToAction> for OperatorScope {

@@ -305,6 +305,13 @@ nb_f_nb: "iab1 def1 ghi1<Esc>03f1i." => "ab1 def1 ghi.1",
 nb_multiple_f: "icccccccccccccccccccc<Esc>013fci." => "ccccccccccccc.ccccccc",
 nb_too_many: "iabc abc<Esc>09999wa." => "abc abc.",
 
+diw: "iabc def ghi<Esc>Fediw" => "abc  ghi",
+diw_spaces: "iabc   :def<Esc>F diw" => "abc:def",
+diw_symbols_left: "iabc (:def<Esc>F(diw" => "abc def",
+diw_symbols_right: "iabc (:def<Esc>F:diw" => "abc def",
+dii: "iabc def<Esc>Fediia." => "abc de.f",
+di_invalid: "iabc def<Esc>Fedifbi." => "abc .def",
+
 );
 
 buffer_tests!(replace,

@@ -6,8 +6,10 @@ use crossterm::event::Event;
 
 use crate::Mode;
 use crate::buffer::api::Buffer;
-use crate::buffer::is_indent::IsIdentChar;
-use crate::buffer::keymaps::{Action, GoToAction, Operator, OperatorScope};
+use crate::buffer::is_indent::{Classifier, IsIdentChar};
+use crate::buffer::keymaps::{
+    Action, Delimitation, GoToAction, Operator, OperatorScope
+};
 use crate::buffer::mode::Actions;
 use crate::event_parser::{EventParsingError, parse_events};
 use crate::utils::bounded_usize::BoundedUsize;
@@ -60,8 +62,7 @@ impl Buffer {
         };
 
         #[expect(clippy::string_slice, reason = "non-ascii not yet supported")]
-        //         #[expect(clippy::arithmetic_side_effects, reason = "explicit
-        // check")]  TODO: add support for UTF-8
+        // TODO: add support for UTF-8
         if max_cursor != min_cursor {
             old_content[min_cursor..max_cursor].clone_into(&mut self.clipboard);
         }
@@ -70,9 +71,26 @@ impl Buffer {
         true
     }
 
+    /// Returns the indices that bound the [`Delimitation`]
+    fn get_delimitation_indices(&self) -> (usize, usize) {
+        let mut after = self.chars_after_cursor();
+        let mut before = self.chars_before_cursor_rev();
+        #[expect(clippy::unwrap_used, reason = "in bound")]
+        let cursor = Classifier::new(after.next().unwrap().1);
+        #[expect(clippy::arithmetic_side_effects, reason = "in bound")]
+        (
+            before
+                .find(|(_, ch)| cursor.xor(*ch))
+                .map_or(0, |(idx, _)| idx + 1),
+            after
+                .find(|(_, ch)| cursor.xor(*ch))
+                .map_or(self.len(), |(idx, _)| idx),
+        )
+    }
+
     /// Get the cursor indices that describe the part of the buffer to be edited
     /// by the motion of an operator.
-    fn get_motion_delimination(
+    fn get_motion_delimination_indices(
         &mut self,
         first: GoToAction,
         maybe_second: Option<GoToAction>,
@@ -485,7 +503,9 @@ impl Buffer {
         let Some((min, max)) = (match scope {
             OperatorScope::WholeLine => Some((0, self.len())),
             OperatorScope::Goto(first, second) =>
-                self.get_motion_delimination(first, second),
+                self.get_motion_delimination_indices(first, second),
+            OperatorScope::Delimitation(Delimitation::Word) =>
+                Some(self.get_delimitation_indices()),
         }) else {
             return false;
         };
