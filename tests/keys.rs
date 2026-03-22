@@ -327,6 +327,11 @@ di_bracket: "iabc[ :d ff:k]s!<Esc>F:di[i." => "abc[.]s!",
 di_brace: "iabc{ :d ff:k}s!<Esc>F:di{i." => "abc{.}s!",
 di_chevron: "iabc<lt> :d ff:k<gt>s!<Esc>F:di<lt>i." => "abc<.>s!",
 
+yi_bracket_basic: "iabc [def] ghi<Esc>F[yi[p" => "abc [ddefef] ghi",
+yi_bracket_nested: "iabc [z[e]f] ghi<Esc>F[yi[p" => "abc [z[ee]f] ghi",
+yi_bracket_before: "iabc [def] ghi<Esc>0yi[p" => "abc [ddefef] ghi",
+yi_bracket_after: "iabc [def] ghi<Esc>yi[p" => "abc [def] ghi",
+
 );
 
 buffer_tests!(replace,

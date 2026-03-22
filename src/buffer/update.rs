@@ -113,7 +113,12 @@ impl Buffer {
         let mut after = self.chars_after_cursor();
         let mut before = self.chars_before_cursor_rev();
 
-        let maybe_start = before.find(|ch| is_start(ch.1)).map(|ch| ch.0 + 1);
+        let at_end = self.as_cursor() == self.len();
+        let maybe_start = if at_end || !is_start(self.as_char()) {
+            before.find(|ch| is_start(ch.1)).map(|ch| ch.0 + 1)
+        } else {
+            Some(self.as_cursor() + 1)
+        };
         let maybe_end = after.find(|(_, ch)| is_end(*ch)).map(|(idx, _)| idx);
 
         if aggressive {
@@ -290,6 +295,17 @@ impl Buffer {
         } else {
             self.cursor.set_to_max();
         }
+    }
+
+    /// Paste the copied content after the cursor
+    #[expect(clippy::arithmetic_side_effects, reason = "smaller than len")]
+    fn paste_after(&mut self) {
+        let pos = if self.as_cursor() >= self.len() {
+            self.len()
+        } else {
+            self.as_cursor() + 1
+        };
+        self.content.insert_str(pos, &self.clipboard);
     }
 
     /// Undos the latest undo
@@ -529,8 +545,7 @@ impl Buffer {
                 return self.update_cursor(goto_action),
             Action::Operator(op, scope) =>
                 return self.update_with_operator(op, scope),
-            Action::PasteAfter =>
-                self.content.insert_str(self.as_cursor(), &self.clipboard),
+            Action::PasteAfter => self.paste_after(),
             Action::PasteBefore => self.content.insert_str(
                 self.as_cursor().saturating_sub(1),
                 &self.clipboard,
