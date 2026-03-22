@@ -130,11 +130,9 @@ impl Buffer {
 impl From<String> for Buffer {
     fn from(value: String) -> Self {
         Self {
+            content: value.clone(),
             cursor: BoundedUsize::with_capacity(value.len()),
-            history: History::with_initial_value(
-                value.clone().into_boxed_str(),
-            ),
-            content: value,
+            history: History::with_initial_value(value.into_boxed_str()),
             ..Default::default()
         }
     }

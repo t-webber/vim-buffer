@@ -7,3 +7,6 @@ allow-panic-in-tests = true
 allow-renamed-params-for = []
 allow-unwrap-in-consts = false
 allow-unwrap-in-tests = true
+avoid-breaking-exported-api = false
+check-incompatible-msrv-in-tests = true
+check-inconsistent-struct-field-initializers = true
