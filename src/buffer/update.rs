@@ -82,11 +82,25 @@ impl Buffer {
     }
 
     /// Returns the indices that bound the [`Delimitation`]
+    #[expect(clippy::arithmetic_side_effects, reason = "smaller than len")]
     fn get_delimitation_indices(
         &self,
         delimitation: Delimitation,
+        include_bounds: bool,
     ) -> Option<(usize, usize)> {
         match delimitation {
+            Delimitation::Group(open, close) if include_bounds => self
+                .get_delimitation_indices_fn(
+                    |ch| ch == open,
+                    |ch| ch == close,
+                    false,
+                )
+                .map(|(start, end)| {
+                    (
+                        start.saturating_sub(1),
+                        if end == self.len() { end } else { end + 1 },
+                    )
+                }),
             Delimitation::Group(open, close) => self
                 .get_delimitation_indices_fn(
                     |ch| ch == open,
@@ -569,8 +583,10 @@ impl Buffer {
             OperatorScope::WholeLine => Some((0, self.len())),
             OperatorScope::Goto(first, second) =>
                 self.get_motion_delimination_indices(first, second),
-            OperatorScope::Delimitation(delim) =>
-                self.get_delimitation_indices(delim),
+            OperatorScope::Inner(delim) =>
+                self.get_delimitation_indices(delim, false),
+            OperatorScope::Around(delim) =>
+                self.get_delimitation_indices(delim, true),
         }) else {
             return false;
         };

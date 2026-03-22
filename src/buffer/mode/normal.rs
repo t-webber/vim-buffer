@@ -1,7 +1,7 @@
 use crossterm::event::{Event, KeyCode};
 
 use crate::buffer::keymaps::{
-    Action, CombinablePending, Delimitation, GoToAction, OPending, Operator, OperatorScope
+    Action, CombinablePending, Delimitation, GoToAction, OPending, Operator, OperatorPendingScope, OperatorScope
 };
 use crate::buffer::macros::actions;
 use crate::buffer::mode::all::Mode;
@@ -87,15 +87,18 @@ impl Normal {
             OPending::ReplaceOne => Action::ReplaceWith(ch).into(),
             OPending::OperatorAction(op, combinable) =>
                 Self::handle_operator_action(op, combinable, ch),
-            OPending::Operator(_, true) if ch == 'i' => Actions::Unsupported,
-            OPending::Operator(op, false) if ch == 'i' =>
-                self.pend(OPending::Operator(op, true)),
-            OPending::Operator(op, false) if ch == op.as_char() =>
-                actions![(op, OperatorScope::WholeLine)],
-            OPending::Operator(op, false) => self.handle_operator(event, op),
-            OPending::Operator(op, true) => Delimitation::maybe_from(ch)
+            OPending::Operator(op, None) => {
+                if let Some(scope) = OperatorPendingScope::maybe_from(ch) {
+                    self.pend(OPending::Operator(op, Some(scope)))
+                } else if ch == op.as_char() {
+                    actions![(op, OperatorScope::WholeLine)]
+                } else {
+                    self.handle_operator(event, op)
+                }
+            }
+            OPending::Operator(op, Some(scope)) => Delimitation::maybe_from(ch)
                 .map_or(Actions::Unsupported, |delim| {
-                    actions![(op, OperatorScope::Delimitation(delim))]
+                    actions![(op, scope, delim)]
                 }),
         }
     }

@@ -332,6 +332,8 @@ yi_bracket_nested: "iabc [z[e]f] ghi<Esc>F[yi[p" => "abc [z[ee]f] ghi",
 yi_bracket_before: "iabc [def] ghi<Esc>0yi[p" => "abc [ddefef] ghi",
 yi_bracket_after: "iabc [def] ghi<Esc>yi[p" => "abc [def] ghi",
 
+ca_parens: "iabc(d:e)<Esc>F:ca(.<Esc>p)" => "abc.(d:e)",
+
 );
 
 buffer_tests!(replace,

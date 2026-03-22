@@ -59,6 +59,17 @@ impl From<(Operator, OperatorScope)> for Action {
     }
 }
 
+impl From<(Operator, OperatorPendingScope, Delimitation)> for Action {
+    fn from(
+        (op, scope, delim): (Operator, OperatorPendingScope, Delimitation),
+    ) -> Self {
+        Self::Operator(op, match scope {
+            OperatorPendingScope::Around => OperatorScope::Around(delim),
+            OperatorPendingScope::Inner => OperatorScope::Inner(delim),
+        })
+    }
+}
+
 impl From<GoToAction> for Action {
     fn from(value: GoToAction) -> Self {
         Self::GoTo(value)
@@ -124,9 +135,8 @@ pub enum OPending {
     GoTo,
     /// Operator action, like `d`, `c`, `g~`
     ///
-    /// The boolean is here to indicate if the operator should be applied on the
-    /// 'inner' (`i`)
-    Operator(Operator, bool),
+    /// The operator can also be pending a scope, like inner `i` or around `a`.
+    Operator(Operator, Option<OperatorPendingScope>),
     /// Operator action that has the motion pending, like `df`, `cf`, `g~f`
     ///
     /// The boolean is here to indicate if the operator should be applied on the
@@ -136,9 +146,30 @@ pub enum OPending {
     ReplaceOne,
 }
 
+/// Pending Scope of an operator, like inner `i` or around `a`.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum OperatorPendingScope {
+    /// Around the scope, including delimiters
+    Around,
+    /// Inside the scope, excluding delimiters
+    Inner,
+}
+
+impl OperatorPendingScope {
+    /// Initiates an operator pending scope, like typing `i` after `d` to do
+    /// `diw`
+    pub const fn maybe_from(ch: char) -> Option<Self> {
+        match ch {
+            'a' => Some(Self::Around),
+            'i' => Some(Self::Inner),
+            _ => None,
+        }
+    }
+}
+
 impl From<Operator> for OPending {
     fn from(value: Operator) -> Self {
-        Self::Operator(value, false)
+        Self::Operator(value, None)
     }
 }
 
@@ -183,10 +214,12 @@ impl Operator {
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum OperatorScope {
-    /// Apply operator on the inner of an operation (e.g., `iw`)
-    Delimitation(Delimitation),
+    /// Apply operator on the around of an operation (e.g., `aw`)
+    Around(Delimitation),
     /// Apply the operator on simply those actions
     Goto(GoToAction, Option<GoToAction>),
+    /// Apply operator on the inner of an operation (e.g., `iw`)
+    Inner(Delimitation),
     /// Apply operator on the whole line
     WholeLine,
 }
