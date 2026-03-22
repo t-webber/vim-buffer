@@ -74,6 +74,7 @@ impl From<Mode> for Action {
 /// Actions to move the cursor
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[expect(clippy::upper_case_acronyms, reason = "vim wording")]
 pub enum GoToAction {
     /// Beginning of line (column 0), reached with `0`
     BeginningOfLine,
