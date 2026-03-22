@@ -11,3 +11,6 @@ avoid-breaking-exported-api = false
 check-incompatible-msrv-in-tests = true
 check-inconsistent-struct-field-initializers = true
 check-private-items = true
+disallowed-names = []
+enum-variant-name-threshold = 1
+excessive-nesting-threshold = 4

@@ -243,7 +243,7 @@ impl Buffer {
                 None => return self.cursor.set(0),
                 Some((idx, ch)) if !ch.is_whitespace() =>
                     return self.cursor.set(idx),
-                Some(_) => {}
+                Some(_) => (),
             }
         }
         let idx =
@@ -281,23 +281,27 @@ impl Buffer {
     /// Moves the cursor to the beginning of the next word.
     fn goto_next_word(&mut self) {
         let mut chars = self.chars_after_cursor();
-        if let Some((_, cursor_ch)) = chars.next()
-            && let cursor = IsIdentChar::new(cursor_ch)
-            && let Some((idx, next_ch)) = chars.find(|(_, ch)| cursor.xor(*ch))
-        {
-            if next_ch.is_whitespace() {
-                if let Some((non_space_idx, _)) =
-                    chars.find(|(_, ch)| !ch.is_whitespace())
-                {
-                    self.cursor.set(non_space_idx);
-                } else {
-                    self.cursor.set_to_max();
-                }
-            } else {
-                self.cursor.set(idx);
-            }
-        } else {
+
+        let Some((_, cursor_ch)) = chars.next() else {
             self.cursor.set_to_max();
+            return;
+        };
+
+        let cursor = IsIdentChar::new(cursor_ch);
+
+        let Some((idx, next_ch)) = chars.find(|(_, ch)| cursor.xor(*ch)) else {
+            self.cursor.set_to_max();
+            return;
+        };
+
+        if !next_ch.is_whitespace() {
+            self.cursor.set(idx);
+            return;
+        }
+
+        match chars.find(|(_, ch)| !ch.is_whitespace()) {
+            Some((non_space_idx, _)) => self.cursor.set(non_space_idx),
+            None => self.cursor.set_to_max(),
         }
     }
 
@@ -498,15 +502,11 @@ impl Buffer {
     pub fn update_no_save(&mut self, event: &Event) -> bool {
         match self.mode.handle_event(event) {
             Actions::Unsupported => false,
-            Actions::List(list) => {
-                for action in &list {
-                    if !self.update_once(*action) {
-                        return false;
-                    }
-                }
-                self.last_action.update(list, self.as_mode());
-                true
-            }
+            Actions::List(list) =>
+                list.iter().all(|action| self.update_once(*action)) && {
+                    self.last_action.update(list, self.as_mode());
+                    true
+                },
         }
     }
 

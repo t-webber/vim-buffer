@@ -69,43 +69,34 @@ impl Normal {
         &mut self,
         opending: OPending,
         event: &Event,
+        ch: char,
     ) -> Actions {
-        if let Some(key_event) = event.as_key_press_event()
-            && let KeyCode::Char(ch) = key_event.code
-        {
-            match opending {
-                OPending::GoTo if ch == 'e' =>
-                    GoToAction::EndOfPreviousWord.into(),
-                OPending::GoTo if ch == 'E' =>
-                    GoToAction::EndOfPreviousWORD.into(),
-                OPending::GoTo => Operator::maybe_from(ch)
-                    .map_or(Actions::Unsupported, |op| self.pend(op)),
-                OPending::CombinablePending(action) => {
-                    let (first, maybe_second) =
-                        Self::handle_combinable_opending_char_event(action, ch);
-                    maybe_second.map_or_else(
-                        || first.into(),
-                        |second| actions![first, second],
-                    )
-                }
-                OPending::ReplaceOne => Action::ReplaceWith(ch).into(),
-                OPending::OperatorAction(op, combinable) =>
-                    Self::handle_operator_action(op, combinable, ch),
-                OPending::Operator(_, true) if ch == 'i' =>
-                    Actions::Unsupported,
-                OPending::Operator(op, false) if ch == 'i' =>
-                    self.pend(OPending::Operator(op, true)),
-                OPending::Operator(op, false) if ch == op.as_char() =>
-                    actions![(op, OperatorScope::WholeLine)],
-                OPending::Operator(op, false) =>
-                    self.handle_operator(event, op),
-                OPending::Operator(op, true) => Delimitation::maybe_from(ch)
-                    .map_or(Actions::Unsupported, |delim| {
-                        actions![(op, OperatorScope::Delimitation(delim))]
-                    }),
+        match opending {
+            OPending::GoTo if ch == 'e' => GoToAction::EndOfPreviousWord.into(),
+            OPending::GoTo if ch == 'E' => GoToAction::EndOfPreviousWORD.into(),
+            OPending::GoTo => Operator::maybe_from(ch)
+                .map_or(Actions::Unsupported, |op| self.pend(op)),
+            OPending::CombinablePending(action) => {
+                let (first, maybe_second) =
+                    Self::handle_combinable_opending_char_event(action, ch);
+                maybe_second.map_or_else(
+                    || first.into(),
+                    |second| actions![first, second],
+                )
             }
-        } else {
-            Actions::Unsupported
+            OPending::ReplaceOne => Action::ReplaceWith(ch).into(),
+            OPending::OperatorAction(op, combinable) =>
+                Self::handle_operator_action(op, combinable, ch),
+            OPending::Operator(_, true) if ch == 'i' => Actions::Unsupported,
+            OPending::Operator(op, false) if ch == 'i' =>
+                self.pend(OPending::Operator(op, true)),
+            OPending::Operator(op, false) if ch == op.as_char() =>
+                actions![(op, OperatorScope::WholeLine)],
+            OPending::Operator(op, false) => self.handle_operator(event, op),
+            OPending::Operator(op, true) => Delimitation::maybe_from(ch)
+                .map_or(Actions::Unsupported, |delim| {
+                    actions![(op, OperatorScope::Delimitation(delim))]
+                }),
         }
     }
 
@@ -210,7 +201,13 @@ impl HandleKeyPress for Normal {
             Self::NumberPending(num) =>
                 self.default_handle_key(event).repeat(num),
             Self::Pending(num, opending) =>
-                self.handle_opending_event(opending, event).repeat(num),
+                if let Some(key_event) = event.as_key_press_event()
+                    && let KeyCode::Char(ch) = key_event.code
+                {
+                    self.handle_opending_event(opending, event, ch).repeat(num)
+                } else {
+                    Actions::Unsupported
+                },
         };
         if actions != Actions::NONE {
             *self = Self::None;
