@@ -45,6 +45,10 @@
     reason = "chosen style"
 )]
 #![expect(clippy::missing_inline_in_public_items, reason = "bad lint")]
+#![cfg_attr(
+    test,
+    allow(clippy::missing_panics_doc, reason = "tests may panic")
+)]
 
 /// Publicly interfaced buffer to handle vim keymap and modes
 mod buffer;

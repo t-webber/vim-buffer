@@ -27,6 +27,10 @@ pub enum ModifiedKeyParsingState {
 impl ModifiedKeyParsingState {
     /// Initialises a [`ModifiedKeyParsingState`] from a char that is found
     /// before a hyphen
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the char before the hyphen isn't a valid modifier
     pub const fn try_from_prehyphen_char(
         ch: char,
     ) -> Result<Self, ModifiedKeyError> {

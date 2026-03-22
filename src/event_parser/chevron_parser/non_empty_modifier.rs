@@ -21,6 +21,11 @@ impl NonEmptyModifiers {
     /// # Panics
     ///
     /// If the invariant 'modifier not empty' is true.
+    ///
+    /// # Errors
+    ///
+    /// If the modifiers list is not valid, more precisely, if it contains the
+    /// same modifier twice, like in `<C-C-S-x>`
     #[expect(clippy::unwrap_used, reason = "caller's responsibility")]
     pub fn build_event_unchecked(mut self) -> Result<Event> {
         let ch = self.0.pop().unwrap();
@@ -32,6 +37,10 @@ impl NonEmptyModifiers {
     }
 
     /// Builds an [`Event`] from a [`NonEmptyModifiers`] and a [`Chars`]
+    ///
+    /// # Errors
+    ///
+    /// If the chars provided do not represent a valid key
     pub fn build_event_with_chars(
         self,
         chars: Chars,
@@ -65,6 +74,11 @@ impl NonEmptyModifiers {
     }
 
     /// Returns the [`KeyModifiers`] associated to the [`NonEmptyModifiers`]
+    ///
+    /// # Errors
+    ///
+    /// If the modifiers list is not valid, more precisely, if it contains the
+    /// same modifier twice, like in `<C-C-S-x>`
     const fn into_modifiers(mut self) -> Result<KeyModifiers> {
         let mut modifiers = KeyModifiers::NONE;
         while let Some(next) = self.0.pop() {

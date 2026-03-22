@@ -30,6 +30,10 @@ impl Buffer {
     }
 
     /// Returns the char pointed by the cursor
+    ///
+    /// # Panics
+    ///
+    /// If the cursor went out of bounds of the buffer
     #[expect(clippy::unwrap_used, reason = "in bound")]
     fn as_char(&self) -> char {
         self.content.chars().nth(self.as_cursor()).unwrap()

@@ -56,7 +56,12 @@ pub enum ChevronGroupParsingState {
 const _: () = assert!(LENGTHS.min >= 2, "Reading 2 character before parsing");
 
 impl ChevronGroupParsingState {
-    /// The group is now certain to be a keycode
+    /// The group is now certain to be a keycode, because the parser read 2
+    /// non-hyphen chars inside the chevron group.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if no named key starts with those 2 characters.
     pub fn evolve_to_named_key(
         &mut self,
         previous: char,

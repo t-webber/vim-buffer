@@ -17,6 +17,11 @@ trait EventParser {
     type Error;
 
     /// Parses one more char with the given state.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the parsing failed, due to a meaningless succession
+    /// of characters.
     fn parse_char(&mut self, ch: char) -> Result<Option<Event>, Self::Error>;
 }
 

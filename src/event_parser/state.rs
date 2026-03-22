@@ -38,7 +38,6 @@ impl EventParserState {
 impl EventParser for EventParserState {
     type Error = EventParsingError;
 
-    /// Minimum length possible
     fn parse_char(&mut self, ch: char) -> Result<Option<Event>, Self::Error> {
         match self {
             Self::None if ch == '<' => {
