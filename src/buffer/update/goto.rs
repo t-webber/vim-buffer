@@ -110,6 +110,32 @@ impl Buffer {
         }
     }
 
+    /// Moves the cursor to the end of the next group, formed by any kind of
+    /// parenthesis
+    fn goto_next_group(&mut self) -> bool {
+        let mut after = self.chars_after_cursor();
+        let compl = [('{', '}'), ('[', ']'), ('(', ')'), ('<', '>')];
+        let cursor = self.as_char();
+        if matches!(cursor, '{' | '[' | '(' | '<')
+            && let Some((idx, _)) =
+                after.find(|(_, ch)| compl.contains(&(cursor, *ch)))
+        {
+            self.cursor.set(idx);
+            return true;
+        }
+        if let Some((_, open_ch)) = after.find(|(_, ch)| {
+            matches!(ch, '{' | '}' | '[' | ']' | '(' | ')' | '<' | '>')
+        }) && matches!(open_ch, '{' | '[' | '(' | '<')
+            && let Some((close_idx, _)) =
+                after.find(|(_, ch)| compl.contains(&(open_ch, *ch)))
+        {
+            self.cursor.set(close_idx);
+            true
+        } else {
+            false
+        }
+    }
+
     /// Moves the cursor to the beginning of the next word.
     fn goto_next_word(&mut self) {
         let mut chars = self.chars_after_cursor();
@@ -186,6 +212,7 @@ impl Buffer {
             GoToAction::EndWORD => self.goto_end_WORD(),
             GoToAction::EndOfPreviousWord => self.goto_end_of_previous_word(),
             GoToAction::EndOfPreviousWORD => self.goto_end_of_previous_WORD(),
+            GoToAction::NextGroup => return self.goto_next_group(),
         }
         true
     }

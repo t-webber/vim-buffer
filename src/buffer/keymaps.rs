@@ -112,6 +112,8 @@ pub enum GoToAction {
     /// Differs from [`Self::Right`] as it will never go beyond the last
     /// character.
     NextChar,
+    /// Apply operator on the next group, usually triggered with `%`
+    NextGroup,
     /// Find next occurrence of char and place cursor on it
     NextOccurrenceOf(char),
     /// Move to the beginning of the next WORD

@@ -178,6 +178,7 @@ impl HandleKeyPress for Normal {
             KeyCode::Char('u') => Action::Undo.into(),
             KeyCode::Char('w') => GoToAction::NextWord.into(),
             KeyCode::Char('y') => self.pend(Operator::Yank),
+            KeyCode::Char('%') => GoToAction::NextGroup.into(),
             KeyCode::Char('~') => actions![
                 (Operator::ToggleCase, GoToAction::Right.into()),
                 GoToAction::NextChar

@@ -33,6 +33,9 @@ impl Buffer {
     }
 
     /// Returns the indices that bound the [`Delimitation`]
+    ///
+    /// It can include the bounds (meaning the delimiters like `(` or `}` will
+    /// be included in the operator) or excluded.
     #[expect(clippy::arithmetic_side_effects, reason = "smaller than len")]
     fn get_delimitation_indices(
         &self,

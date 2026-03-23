@@ -306,4 +306,9 @@ yi_bracket_after: "iabc [def] ghi<Esc>yi[p" => "abc [def] ghi",
 
 ca_parens: "iabc(d:e)<Esc>F:ca(.<Esc>p)" => "abc.(d:e)",
 
+percent: "iabc(def)<Esc>0%a." => "abc(def).",
+percent_start: "i(def)<Esc>0%a." => "(def).",
+percent_unclosed: "iabc(def<Esc>0%i." => ".abc(def",
+percent_unclosed_closed: "iabc(def[ghi]<Esc>0%i." => ".abc(def[ghi]",
+
 );
