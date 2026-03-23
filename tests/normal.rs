@@ -310,5 +310,8 @@ percent: "iabc(def)<Esc>0%a." => "abc(def).",
 percent_start: "i(def)<Esc>0%a." => "(def).",
 percent_unclosed: "iabc(def<Esc>0%i." => ".abc(def",
 percent_unclosed_closed: "iabc(def[ghi]<Esc>0%i." => ".abc(def[ghi]",
+percent_end: "i(def)<Esc>F)%a." => "(.def)",
+percent_wrong_one: "iabc]def[ghi]<Esc>0%i." => ".abc]def[ghi]",
+percent_on_invalid: "iabc)def[ghi]<Esc>F)%i." => "abc.)def[ghi]",
 
 );

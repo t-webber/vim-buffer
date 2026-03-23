@@ -121,9 +121,18 @@ impl Buffer {
                 after.find(|(_, ch)| compl.contains(&(cursor, *ch)))
         {
             self.cursor.set(idx);
-            return true;
-        }
-        if let Some((_, open_ch)) = after.find(|(_, ch)| {
+            true
+        } else if matches!(cursor, '}' | ']' | ')' | '<') {
+            if let Some((start, _)) = self
+                .chars_before_cursor_rev()
+                .find(|(_, ch)| compl.contains(&(*ch, cursor)))
+            {
+                self.cursor.set(start);
+                true
+            } else {
+                false
+            }
+        } else if let Some((_, open_ch)) = after.find(|(_, ch)| {
             matches!(ch, '{' | '}' | '[' | ']' | '(' | ')' | '<' | '>')
         }) && matches!(open_ch, '{' | '[' | '(' | '<')
             && let Some((close_idx, _)) =
