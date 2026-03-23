@@ -116,33 +116,27 @@ impl Buffer {
         let mut after = self.chars_after_cursor();
         let compl = [('{', '}'), ('[', ']'), ('(', ')'), ('<', '>')];
         let cursor = self.as_char();
-        if matches!(cursor, '{' | '[' | '(' | '<')
-            && let Some((idx, _)) =
-                after.find(|(_, ch)| compl.contains(&(cursor, *ch)))
-        {
+
+        match cursor {
+            '{' | '[' | '(' | '<' =>
+                after.find(|(_, ch)| compl.contains(&(cursor, *ch))),
+            '}' | ']' | ')' | '>' => self
+                .chars_before_cursor_rev()
+                .find(|(_, ch)| compl.contains(&(*ch, cursor))),
+            _ => after
+                .find(|(_, ch)| {
+                    matches!(ch, '{' | '}' | '[' | ']' | '(' | ')' | '<' | '>')
+                })
+                .and_then(|(_, found)| match found {
+                    '{' | '[' | '(' | '<' =>
+                        after.find(|(_, ch)| compl.contains(&(found, *ch))),
+                    _ => None,
+                }),
+        }
+        .is_some_and(|(idx, _)| {
             self.cursor.set(idx);
             true
-        } else if matches!(cursor, '}' | ']' | ')' | '<') {
-            if let Some((start, _)) = self
-                .chars_before_cursor_rev()
-                .find(|(_, ch)| compl.contains(&(*ch, cursor)))
-            {
-                self.cursor.set(start);
-                true
-            } else {
-                false
-            }
-        } else if let Some((_, open_ch)) = after.find(|(_, ch)| {
-            matches!(ch, '{' | '}' | '[' | ']' | '(' | ')' | '<' | '>')
-        }) && matches!(open_ch, '{' | '[' | '(' | '<')
-            && let Some((close_idx, _)) =
-                after.find(|(_, ch)| compl.contains(&(open_ch, *ch)))
-        {
-            self.cursor.set(close_idx);
-            true
-        } else {
-            false
-        }
+        })
     }
 
     /// Moves the cursor to the beginning of the next word.
