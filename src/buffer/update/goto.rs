@@ -117,7 +117,7 @@ impl Buffer {
         let compl = [('{', '}'), ('[', ']'), ('(', ')'), ('<', '>')];
         let cursor = self.as_char();
 
-        match cursor {
+        if let Some((idx, _)) = match cursor {
             '{' | '[' | '(' | '<' =>
                 after.find(|(_, ch)| compl.contains(&(cursor, *ch))),
             '}' | ']' | ')' | '>' => self
@@ -132,11 +132,10 @@ impl Buffer {
                         after.find(|(_, ch)| compl.contains(&(found, *ch))),
                     _ => None,
                 }),
-        }
-        .is_some_and(|(idx, _)| {
+        } {
             self.cursor.set(idx);
-            true
-        })
+        }
+        true
     }
 
     /// Moves the cursor to the beginning of the next word.

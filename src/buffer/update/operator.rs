@@ -132,7 +132,10 @@ impl Buffer {
         let new_cursor = self.as_cursor();
         let max = new_cursor.max(old_cursor);
         let min = new_cursor.min(old_cursor);
-        if matches!(first, GoToAction::EndWord | GoToAction::EndWORD) {
+        if matches!(
+            first,
+            GoToAction::EndWord | GoToAction::EndWORD | GoToAction::NextGroup
+        ) {
             Some((min, max.saturating_add(1).min(self.len())))
         } else {
             Some((min, max))

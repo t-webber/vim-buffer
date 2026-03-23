@@ -314,4 +314,12 @@ percent_end: "i(def)<Esc>F)%a." => "(.def)",
 percent_wrong_one: "iabc]def[ghi]<Esc>0%i." => ".abc]def[ghi]",
 percent_on_invalid: "iabc)def[ghi]<Esc>F)%i." => "abc.)def[ghi]",
 
+dpercent_before: "iabc(def)ghi<Esc>0d%" => "ghi",
+dpercent_start: "i(abc)def<Esc>0d%" => "def",
+dpercent_end: "iabc(def)ghi<Esc>F)d%" => "abcghi",
+dpercent_after: "iabc(def)ghi<Esc>d%" => "abc(def)gh",
+dpercent_unclosed_closed: "iabc(def[ghi]<Esc>0d%" => "bc(def[ghi]",
+dpercent_wrong_one: "iabc]def[ghi]<Esc>0d%" => "bc]def[ghi]",
+dpercent_on_invalid: "iabc)def[ghi]<Esc>F)d%" => "abcdef[ghi]",
+
 );
