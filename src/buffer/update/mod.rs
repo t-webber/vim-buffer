@@ -18,14 +18,18 @@ use crate::event_parser::{EventParsingError, parse_events};
 
 impl Buffer {
     /// Paste the copied content after the cursor
+    #[must_use]
     #[expect(clippy::arithmetic_side_effects, reason = "smaller than len")]
-    fn paste_after(&mut self) {
+    fn paste_after(&mut self) -> bool {
         let pos = if self.as_cursor() >= self.len() {
             self.len()
         } else {
             self.as_cursor() + 1
         };
-        self.content.insert_str(pos, self.registers.get());
+        self.registers.get().is_some_and(|clip| {
+            self.content.insert_str(pos, clip);
+            true
+        })
     }
 
     /// Remove the character under the current cursor and replace it by
@@ -173,11 +177,14 @@ impl Buffer {
                 return self.update_cursor(goto_action),
             Action::Operator(op, scope) =>
                 return self.update_with_operator(op, scope),
-            Action::PasteAfter => self.paste_after(),
-            Action::PasteBefore => self.content.insert_str(
-                self.as_cursor().saturating_sub(1),
-                self.registers.get(),
-            ),
+            Action::PasteAfter => return self.paste_after(),
+            Action::PasteBefore =>
+                if let Some(clip) = self.registers.get() {
+                    let idx = self.as_cursor().saturating_sub(1);
+                    self.content.insert_str(idx, clip);
+                } else {
+                    return false;
+                },
             Action::Repeat => {
                 let last = take(&mut self.last_action);
                 let ok = last.perform(self);
