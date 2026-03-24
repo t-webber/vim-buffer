@@ -1,12 +1,15 @@
-/// Name of the registers
-mod keys {
-    #![expect(clippy::as_conversions, reason = "compile time")]
-
-    /// Default register that is always updated
-    pub const DEFAULT: usize = '"' as usize;
+/// Associates key name to value
+macro_rules! key {
+    ($name:ident : $value:literal) => {
+        #[expect(clippy::as_conversions, reason = "compile time")]
+        const $name: usize = $value as usize;
+        const _: () = assert!($name < 128);
+    };
 }
 
-use keys::DEFAULT;
+key!(DEFAULT: '"');
+key!(DELETE: '-');
+key!(COPY: '0');
 
 /// Register values and handling
 #[derive(Debug)]
@@ -19,11 +22,26 @@ impl Registers {
     }
 
     /// Insert a new value at the given register
-    pub fn insert(&mut self, value: &str) {
-        if let Some(old) = &mut self.0[DEFAULT] {
+    pub fn insert(&mut self, value: &str, is_delete: bool) {
+        self.insert_key(DEFAULT, value);
+        if is_delete {
+            self.insert_key(DELETE, value);
+        } else {
+            self.insert_key(COPY, value);
+        }
+    }
+
+    /// Insert a new value at the given register
+    ///
+    /// # Panics
+    ///
+    /// If key >= 128.
+    #[expect(clippy::indexing_slicing, reason = "keys are less than 128")]
+    fn insert_key(&mut self, key: usize, value: &str) {
+        if let Some(old) = &mut self.0[key] {
             value.clone_into(old);
         } else {
-            self.0[DEFAULT] = Some(value.to_owned());
+            self.0[key] = Some(value.to_owned());
         }
     }
 }
