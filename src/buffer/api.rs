@@ -2,6 +2,7 @@ use crate::Mode;
 use crate::buffer::history::History;
 use crate::buffer::last_action::LastAction;
 use crate::buffer::mode::BufferMode;
+use crate::buffer::registers::Registers;
 use crate::utils::bounded_usize::BoundedUsize;
 
 /// Buffer that supports vim keymaps
@@ -28,8 +29,6 @@ use crate::utils::bounded_usize::BoundedUsize;
 /// ```
 #[derive(Debug, Default)]
 pub struct Buffer {
-    /// Content of clipboard, from yanks and deletions, used by paste.
-    pub(super) clipboard: String,
     /// Content of the buffer
     pub(super) content: String,
     /// Position of the cursor within the buffer
@@ -42,6 +41,8 @@ pub struct Buffer {
     pub(super) mode: BufferMode,
     /// Removed charracters when writing in replace mode
     pub(super) pre_replace_content: Vec<Option<char>>,
+    /// Content of clipboard, from yanks and deletions, used by paste.
+    pub(super) registers: Registers,
 }
 
 impl Buffer {

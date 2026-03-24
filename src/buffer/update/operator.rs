@@ -25,7 +25,7 @@ impl Buffer {
         #[expect(clippy::string_slice, reason = "non-ascii not yet supported")]
         // TODO: add support for UTF-8
         if max_cursor != min_cursor {
-            old_content[min_cursor..max_cursor].clone_into(&mut self.clipboard);
+            self.registers.insert(&old_content[min_cursor..max_cursor]);
         }
         self.cursor = BoundedUsize::with_capacity(self.content.len());
         self.cursor.set(min_cursor);
@@ -164,7 +164,7 @@ impl Buffer {
             Operator::Delete => return self.delete(min, max),
             Operator::Yank => {
                 #[expect(clippy::string_slice, reason = "utf8 not supported")]
-                self.content[min..max].clone_into(&mut self.clipboard);
+                self.registers.insert(&self.content[min..max]);
                 return true;
             }
             Operator::Change =>

@@ -12,6 +12,8 @@ mod last_action;
 mod macros;
 /// Handles the vim modes and the keypresses on those modes
 mod mode;
+/// Handles the different vim registers.
+mod registers;
 /// Methods to update the [`Buffer`] with keymaps.
 mod update;
 

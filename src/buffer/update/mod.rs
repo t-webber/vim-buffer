@@ -25,7 +25,7 @@ impl Buffer {
         } else {
             self.as_cursor() + 1
         };
-        self.content.insert_str(pos, &self.clipboard);
+        self.content.insert_str(pos, self.registers.get());
     }
 
     /// Remove the character under the current cursor and replace it by
@@ -176,7 +176,7 @@ impl Buffer {
             Action::PasteAfter => self.paste_after(),
             Action::PasteBefore => self.content.insert_str(
                 self.as_cursor().saturating_sub(1),
-                &self.clipboard,
+                self.registers.get(),
             ),
             Action::Repeat => {
                 let last = take(&mut self.last_action);
