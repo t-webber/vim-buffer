@@ -80,16 +80,16 @@ impl Buffer {
     /// let mut buffer = Buffer::default();
     ///
     /// // Update it with crossterm events
-    /// buffer.update(&Event::Key(KeyEvent::from(KeyCode::Char('i'))));
+    /// buffer.update(Event::Key(KeyEvent::from(KeyCode::Char('i'))));
     /// for ch in "hello".chars() {
-    ///     buffer.update(&Event::Key(KeyEvent::from(KeyCode::Char('h'))));
+    ///     buffer.update(Event::Key(KeyEvent::from(KeyCode::Char('h'))));
     /// }
-    /// buffer.update(&Event::Key(KeyEvent::from(KeyCode::Esc)));
-    /// buffer.update(&Event::Key(KeyEvent::from(KeyCode::Char('^'))));
-    /// buffer.update(&Event::Key(KeyEvent::from(KeyCode::Char('s'))));
-    /// buffer.update(&Event::Key(KeyEvent::from(KeyCode::Char('H'))));
+    /// buffer.update(Event::Key(KeyEvent::from(KeyCode::Esc)));
+    /// buffer.update(Event::Key(KeyEvent::from(KeyCode::Char('^'))));
+    /// buffer.update(Event::Key(KeyEvent::from(KeyCode::Char('s'))));
+    /// buffer.update(Event::Key(KeyEvent::from(KeyCode::Char('H'))));
     /// ```
-    pub fn update(&mut self, event: &Event) -> bool {
+    pub fn update(&mut self, event: Event) -> bool {
         let success = self.update_no_save(event);
         self.save_to_history();
         success
@@ -126,13 +126,13 @@ impl Buffer {
         keymaps: &str,
     ) -> Result<(), EventParsingError> {
         for event in parse_events(keymaps)? {
-            self.update(&event);
+            self.update(event);
         }
         Ok(())
     }
 
     /// Same as [`Self::update`] but without updating the history.
-    pub fn update_no_save(&mut self, event: &Event) -> bool {
+    pub fn update_no_save(&mut self, event: Event) -> bool {
         match self.mode.handle_event(event) {
             Actions::Unsupported => false,
             Actions::List(list) =>

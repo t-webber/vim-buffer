@@ -30,7 +30,7 @@ fn normal_u_2_words() {
     do_evt!(buffer, 'c');
     do_evt!(buffer, Esc);
     do_evt!(buffer, 'i');
-    buffer.update(&evt!('d'));
+    buffer.update(evt!('d'));
     do_evt!(buffer, 'e');
     do_evt!(buffer, 'f');
     do_evt!(buffer, Esc);

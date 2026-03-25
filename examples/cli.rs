@@ -85,7 +85,7 @@ fn raw_main() -> colour_eyre::Result<()> {
             break Ok(());
         }
 
-        buffer.update(&event);
+        buffer.update(event);
     }
 }
 

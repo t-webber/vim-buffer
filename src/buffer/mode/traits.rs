@@ -55,7 +55,7 @@ impl From<GoToAction> for Actions {
 /// Handle incoming terminal events, like keypresses.
 pub trait HandleKeyPress {
     /// Handle incoming terminal events off any kind.
-    fn default_handle_key(&mut self, event: &Event) -> Actions {
+    fn default_handle_key(&mut self, event: Event) -> Actions {
         event.as_key_press_event().map_or(
             Actions::Unsupported,
             |mut key_event| {
@@ -83,7 +83,7 @@ pub trait HandleKeyPress {
     fn handle_ctrl_key_press(&mut self, code: KeyCode) -> Actions;
 
     /// Handle incoming terminal events off any kind.
-    fn handle_key(&mut self, event: &Event) -> Actions {
+    fn handle_key(&mut self, event: Event) -> Actions {
         self.default_handle_key(event)
     }
 

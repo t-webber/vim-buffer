@@ -69,7 +69,7 @@ impl Normal {
     fn handle_opending_event(
         &mut self,
         opending: OPending,
-        event: &Event,
+        event: Event,
         ch: char,
     ) -> Actions {
         match opending {
@@ -105,7 +105,7 @@ impl Normal {
     }
 
     /// Handle operator events (`d`, `c`, etc.)
-    fn handle_operator(&mut self, event: &Event, op: Operator) -> Actions {
+    fn handle_operator(&mut self, event: Event, op: Operator) -> Actions {
         let mut normal = Self::default();
         match normal.handle_key(event) {
             Actions::List(list) =>
@@ -200,7 +200,7 @@ impl HandleKeyPress for Normal {
         }
     }
 
-    fn handle_key(&mut self, event: &Event) -> Actions {
+    fn handle_key(&mut self, event: Event) -> Actions {
         let actions = match *self {
             Self::None => self.default_handle_key(event),
             Self::NumberPending(num) =>

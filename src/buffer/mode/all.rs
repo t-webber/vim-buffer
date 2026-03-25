@@ -38,7 +38,7 @@ impl Default for BufferMode {
 
 impl BufferMode {
     /// Handle incoming terminal events off any kind.
-    pub fn handle_event(&mut self, event: &Event) -> Actions {
+    pub fn handle_event(&mut self, event: Event) -> Actions {
         match self {
             Self::Insert => Insert.handle_key(event),
             Self::Normal(normal) => normal.handle_key(event),

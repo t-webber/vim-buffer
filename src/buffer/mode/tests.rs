@@ -8,11 +8,11 @@ use crate::buffer::mode::{Actions, BufferMode};
 const NORMAL: BufferMode = BufferMode::Normal(Normal::new());
 
 fn expect_action(mut mode: BufferMode, event: Event, action: &[Action]) {
-    assert_eq!(mode.handle_event(&event), action.to_vec().into());
+    assert_eq!(mode.handle_event(event), action.to_vec().into());
 }
 
 fn expect_no_action(mut mode: BufferMode, event: Event) {
-    assert_eq!(mode.handle_event(&event), Actions::Unsupported);
+    assert_eq!(mode.handle_event(event), Actions::Unsupported);
 }
 
 fn code_event(code: KeyCode) -> Event {
@@ -125,7 +125,7 @@ fn combinable_pending_cancelled() {
         OPending::CombinablePending(CombinablePending::FindNext),
     ));
     let event = code_event(KeyCode::Esc);
-    let actions = mode.handle_event(&event);
+    let actions = mode.handle_event(event);
     assert_eq!(actions, Actions::Unsupported);
     assert_eq!(mode, NORMAL);
 }
@@ -135,7 +135,7 @@ fn pending_cancelled() {
     let mut mode =
         BufferMode::Normal(Normal::Pending(None, OPending::ReplaceOne));
     let event = code_event(KeyCode::Esc);
-    let actions = mode.handle_event(&event);
+    let actions = mode.handle_event(event);
     assert_eq!(actions, Actions::Unsupported);
     assert_eq!(mode, NORMAL);
 }

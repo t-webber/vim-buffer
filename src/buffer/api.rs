@@ -17,9 +17,9 @@ use crate::utils::bounded_usize::BoundedUsize;
 /// assert_eq!(buffer.as_mode(), Mode::Normal);
 ///
 /// // Update it with crossterm events
-/// buffer.update(&Event::Key(KeyEvent::from(KeyCode::Char('i'))));
+/// buffer.update(Event::Key(KeyEvent::from(KeyCode::Char('i'))));
 /// for ch in "hello".chars() {
-///     buffer.update(&Event::Key(KeyEvent::from(KeyCode::Char(ch))));
+///     buffer.update(Event::Key(KeyEvent::from(KeyCode::Char(ch))));
 /// }
 /// assert_eq!(buffer.as_content(), "hello");
 ///

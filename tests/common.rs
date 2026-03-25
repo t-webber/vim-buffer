@@ -14,10 +14,10 @@ macro_rules! evt {
 #[macro_export]
 macro_rules! do_evt {
     ($buffer:ident, $name:ident) => {
-        $buffer.update(&evt!($name))
+        $buffer.update(evt!($name))
     };
     ($buffer:ident, $name:literal) => {
-        $buffer.update(&evt!($name))
+        $buffer.update(evt!($name))
     };
 }
 
