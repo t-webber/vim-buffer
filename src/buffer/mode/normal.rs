@@ -16,7 +16,7 @@ pub enum Normal {
     /// A digit was pressed, and is pending for a action.
     NumberPending(usize),
     /// Pending keymaps that wait for further keypresses
-    Pending(usize, OPending),
+    Pending(Option<usize>, OPending),
 }
 
 impl Normal {
@@ -37,9 +37,10 @@ impl Normal {
 
     /// Triggers a new pending action.
     fn pend(&mut self, pending: impl Into<OPending>) -> Actions {
-        *self = match self {
-            Self::Pending(..) | Self::None => Self::Pending(1, pending.into()),
-            Self::NumberPending(num) => Self::Pending(*num, pending.into()),
+        *self = if let Self::NumberPending(num) = *self {
+            Self::Pending(Some(num), pending.into())
+        } else {
+            Self::Pending(None, pending.into())
         };
         Actions::NONE
     }
@@ -208,7 +209,8 @@ impl HandleKeyPress for Normal {
                 if let Some(key_event) = event.as_key_press_event()
                     && let KeyCode::Char(ch) = key_event.code
                 {
-                    self.handle_opending_event(opending, event, ch).repeat(num)
+                    self.handle_opending_event(opending, event, ch)
+                        .repeat(num.unwrap_or(1))
                 } else {
                     Actions::Unsupported
                 },
