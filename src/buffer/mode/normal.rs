@@ -26,12 +26,27 @@ impl Normal {
     }
 
     /// Triggers a new number pending.
-    const fn num(&mut self, num: usize) -> Actions {
-        if let Self::NumberPending(old) = self {
-            *old = old.saturating_mul(10).saturating_add(num);
-        } else {
-            *self = Self::NumberPending(num);
-        }
+    ///
+    /// # Panics
+    ///
+    /// If `ch` isn't an ascii digit.
+    #[expect(
+        clippy::as_conversions,
+        clippy::arithmetic_side_effects,
+        reason = "in bounds"
+    )]
+    fn num(&mut self, ch: char) -> Actions {
+        debug_assert!(ch.is_ascii_digit(), "invalid arguments");
+        let num = ((ch as u32) - ('0' as u32)) as usize;
+        *self = match *self {
+            Self::None => Self::NumberPending(num),
+            Self::NumberPending(old) =>
+                Self::NumberPending(old.saturating_mul(10).saturating_add(num)),
+            Self::Pending(old, opending) => Self::Pending(
+                Some(old.unwrap_or(0).saturating_mul(10).saturating_add(num)),
+                opending,
+            ),
+        };
         Actions::NONE
     }
 
@@ -143,6 +158,29 @@ impl Normal {
         };
         actions![(op, OperatorScope::Goto(first, second))]
     }
+
+    /// Handles a keypress when [`Normal`] is [`Normal::Pending`]
+    fn handle_pending(
+        &mut self,
+        event: Event,
+        num: Option<usize>,
+        opending: OPending,
+    ) -> Actions {
+        if let Some(key_event) = event.as_key_press_event()
+            && let KeyCode::Char(ch) = key_event.code
+        {
+            if (matches!(ch, '1'..='9') || (ch == '0' && num.is_some()))
+                && !matches!(opending, OPending::CombinablePending(_))
+            {
+                self.num(ch)
+            } else {
+                self.handle_opending_event(opending, event, ch)
+                    .repeat(num.unwrap_or(1))
+            }
+        } else {
+            Actions::Unsupported
+        }
+    }
 }
 
 #[expect(clippy::wildcard_enum_match_arm, reason = "only support a few")]
@@ -186,9 +224,7 @@ impl HandleKeyPress for Normal {
             ],
             KeyCode::Char('0') if !matches!(self, Self::NumberPending(_)) =>
                 GoToAction::BeginningOfLine.into(),
-            KeyCode::Char(ch @ '0'..='9') =>
-                usize::try_from(u32::from(ch).saturating_sub(u32::from('0')))
-                    .map_or(Actions::Unsupported, |num| self.num(num)),
+            KeyCode::Char(ch @ '0'..='9') => self.num(ch),
             _ => Actions::Unsupported,
         }
     }
@@ -206,14 +242,7 @@ impl HandleKeyPress for Normal {
             Self::NumberPending(num) =>
                 self.default_handle_key(event).repeat(num),
             Self::Pending(num, opending) =>
-                if let Some(key_event) = event.as_key_press_event()
-                    && let KeyCode::Char(ch) = key_event.code
-                {
-                    self.handle_opending_event(opending, event, ch)
-                        .repeat(num.unwrap_or(1))
-                } else {
-                    Actions::Unsupported
-                },
+                self.handle_pending(event, num, opending),
         };
         if actions != Actions::NONE {
             *self = Self::None;

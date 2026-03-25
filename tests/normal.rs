@@ -322,4 +322,7 @@ dpercent_unclosed_closed: "iabc(def[ghi]<Esc>0d%" => "bc(def[ghi]",
 dpercent_wrong_one: "iabc]def[ghi]<Esc>0d%" => "bc]def[ghi]",
 dpercent_on_invalid: "iabc)def[ghi]<Esc>F)d%" => "abcdef[ghi]",
 
+two_dw: "iabc def ghi<Esc>02dw" => "ghi",
+d2w: "iabc def ghi<Esc>0d2w" => "ghi",
+
 );
