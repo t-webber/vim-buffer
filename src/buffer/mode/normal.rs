@@ -8,15 +8,18 @@ use crate::buffer::mode::all::Mode;
 use crate::buffer::mode::traits::{Actions, HandleKeyPress};
 
 /// Struct to handle keypresses in normal mode
+#[expect(clippy::arbitrary_source_item_ordering, reason = "timeline")]
 #[derive(Debug, Default, Eq, PartialEq, Clone, Copy)]
 pub enum Normal {
     /// Normal mode but no operations are pending
     #[default]
     None,
     /// A digit was pressed, and is pending for a action.
-    NumberPending(usize),
+    PreNum(usize),
     /// Pending keymaps that wait for further keypresses
     Pending(Option<usize>, OPending),
+    /// A digit was pressed in the middle of pending keymaps
+    PostNum(Option<usize>, OPending, usize),
 }
 
 impl Normal {
@@ -39,12 +42,14 @@ impl Normal {
         debug_assert!(ch.is_ascii_digit(), "invalid arguments");
         let num = ((ch as u32) - ('0' as u32)) as usize;
         *self = match *self {
-            Self::None => Self::NumberPending(num),
-            Self::NumberPending(old) =>
-                Self::NumberPending(old.saturating_mul(10).saturating_add(num)),
-            Self::Pending(old, opending) => Self::Pending(
-                Some(old.unwrap_or(0).saturating_mul(10).saturating_add(num)),
-                opending,
+            Self::None => Self::PreNum(num),
+            Self::PreNum(old) =>
+                Self::PreNum(old.saturating_mul(10).saturating_add(num)),
+            Self::Pending(old, opending) => Self::PostNum(old, opending, num),
+            Self::PostNum(pre, pend, old) => Self::PostNum(
+                pre,
+                pend,
+                old.saturating_mul(10).saturating_add(num),
             ),
         };
         Actions::NONE
@@ -52,7 +57,7 @@ impl Normal {
 
     /// Triggers a new pending action.
     fn pend(&mut self, pending: impl Into<OPending>) -> Actions {
-        *self = if let Self::NumberPending(num) = *self {
+        *self = if let Self::PreNum(num) = *self {
             Self::Pending(Some(num), pending.into())
         } else {
             Self::Pending(None, pending.into())
@@ -222,7 +227,8 @@ impl HandleKeyPress for Normal {
                 (Operator::ToggleCase, GoToAction::Right.into()),
                 GoToAction::NextChar
             ],
-            KeyCode::Char('0') if !matches!(self, Self::NumberPending(_)) =>
+            KeyCode::Char('0')
+                if !matches!(self, Self::PreNum(_) | Self::PostNum(..)) =>
                 GoToAction::BeginningOfLine.into(),
             KeyCode::Char(ch @ '0'..='9') => self.num(ch),
             _ => Actions::Unsupported,
@@ -239,10 +245,14 @@ impl HandleKeyPress for Normal {
     fn handle_key(&mut self, event: Event) -> Actions {
         let actions = match *self {
             Self::None => self.default_handle_key(event),
-            Self::NumberPending(num) =>
-                self.default_handle_key(event).repeat(num),
+            Self::PreNum(num) => self.default_handle_key(event).repeat(num),
             Self::Pending(num, opending) =>
                 self.handle_pending(event, num, opending),
+            Self::PostNum(pre, opending, post) => self.handle_pending(
+                event,
+                Some(pre.unwrap_or(1).saturating_mul(post)),
+                opending,
+            ),
         };
         if actions != Actions::NONE {
             *self = Self::None;
