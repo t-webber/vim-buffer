@@ -55,12 +55,14 @@ impl Normal {
         Actions::NONE
     }
 
-    /// Triggers a new pending action.
-    fn pend(&mut self, pending: impl Into<OPending>) -> Actions {
-        *self = if let Self::PreNum(num) = *self {
-            Self::Pending(Some(num), pending.into())
-        } else {
-            Self::Pending(None, pending.into())
+    /// Triggers a new pending action, or continues building the previous one.
+    fn pend(&mut self, pending: impl Copy + Into<OPending>) -> Actions {
+        *self = match *self {
+            Self::None => Self::Pending(None, pending.into()),
+            Self::PreNum(num) => Self::Pending(Some(num), pending.into()),
+            Self::Pending(pre, _) => Self::Pending(pre, pending.into()),
+            Self::PostNum(pre, _, post) =>
+                Self::PostNum(pre, pending.into(), post),
         };
         Actions::NONE
     }
