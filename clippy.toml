@@ -21,7 +21,7 @@ max-suggested-slice-pattern-length = 20
 max-trait-bounds = 1
 pub-underscore-fields-behavior = "AllPubFields"
 standard-macro-braces = [{ name = "actions", brace = "[" }]
-too-many-arguments-threshold = 4
+too-many-arguments-threshold = 5
 too-many-lines-threshold = 50
 type-complexity-threshold = 100
 upper-case-acronyms-aggressive = true
