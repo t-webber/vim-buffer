@@ -176,8 +176,8 @@ impl Buffer {
             Action::Redo => return self.redo(),
             Action::GoTo(goto_action) =>
                 return self.update_cursor(goto_action),
-            Action::Operator(op, scope) =>
-                return self.update_with_operator(op, scope),
+            Action::Operator(op, scope, num) =>
+                return self.update_with_operator(op, scope, num),
             Action::PasteAfter => return self.paste_after(),
             Action::PasteBefore =>
                 if let Some(clip) = self.registers.get() {

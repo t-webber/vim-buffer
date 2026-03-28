@@ -6,7 +6,7 @@
 /// Creates an [`crate::buffer::mode::Actions`] from a list of actions.
 macro_rules! actions {
     ($($action:expr),*) => {
-        vec![$($action.into()),*].into()
+        Actions::from(vec![$($action.into()),*])
     };
 }
 

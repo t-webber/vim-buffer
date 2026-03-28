@@ -1,8 +1,9 @@
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
 use crate::buffer::keymaps::{
-    Action, CombinablePending, GoToAction, OPending, Operator, OperatorScope
+    Action, CombinablePending, GoToAction, OPending, Operator
 };
+use crate::buffer::macros::actions;
 use crate::buffer::mode::all::Mode;
 use crate::buffer::mode::normal::Normal;
 use crate::buffer::mode::{Actions, BufferMode};
@@ -145,64 +146,21 @@ fn pending_cancelled() {
 
 #[test]
 fn reg_num_yank() {
-    let mut mode = BufferMode::Normal(Normal::None);
-    for ch in ['"', 'a', '3', 'y'] {
+    for chars in [['"', 'a', '3', 'y'], ['"', 'a', 'y', '3']] {
+        let mut mode = BufferMode::Normal(Normal::None);
+        for ch in chars {
+            assert_eq!(
+                mode.handle_event(code_event(KeyCode::Char(ch))),
+                Actions::None
+            );
+        }
         assert_eq!(
-            mode.handle_event(code_event(KeyCode::Char(ch))),
-            Actions::None
+            mode.handle_event(code_event(KeyCode::Char('w'))),
+            actions![(Operator::Yank, GoToAction::NextWord.into())]
+                .repeat(3)
+                .with_reg(Some('a'))
         );
     }
-    assert_eq!(
-        mode.handle_event(code_event(KeyCode::Char('w'))),
-        Actions::List(
-            vec![
-                Action::Operator(
-                    Operator::Yank,
-                    OperatorScope::Goto(GoToAction::NextWord, None)
-                ),
-                Action::Operator(
-                    Operator::Yank,
-                    OperatorScope::Goto(GoToAction::NextWord, None)
-                ),
-                Action::Operator(
-                    Operator::Yank,
-                    OperatorScope::Goto(GoToAction::NextWord, None)
-                ),
-            ],
-            Some('a'),
-        )
-    );
-}
-
-#[test]
-fn reg_yank_num() {
-    let mut mode = BufferMode::Normal(Normal::None);
-    for ch in ['"', 'a', 'y', '3'] {
-        assert_eq!(
-            mode.handle_event(code_event(KeyCode::Char(ch))),
-            Actions::None
-        );
-    }
-    assert_eq!(
-        mode.handle_event(code_event(KeyCode::Char('w'))),
-        Actions::List(
-            vec![
-                Action::Operator(
-                    Operator::Yank,
-                    OperatorScope::Goto(GoToAction::NextWord, None)
-                ),
-                Action::Operator(
-                    Operator::Yank,
-                    OperatorScope::Goto(GoToAction::NextWord, None)
-                ),
-                Action::Operator(
-                    Operator::Yank,
-                    OperatorScope::Goto(GoToAction::NextWord, None)
-                ),
-            ],
-            Some('a'),
-        )
-    );
 }
 
 #[test]

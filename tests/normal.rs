@@ -324,7 +324,7 @@ dpercent_on_invalid: "iabc)def[ghi]<Esc>F)d%" => "abcdef[ghi]",
 
 _2dw: "iabc def ghi<Esc>02dw" => "ghi",
 _20dw: "iabc def ghi klm<Esc>020dw" => "",
-d2w: "iabc def ghi<Esc>0d2w" => "ghi",
+__d2w: "iabc def ghi<Esc>0d2w" => "ghi",
 d20w: "iabc def ghi klm<Esc>0d20w" => "",
 _2d2w: "iabc def ghi klm nop<Esc>02d2w" => "nop",
 di2w: "iabc def<Esc>0di2wi." => "abc .def",

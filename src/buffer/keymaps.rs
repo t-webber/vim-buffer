@@ -31,7 +31,7 @@ pub enum Action {
     /// Inserts a char at the current cursor
     InsertChar(char),
     /// Applies an operator motion
-    Operator(Operator, OperatorScope),
+    Operator(Operator, OperatorScope, usize),
     /// Pastes the content of the clipboard after the cursor
     PasteAfter,
     /// Pastes the content of the clipboard before the cursor
@@ -55,7 +55,7 @@ pub enum Action {
 
 impl From<(Operator, OperatorScope)> for Action {
     fn from((op, scope): (Operator, OperatorScope)) -> Self {
-        Self::Operator(op, scope)
+        Self::Operator(op, scope, 1)
     }
 }
 
@@ -63,10 +63,14 @@ impl From<(Operator, OperatorPendingScope, Delimitation)> for Action {
     fn from(
         (op, scope, delim): (Operator, OperatorPendingScope, Delimitation),
     ) -> Self {
-        Self::Operator(op, match scope {
-            OperatorPendingScope::Around => OperatorScope::Around(delim),
-            OperatorPendingScope::Inner => OperatorScope::Inner(delim),
-        })
+        Self::Operator(
+            op,
+            match scope {
+                OperatorPendingScope::Around => OperatorScope::Around(delim),
+                OperatorPendingScope::Inner => OperatorScope::Inner(delim),
+            },
+            1,
+        )
     }
 }
 

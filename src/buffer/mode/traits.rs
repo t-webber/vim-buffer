@@ -23,8 +23,15 @@ impl Actions {
     /// Repeats the action `occurrences` times, if possible.
     pub fn repeat(self, occurrences: usize) -> Self {
         match self {
-            Self::List(actions, reg) =>
-                Self::List(actions.repeat(occurrences), reg),
+            Self::List(actions, reg) => {
+                if let [action] = actions.as_slice()
+                    && let Action::Operator(op, scope, _) = *action
+                {
+                    Action::Operator(op, scope, occurrences).into()
+                } else {
+                    Self::List(actions.repeat(occurrences), reg)
+                }
+            }
             Self::None | Self::Unsupported => self,
         }
     }

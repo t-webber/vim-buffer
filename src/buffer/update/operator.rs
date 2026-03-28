@@ -147,18 +147,26 @@ impl Buffer {
         &mut self,
         op: Operator,
         scope: OperatorScope,
+        num: usize,
     ) -> bool {
-        let Some((min, max)) = (match scope {
-            OperatorScope::WholeLine => Some((0, self.len())),
-            OperatorScope::Goto(first, second) =>
-                self.get_motion_delimination_indices(first, second),
-            OperatorScope::Inner(delim) =>
-                self.get_delimitation_indices(delim, false),
-            OperatorScope::Around(delim) =>
-                self.get_delimitation_indices(delim, true),
-        }) else {
-            return false;
-        };
+        let mut min = self.len();
+        let mut max = 0;
+        for _ in 0..num {
+            let Some((this_min, this_max)) = (match scope {
+                OperatorScope::WholeLine => Some((0, self.len())),
+                OperatorScope::Goto(first, second) =>
+                    self.get_motion_delimination_indices(first, second),
+                OperatorScope::Inner(delim) =>
+                    self.get_delimitation_indices(delim, false),
+                OperatorScope::Around(delim) =>
+                    self.get_delimitation_indices(delim, true),
+            }) else {
+                return false;
+            };
+            min = min.min(this_min);
+            max = max.max(this_max);
+            self.cursor.set(max);
+        }
         self.cursor.set(min);
         let fun = match op {
             Operator::Delete => return self.delete(min, max),
