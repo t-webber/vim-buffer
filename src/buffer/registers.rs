@@ -1,7 +1,7 @@
 /// Associates key name to value
 macro_rules! key {
     ($name:ident : $value:literal) => {
-        const $name: usize = Registers::to_key($value).unwrap();
+        const $name: usize = Registers::to_key($value, true).unwrap();
     };
 }
 
@@ -10,7 +10,7 @@ key!(DELETE: '-');
 key!(COPY: '0');
 
 /// Maximum number of registers
-const LEN: usize = 96;
+const LEN: usize = 43;
 
 #[doc = include_str!("registers.md")]
 #[derive(Debug)]
@@ -22,7 +22,7 @@ impl Registers {
     pub fn get(&self, reg: Option<char>) -> Option<&str> {
         reg.map_or_else(
             || self.0[DEFAULT].as_deref(),
-            |ch| self.0[Self::to_key(ch)?].as_deref(),
+            |ch| self.0[Self::to_key(ch, false)?].as_deref(),
         )
     }
 
@@ -40,7 +40,7 @@ impl Registers {
             self.insert_key(COPY, value);
         }
         reg.is_none_or(|ch| {
-            Self::to_key(ch).is_some_and(|key| {
+            Self::to_key(ch, true).is_some_and(|key| {
                 self.insert_key(key, value);
                 true
             })
@@ -67,9 +67,20 @@ impl Registers {
         clippy::arithmetic_side_effects,
         reason = "explicit checks"
     )]
-    const fn to_key(reg: char) -> Option<usize> {
-        let idx = reg as u32;
-        if idx >= 32 && idx < 127 { Some((idx - 32) as usize) } else { None }
+    const fn to_key(reg: char, edit: bool) -> Option<usize> {
+        Some(match reg {
+            '0'..='9' => reg as usize - '0' as usize,
+            'a'..='z' => reg as usize - 'a' as usize + 10,
+            '"' => 36,
+            '-' => 37,
+            '=' => 38,
+            _ if edit => return None,
+            '%' => 39,
+            '#' => 40,
+            ':' => 41,
+            '/' => 42,
+            _ => return None,
+        })
     }
 }
 
