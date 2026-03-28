@@ -8,29 +8,39 @@ use crate::buffer::macros::actions;
 #[derive(Debug, PartialEq, Eq)]
 pub enum Actions {
     /// List of buffer actions to be followed
-    List(Vec<Action>),
+    ///
+    /// The option is to hold the register used for this action
+    List(Vec<Action>, Option<char>),
+    /// No actions yet
+    ///
+    /// This happens when some state is pending, waiting for the next characters
+    None,
     /// The given keycode is not supported or has no meaning
     Unsupported,
 }
 
 impl Actions {
-    /// Constant that represents no actions.
-    ///
-    /// This can happen when an event is swallowed by a pending operation.
-    pub const NONE: Self = Self::List(Vec::new());
-
     /// Repeats the action `occurrences` times, if possible.
     pub fn repeat(self, occurrences: usize) -> Self {
         match self {
-            Self::List(actions) => Self::List(actions.repeat(occurrences)),
-            Self::Unsupported => Self::Unsupported,
+            Self::List(actions, reg) =>
+                Self::List(actions.repeat(occurrences), reg),
+            Self::None | Self::Unsupported => self,
+        }
+    }
+
+    /// Adds or replaces the register in the list of actions
+    pub fn with_reg(self, reg: Option<char>) -> Self {
+        match self {
+            Self::List(actions, _) => Self::List(actions, reg),
+            Self::None | Self::Unsupported => self,
         }
     }
 }
 
 impl From<Vec<Action>> for Actions {
     fn from(value: Vec<Action>) -> Self {
-        Self::List(value)
+        Self::List(value, None)
     }
 }
 

@@ -1,6 +1,8 @@
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
-use crate::buffer::keymaps::{Action, CombinablePending, GoToAction, OPending};
+use crate::buffer::keymaps::{
+    Action, CombinablePending, GoToAction, OPending, Operator, OperatorScope
+};
 use crate::buffer::mode::all::Mode;
 use crate::buffer::mode::normal::Normal;
 use crate::buffer::mode::{Actions, BufferMode};
@@ -122,6 +124,7 @@ fn not_press() {
 fn combinable_pending_cancelled() {
     let mut mode = BufferMode::Normal(Normal::Pending(
         None,
+        None,
         OPending::CombinablePending(CombinablePending::FindNext),
     ));
     let event = code_event(KeyCode::Esc);
@@ -133,9 +136,84 @@ fn combinable_pending_cancelled() {
 #[test]
 fn pending_cancelled() {
     let mut mode =
-        BufferMode::Normal(Normal::Pending(None, OPending::ReplaceOne));
+        BufferMode::Normal(Normal::Pending(None, None, OPending::ReplaceOne));
     let event = code_event(KeyCode::Esc);
     let actions = mode.handle_event(event);
     assert_eq!(actions, Actions::Unsupported);
     assert_eq!(mode, NORMAL);
+}
+
+#[test]
+fn reg_num_yank() {
+    let mut mode = BufferMode::Normal(Normal::None);
+    for ch in ['"', 'a', '3', 'y'] {
+        assert_eq!(
+            mode.handle_event(code_event(KeyCode::Char(ch))),
+            Actions::None
+        );
+    }
+    assert_eq!(
+        mode.handle_event(code_event(KeyCode::Char('w'))),
+        Actions::List(
+            vec![
+                Action::Operator(
+                    Operator::Yank,
+                    OperatorScope::Goto(GoToAction::NextWord, None)
+                ),
+                Action::Operator(
+                    Operator::Yank,
+                    OperatorScope::Goto(GoToAction::NextWord, None)
+                ),
+                Action::Operator(
+                    Operator::Yank,
+                    OperatorScope::Goto(GoToAction::NextWord, None)
+                ),
+            ],
+            Some('a'),
+        )
+    );
+}
+
+#[test]
+fn reg_yank_num() {
+    let mut mode = BufferMode::Normal(Normal::None);
+    for ch in ['"', 'a', 'y', '3'] {
+        assert_eq!(
+            mode.handle_event(code_event(KeyCode::Char(ch))),
+            Actions::None
+        );
+    }
+    assert_eq!(
+        mode.handle_event(code_event(KeyCode::Char('w'))),
+        Actions::List(
+            vec![
+                Action::Operator(
+                    Operator::Yank,
+                    OperatorScope::Goto(GoToAction::NextWord, None)
+                ),
+                Action::Operator(
+                    Operator::Yank,
+                    OperatorScope::Goto(GoToAction::NextWord, None)
+                ),
+                Action::Operator(
+                    Operator::Yank,
+                    OperatorScope::Goto(GoToAction::NextWord, None)
+                ),
+            ],
+            Some('a'),
+        )
+    );
+}
+
+#[test]
+fn reg_unsupported() {
+    let mut mode = BufferMode::Normal(Normal::None);
+    assert_eq!(
+        mode.handle_event(code_event(KeyCode::Char('"'))),
+        Actions::None
+    );
+    assert_eq!(
+        mode.handle_event(code_event(KeyCode::Backspace)),
+        Actions::Unsupported
+    );
 }

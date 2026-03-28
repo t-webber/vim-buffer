@@ -14,12 +14,14 @@ pub enum Normal {
     /// Normal mode but no operations are pending
     #[default]
     None,
+    /// Register pending on the action
+    Register(Option<char>),
     /// A digit was pressed, and is pending for a action.
-    PreNum(usize),
+    PreNum(Option<char>, usize),
     /// Pending keymaps that wait for further keypresses
-    Pending(Option<usize>, OPending),
+    Pending(Option<char>, Option<usize>, OPending),
     /// A digit was pressed in the middle of pending keymaps
-    PostNum(Option<usize>, OPending, usize),
+    PostNum(Option<char>, Option<usize>, OPending, usize),
 }
 
 impl Normal {
@@ -42,29 +44,35 @@ impl Normal {
         debug_assert!(ch.is_ascii_digit(), "invalid arguments");
         let num = ((ch as u32) - ('0' as u32)) as usize;
         *self = match *self {
-            Self::None => Self::PreNum(num),
-            Self::PreNum(old) =>
-                Self::PreNum(old.saturating_mul(10).saturating_add(num)),
-            Self::Pending(old, opending) => Self::PostNum(old, opending, num),
-            Self::PostNum(pre, pend, old) => Self::PostNum(
+            Self::None => Self::PreNum(None, num),
+            Self::Register(reg) => Self::PreNum(reg, num),
+            Self::PreNum(reg, old) =>
+                Self::PreNum(reg, old.saturating_mul(10).saturating_add(num)),
+            Self::Pending(reg, old, opending) =>
+                Self::PostNum(reg, old, opending, num),
+            Self::PostNum(reg, pre, pend, old) => Self::PostNum(
+                reg,
                 pre,
                 pend,
                 old.saturating_mul(10).saturating_add(num),
             ),
         };
-        Actions::NONE
+        Actions::None
     }
 
     /// Triggers a new pending action, or continues building the previous one.
     fn pend(&mut self, pending: impl Copy + Into<OPending>) -> Actions {
         *self = match *self {
-            Self::None => Self::Pending(None, pending.into()),
-            Self::PreNum(num) => Self::Pending(Some(num), pending.into()),
-            Self::Pending(pre, _) => Self::Pending(pre, pending.into()),
-            Self::PostNum(pre, _, post) =>
-                Self::PostNum(pre, pending.into(), post),
+            Self::None => Self::Pending(None, None, pending.into()),
+            Self::Register(reg) => Self::Pending(reg, None, pending.into()),
+            Self::PreNum(reg, num) =>
+                Self::Pending(reg, Some(num), pending.into()),
+            Self::Pending(reg, pre, _) =>
+                Self::Pending(reg, pre, pending.into()),
+            Self::PostNum(reg, pre, _, post) =>
+                Self::PostNum(reg, pre, pending.into(), post),
         };
-        Actions::NONE
+        Actions::None
     }
 }
 
@@ -130,15 +138,19 @@ impl Normal {
     fn handle_operator(&mut self, event: Event, op: Operator) -> Actions {
         let mut normal = Self::default();
         match normal.handle_key(event) {
-            Actions::List(list) =>
-                if list.is_empty()
-                    && let Self::Pending(
-                        _,
-                        OPending::CombinablePending(combinable),
-                    ) = normal
+            Actions::None => {
+                if let Self::Pending(
+                    ..,
+                    OPending::CombinablePending(combinable),
+                ) = normal
                 {
                     self.pend(OPending::OperatorAction(op, combinable))
-                } else if let &[list_action] = list.as_slice()
+                } else {
+                    Actions::Unsupported
+                }
+            }
+            Actions::List(list, _) =>
+                if let &[list_action] = list.as_slice()
                     && let Action::GoTo(goto) = list_action
                 {
                     actions![(op, goto.into())]
@@ -234,7 +246,7 @@ impl HandleKeyPress for Normal {
                 GoToAction::NextChar
             ],
             KeyCode::Char('0')
-                if !matches!(self, Self::PreNum(_) | Self::PostNum(..)) =>
+                if !matches!(self, Self::PreNum(..) | Self::PostNum(..)) =>
                 GoToAction::BeginningOfLine.into(),
             KeyCode::Char(ch @ '0'..='9') => self.num(ch),
             _ => Actions::Unsupported,
@@ -249,18 +261,33 @@ impl HandleKeyPress for Normal {
     }
 
     fn handle_key(&mut self, event: Event) -> Actions {
+        let ch = event.as_key_press_event().and_then(|ev| ev.code.as_char());
         let actions = match *self {
+            Self::None if ch == Some('"') => {
+                *self = Self::Register(None);
+                Actions::None
+            }
             Self::None => self.default_handle_key(event),
-            Self::PreNum(num) => self.default_handle_key(event).repeat(num),
-            Self::Pending(num, opending) =>
-                self.handle_pending(event, num, opending),
-            Self::PostNum(pre, opending, post) => self.handle_pending(
-                event,
-                Some(pre.unwrap_or(1).saturating_mul(post)),
-                opending,
-            ),
+            Self::Register(None) if ch.is_some() => {
+                *self = Self::Register(ch);
+                Actions::None
+            }
+            Self::Register(None) => Actions::Unsupported,
+            Self::Register(reg @ Some(_)) =>
+                self.default_handle_key(event).with_reg(reg),
+            Self::PreNum(reg, num) =>
+                self.default_handle_key(event).repeat(num).with_reg(reg),
+            Self::Pending(reg, num, opending) =>
+                self.handle_pending(event, num, opending).with_reg(reg),
+            Self::PostNum(reg, pre, opending, post) => self
+                .handle_pending(
+                    event,
+                    Some(pre.unwrap_or(1).saturating_mul(post)),
+                    opending,
+                )
+                .with_reg(reg),
         };
-        if actions != Actions::NONE {
+        if actions != Actions::None {
             *self = Self::None;
         }
         actions

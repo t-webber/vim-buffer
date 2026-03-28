@@ -135,7 +135,8 @@ impl Buffer {
     pub fn update_no_save(&mut self, event: Event) -> bool {
         match self.mode.handle_event(event) {
             Actions::Unsupported => false,
-            Actions::List(list) =>
+            Actions::None => true,
+            Actions::List(list, _) =>
                 list.iter().all(|action| self.update_once(*action)) && {
                     self.last_action.update(list, self.as_mode());
                     true
