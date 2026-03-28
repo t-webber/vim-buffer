@@ -20,13 +20,13 @@ impl Buffer {
     /// Paste the copied content after the cursor
     #[must_use]
     #[expect(clippy::arithmetic_side_effects, reason = "smaller than len")]
-    fn paste_after(&mut self) -> bool {
+    fn paste_after(&mut self, reg: Option<char>) -> bool {
         let pos = if self.as_cursor() >= self.len() {
             self.len()
         } else {
             self.as_cursor() + 1
         };
-        self.registers.get().is_some_and(|clip| {
+        self.registers.get(reg).is_some_and(|clip| {
             self.content.insert_str(pos, clip);
             true
         })
@@ -136,8 +136,8 @@ impl Buffer {
         match self.mode.handle_event(event) {
             Actions::Unsupported => false,
             Actions::None => true,
-            Actions::List(list, _) =>
-                list.iter().all(|action| self.update_once(*action)) && {
+            Actions::List(list, reg) =>
+                list.iter().all(|action| self.update_once(*action, reg)) && {
                     self.last_action.update(list, self.as_mode());
                     true
                 },
@@ -148,7 +148,11 @@ impl Buffer {
     ///
     /// Returns `true` iff the update was successful.
     #[must_use]
-    pub(crate) fn update_once(&mut self, action: Action) -> bool {
+    pub(crate) fn update_once(
+        &mut self,
+        action: Action,
+        reg: Option<char>,
+    ) -> bool {
         match action {
             Action::InsertChar(ch) => {
                 self.content.insert(self.as_cursor(), ch);
@@ -177,10 +181,10 @@ impl Buffer {
             Action::GoTo(goto_action) =>
                 return self.update_cursor(goto_action),
             Action::Operator(op, scope, num) =>
-                return self.update_with_operator(op, scope, num),
-            Action::PasteAfter => return self.paste_after(),
+                return self.update_with_operator(op, scope, num, reg),
+            Action::PasteAfter => return self.paste_after(reg),
             Action::PasteBefore =>
-                if let Some(clip) = self.registers.get() {
+                if let Some(clip) = self.registers.get(reg) {
                     let idx = self.as_cursor().saturating_sub(1);
                     self.content.insert_str(idx, clip);
                 } else {

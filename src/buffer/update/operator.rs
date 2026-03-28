@@ -12,7 +12,12 @@ impl Buffer {
     ///
     /// The deleted part is from the current cursor to the cursor after the
     /// [`GoToAction`].
-    fn delete(&mut self, min_cursor: usize, max_cursor: usize) -> bool {
+    fn delete(
+        &mut self,
+        min_cursor: usize,
+        max_cursor: usize,
+        reg: Option<char>,
+    ) -> bool {
         let old_content = take(&mut self.content);
         self.content.reserve(old_content.len());
         #[expect(clippy::string_slice, reason = "non-ascii not yet supported")]
@@ -25,7 +30,11 @@ impl Buffer {
         #[expect(clippy::string_slice, reason = "non-ascii not yet supported")]
         // TODO: add support for UTF-8
         if max_cursor != min_cursor {
-            self.registers.insert(&old_content[min_cursor..max_cursor], true);
+            self.registers.insert(
+                &old_content[min_cursor..max_cursor],
+                true,
+                reg,
+            );
         }
         self.cursor = BoundedUsize::with_capacity(self.content.len());
         self.cursor.set(min_cursor);
@@ -148,6 +157,7 @@ impl Buffer {
         op: Operator,
         scope: OperatorScope,
         num: usize,
+        reg: Option<char>,
     ) -> bool {
         let mut min = self.len();
         let mut max = 0;
@@ -169,14 +179,14 @@ impl Buffer {
         }
         self.cursor.set(min);
         let fun = match op {
-            Operator::Delete => return self.delete(min, max),
+            Operator::Delete => return self.delete(min, max, reg),
             Operator::Yank => {
                 #[expect(clippy::string_slice, reason = "utf8 not supported")]
-                self.registers.insert(&self.content[min..max], false);
+                self.registers.insert(&self.content[min..max], false, reg);
                 return true;
             }
             Operator::Change =>
-                return self.delete(min, max) && {
+                return self.delete(min, max, reg) && {
                     self.mode.switch_to(Mode::Insert);
                     true
                 },

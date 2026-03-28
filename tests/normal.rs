@@ -331,4 +331,9 @@ di2w: "iabc def<Esc>0di2wi." => "abc .def",
 d2iw: "iabc def<Esc>0d2iw" => "def",
 _2diw: "iabc def<Esc>0d2iw" => "def",
 
+reg_yd: r#"iabc def<Esc>0ywwdw"0p"# => "abc abc ",
+reg_dy: r#"iabc def<Esc>0dwyw"-p"# => "dabc ef",
+reg_yy: r#"iabc def<Esc>0"aywfdyw$"ap"# => "abc defabc ",
+reg_invalid: r#"iabc def<Esc>0"<BS>dw"# => "def",
+
 );

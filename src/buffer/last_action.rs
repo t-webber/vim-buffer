@@ -8,15 +8,20 @@ pub struct LastAction {
     actions: Vec<Action>,
     /// On what buffer mode they should be performed
     mode: Mode,
+    /// Register used for that action
+    reg: Option<char>,
 }
 
 impl LastAction {
     /// Performs the last action on the given buffer.
     pub fn perform(&self, buffer: &mut Buffer) -> bool {
         let old_mode = buffer.as_mode();
-        if buffer.update_once(self.mode.into())
-            && self.actions.iter().all(|action| buffer.update_once(*action))
-            && buffer.update_once(old_mode.into())
+        if buffer.update_once(self.mode.into(), self.reg)
+            && self
+                .actions
+                .iter()
+                .all(|action| buffer.update_once(*action, self.reg))
+            && buffer.update_once(old_mode.into(), self.reg)
         {
             buffer.save_to_history();
             true
