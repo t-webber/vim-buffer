@@ -16,4 +16,4 @@
 | `/`   | readonly       | last search pattern                    | Needs search support    |
 | `.`   | readonly       | last inserted text                     | No                      |
 | `=`   | expression     | evaluate Vimscript expression          | No                      |
-| `_`   | black hole     | discard content                        | No                      |
+| `_`   | black hole     | discard content                        | Yes                     |

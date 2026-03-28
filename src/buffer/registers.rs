@@ -33,6 +33,9 @@ impl Registers {
         is_delete: bool,
         reg: Option<char>,
     ) -> bool {
+        if reg == Some('_') {
+            return true;
+        }
         self.insert_key(DEFAULT, value);
         if is_delete {
             self.insert_key(DELETE, value);

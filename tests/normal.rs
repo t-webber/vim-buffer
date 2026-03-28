@@ -343,5 +343,7 @@ _2_reg_2yw: r#"iabc def ghi jkl mno<Esc>02"a2yw$p"# => "abc def ghi jkl mnoabc d
 _2_reg_2y2w: r#"iab cd de fg hi jk lm no pq<Esc>02"a2y2w$p"# => "ab cd de fg hi jk lm no pqab cd de fg hi jk lm no ",
 _2_reg_y2w: r#"iabc def ghi jkl mno<Esc>02"ay2w$p"# => "abc def ghi jkl mnoabc def ghi jkl ",
 _10_reg_10d10w: r#"ia b c d e f g h i j k l m n o p q r s t u v w x y z<Esc>010"a10d10w"# => "",
+underscore_reg_d: r#"iabc def<Esc>0"_dwp"# => "def",
+underscore_reg_y: r#"iabc def<Esc>0yww"_yw$p"# => "abc defabc ",
 
 );
