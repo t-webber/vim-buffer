@@ -338,4 +338,10 @@ reg_invalid: r#"iabc def<Esc>0"<BS>dw"# => "def",
 reg_3yw: r#"iabc def ghi<Esc>0"a3yw$p"# => "abc def ghiabc def ghi",
 reg_y3w: r#"iabc def ghi<Esc>0"ay3w$p"# => "abc def ghiabc def ghi",
 
+_2_reg_yw: r#"iabc def ghi<Esc>02"ayw$p"# => "abc def ghiabc def ",
+_2_reg_2yw: r#"iabc def ghi jkl mno<Esc>02"a2yw$p"# => "abc def ghi jkl mnoabc def ghi jkl ",
+_2_reg_2y2w: r#"iab cd de fg hi jk lm no pq<Esc>02"a2y2w$p"# => "ab cd de fg hi jk lm no pqab cd de fg hi jk lm no ",
+_2_reg_y2w: r#"iabc def ghi jkl mno<Esc>02"ay2w$p"# => "abc def ghi jkl mnoabc def ghi jkl ",
+_10_reg_10d10w: r#"ia b c d e f g h i j k l m n o p q r s t u v w x y z<Esc>010"a10d10w"# => "",
+
 );

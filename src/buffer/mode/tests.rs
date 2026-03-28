@@ -126,6 +126,7 @@ fn combinable_pending_cancelled() {
     let mut mode = BufferMode::Normal(Normal::Pending(
         None,
         None,
+        None,
         OPending::CombinablePending(CombinablePending::FindNext),
     ));
     let event = code_event(KeyCode::Esc);
@@ -136,8 +137,12 @@ fn combinable_pending_cancelled() {
 
 #[test]
 fn pending_cancelled() {
-    let mut mode =
-        BufferMode::Normal(Normal::Pending(None, None, OPending::ReplaceOne));
+    let mut mode = BufferMode::Normal(Normal::Pending(
+        None,
+        None,
+        None,
+        OPending::ReplaceOne,
+    ));
     let event = code_event(KeyCode::Esc);
     let actions = mode.handle_event(event);
     assert_eq!(actions, Actions::Unsupported);

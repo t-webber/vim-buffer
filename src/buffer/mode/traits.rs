@@ -27,7 +27,10 @@ impl Actions {
                 if let [action] = actions.as_slice()
                     && let Action::Operator(op, scope, _) = *action
                 {
-                    Action::Operator(op, scope, occurrences).into()
+                    Self::List(
+                        vec![Action::Operator(op, scope, occurrences)],
+                        reg,
+                    )
                 } else {
                     Self::List(actions.repeat(occurrences), reg)
                 }

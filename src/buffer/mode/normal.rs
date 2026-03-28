@@ -14,14 +14,16 @@ pub enum Normal {
     /// Normal mode but no operations are pending
     #[default]
     None,
+    /// A digit was pressed, and is pending for an action or a register.
+    PreNum(usize),
     /// Register pending on the action
-    Register(Option<char>),
-    /// A digit was pressed, and is pending for a action.
-    PreNum(Option<char>, usize),
+    Register(Option<usize>, Option<char>),
+    /// A digit was pressed, and is pending for an action.
+    MidNum(Option<usize>, Option<char>, usize),
     /// Pending keymaps that wait for further keypresses
-    Pending(Option<char>, Option<usize>, OPending),
+    Pending(Option<usize>, Option<char>, Option<usize>, OPending),
     /// A digit was pressed in the middle of pending keymaps
-    PostNum(Option<char>, Option<usize>, OPending, usize),
+    PostNum(Option<usize>, Option<char>, Option<usize>, OPending, usize),
 }
 
 impl Normal {
@@ -44,15 +46,21 @@ impl Normal {
         debug_assert!(ch.is_ascii_digit(), "invalid arguments");
         let num = ((ch as u32) - ('0' as u32)) as usize;
         *self = match *self {
-            Self::None => Self::PreNum(None, num),
-            Self::Register(reg) => Self::PreNum(reg, num),
-            Self::PreNum(reg, old) =>
-                Self::PreNum(reg, old.saturating_mul(10).saturating_add(num)),
-            Self::Pending(reg, old, opending) =>
-                Self::PostNum(reg, old, opending, num),
-            Self::PostNum(reg, pre, pend, old) => Self::PostNum(
-                reg,
+            Self::None => Self::PreNum(num),
+            Self::PreNum(old) =>
+                Self::PreNum(old.saturating_mul(10).saturating_add(num)),
+            Self::Register(pre, reg) => Self::MidNum(pre, reg, num),
+            Self::MidNum(pre, reg, old) => Self::MidNum(
                 pre,
+                reg,
+                old.saturating_mul(10).saturating_add(num),
+            ),
+            Self::Pending(pre, reg, mid, opending) =>
+                Self::PostNum(pre, reg, mid, opending, num),
+            Self::PostNum(pre, reg, mid, pend, old) => Self::PostNum(
+                pre,
+                reg,
+                mid,
                 pend,
                 old.saturating_mul(10).saturating_add(num),
             ),
@@ -63,14 +71,17 @@ impl Normal {
     /// Triggers a new pending action, or continues building the previous one.
     fn pend(&mut self, pending: impl Copy + Into<OPending>) -> Actions {
         *self = match *self {
-            Self::None => Self::Pending(None, None, pending.into()),
-            Self::Register(reg) => Self::Pending(reg, None, pending.into()),
-            Self::PreNum(reg, num) =>
-                Self::Pending(reg, Some(num), pending.into()),
-            Self::Pending(reg, pre, _) =>
-                Self::Pending(reg, pre, pending.into()),
-            Self::PostNum(reg, pre, _, post) =>
-                Self::PostNum(reg, pre, pending.into(), post),
+            Self::None => Self::Pending(None, None, None, pending.into()),
+            Self::PreNum(num) =>
+                Self::Pending(None, None, Some(num), pending.into()),
+            Self::Register(pre, reg) =>
+                Self::Pending(pre, reg, None, pending.into()),
+            Self::MidNum(pre, reg, mid) =>
+                Self::Pending(pre, reg, Some(mid), pending.into()),
+            Self::Pending(pre, reg, mid, _) =>
+                Self::Pending(pre, reg, mid, pending.into()),
+            Self::PostNum(pre, reg, mid, _, post) =>
+                Self::PostNum(pre, reg, mid, pending.into(), post), /* TODO: investigate this */
         };
         Actions::None
     }
@@ -182,13 +193,13 @@ impl Normal {
     fn handle_pending(
         &mut self,
         event: Event,
-        num: Option<usize>,
+        has_num: bool,
         opending: OPending,
     ) -> Actions {
         if let Some(key_event) = event.as_key_press_event()
             && let KeyCode::Char(ch) = key_event.code
         {
-            if (matches!(ch, '1'..='9') || (ch == '0' && num.is_some()))
+            if (matches!(ch, '1'..='9') || (ch == '0' && has_num))
                 && !matches!(
                     opending,
                     OPending::CombinablePending(_)
@@ -198,7 +209,6 @@ impl Normal {
                 self.num(ch)
             } else {
                 self.handle_opending_event(opending, event, ch)
-                    .repeat(num.unwrap_or(1))
             }
         } else {
             Actions::Unsupported
@@ -246,7 +256,10 @@ impl HandleKeyPress for Normal {
                 GoToAction::NextChar
             ],
             KeyCode::Char('0')
-                if !matches!(self, Self::PreNum(..) | Self::PostNum(..)) =>
+                if !matches!(
+                    self,
+                    Self::PreNum(..) | Self::MidNum(..) | Self::PostNum(..)
+                ) =>
                 GoToAction::BeginningOfLine.into(),
             KeyCode::Char(ch @ '0'..='9') => self.num(ch),
             _ => Actions::Unsupported,
@@ -264,28 +277,40 @@ impl HandleKeyPress for Normal {
         let ch = event.as_key_press_event().and_then(|ev| ev.code.as_char());
         let actions = match *self {
             Self::None if ch == Some('"') => {
-                *self = Self::Register(None);
+                *self = Self::Register(None, None);
+                Actions::None
+            }
+            Self::PreNum(pre) if ch == Some('"') => {
+                *self = Self::Register(Some(pre), None);
                 Actions::None
             }
             Self::None => self.default_handle_key(event),
-            Self::Register(None) if ch.is_some() => {
-                *self = Self::Register(ch);
+            Self::PreNum(num) => self.default_handle_key(event).repeat(num),
+            Self::Register(pre, None) if ch.is_some() => {
+                *self = Self::Register(pre, ch);
                 Actions::None
             }
-            Self::Register(None) => Actions::Unsupported,
-            Self::Register(reg @ Some(_)) =>
-                self.default_handle_key(event).with_reg(reg),
-            Self::PreNum(reg, num) =>
-                self.default_handle_key(event).repeat(num).with_reg(reg),
-            Self::Pending(reg, num, opending) =>
-                self.handle_pending(event, num, opending).with_reg(reg),
-            Self::PostNum(reg, pre, opending, post) => self
-                .handle_pending(
-                    event,
-                    Some(pre.unwrap_or(1).saturating_mul(post)),
-                    opending,
-                )
+            Self::Register(num, reg @ Some(_)) => self
+                .default_handle_key(event)
+                .with_reg(reg)
+                .repeat(num.unwrap_or(1)),
+            Self::Register(..) => Actions::Unsupported,
+            Self::MidNum(pre, reg, mid) => self
+                .default_handle_key(event)
+                .repeat(pre.unwrap_or(1).saturating_mul(mid))
                 .with_reg(reg),
+            Self::Pending(pre, reg, mid, opending) => self
+                .handle_pending(event, mid.is_some(), opending) //TODO: number after
+                                                                //pending but before
+                                                                //here
+                .with_reg(reg)
+                .repeat(pre.unwrap_or(1).saturating_mul(mid.unwrap_or(1))),
+            Self::PostNum(pre, reg, mid, opending, post) =>
+                self.handle_pending(event, true, opending).with_reg(reg).repeat(
+                    pre.unwrap_or(1)
+                        .saturating_mul(mid.unwrap_or(1))
+                        .saturating_mul(post),
+                ),
         };
         if actions != Actions::None {
             *self = Self::None;
