@@ -335,5 +335,7 @@ reg_yd: r#"iabc def<Esc>0ywwdw"0p"# => "abc abc ",
 reg_dy: r#"iabc def<Esc>0dwyw"-p"# => "dabc ef",
 reg_yy: r#"iabc def<Esc>0"aywfdyw$"ap"# => "abc defabc ",
 reg_invalid: r#"iabc def<Esc>0"<BS>dw"# => "def",
+reg_3yw: r#"iabc def ghi<Esc>0"a3yw$p"# => "abc def ghiabc def ghi",
+reg_y3w: r#"iabc def ghi<Esc>0"ay3w$p"# => "abc def ghiabc def ghi",
 
 );
