@@ -12,7 +12,7 @@ key!(COPY: '0');
 /// Maximum number of registers
 const LEN: usize = 96;
 
-/// Register values and handling
+#[doc = include_str!("registers.md")]
 #[derive(Debug)]
 pub struct Registers([Option<String>; LEN]);
 
