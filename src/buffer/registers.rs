@@ -1,7 +1,8 @@
 /// Associates key name to value
 macro_rules! key {
     ($name:ident : $value:literal) => {
-        const $name: usize = Registers::to_key($value, true).unwrap();
+        const $name: usize = Registers::to_key($value, true).unwrap().0;
+        const _: () = assert!(!Registers::to_key($value, true).unwrap().1);
     };
 }
 
@@ -22,7 +23,7 @@ impl Registers {
     pub fn get(&self, reg: Option<char>) -> Option<&str> {
         reg.map_or_else(
             || self.0[DEFAULT].as_deref(),
-            |ch| self.0[Self::to_key(ch, false)?].as_deref(),
+            |ch| self.0[Self::to_key(ch, false)?.0].as_deref(),
         )
     }
 
@@ -36,15 +37,15 @@ impl Registers {
         if reg == Some('_') {
             return true;
         }
-        self.insert_key(DEFAULT, value);
+        self.insert_key(DEFAULT, value, false);
         if is_delete {
-            self.insert_key(DELETE, value);
+            self.insert_key(DELETE, value, false);
         } else {
-            self.insert_key(COPY, value);
+            self.insert_key(COPY, value, false);
         }
         reg.is_none_or(|ch| {
-            Self::to_key(ch, true).is_some_and(|key| {
-                self.insert_key(key, value);
+            Self::to_key(ch, true).is_some_and(|(key, append)| {
+                self.insert_key(key, value, append);
                 true
             })
         })
@@ -56,9 +57,13 @@ impl Registers {
     ///
     /// If key >= 128.
     #[expect(clippy::indexing_slicing, reason = "keys are less than 128")]
-    fn insert_key(&mut self, key: usize, value: &str) {
+    fn insert_key(&mut self, key: usize, value: &str, append: bool) {
         if let Some(old) = &mut self.0[key] {
-            value.clone_into(old);
+            if append {
+                old.push_str(value);
+            } else {
+                value.clone_into(old);
+            }
         } else {
             self.0[key] = Some(value.to_owned());
         }
@@ -70,10 +75,11 @@ impl Registers {
         clippy::arithmetic_side_effects,
         reason = "explicit checks"
     )]
-    const fn to_key(reg: char, edit: bool) -> Option<usize> {
-        Some(match reg {
+    const fn to_key(reg: char, edit: bool) -> Option<(usize, bool)> {
+        let key = match reg {
             '0'..='9' => reg as usize - '0' as usize,
             'a'..='z' => reg as usize - 'a' as usize + 10,
+            'A'..='Z' => return Some((reg as usize - 'A' as usize + 10, true)),
             '"' => 36,
             '-' => 37,
             '=' => 38,
@@ -83,7 +89,8 @@ impl Registers {
             ':' => 41,
             '/' => 42,
             _ => return None,
-        })
+        };
+        Some((key, false))
     }
 }
 

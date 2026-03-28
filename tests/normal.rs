@@ -346,4 +346,7 @@ _10_reg_10d10w: r#"ia b c d e f g h i j k l m n o p q r s t u v w x y z<Esc>010"
 underscore_reg_d: r#"iabc def<Esc>0"_dwp"# => "def",
 underscore_reg_y: r#"iabc def<Esc>0yww"_yw$p"# => "abc defabc ",
 
+capital_reg_paste_minuscule: r#"iabc def ghi<Esc>0"ayww"Ayww"Ayw0"Ayy$"ap"# => "abc def ghiabc def ghiabc def ghi",
+capital_reg_paste_capital: r#"iabc def ghi<Esc>0"ayww"Ayww"Ayw0"Ayy$"Ap"# => "abc def ghiabc def ghiabc def ghi",
+
 );

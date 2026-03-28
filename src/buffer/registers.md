@@ -7,7 +7,7 @@
 | `1–9` | delete history | linewise deletes; `"1` = newest        | Needs multiline support |
 | `-`   | small delete   | deletes within one line                | Yes                     |
 | `a–z` | named          | user-defined (overwrite)               | Yes                     |
-| `A–Z` | named append   | same as a–z but append                 | No                      |
+| `A–Z` | named append   | same as a–z but append                 | Yes                     |
 | `+`   | clipboard      | system clipboard                       | No                      |
 | `*`   | primary        | X11 primary selection                  | No                      |
 | `%`   | readonly       | current file name                      | Meaningless (no file)   |
