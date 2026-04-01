@@ -205,6 +205,7 @@ impl Normal {
                     OPending::CombinablePending(_)
                         | OPending::Operator(_, Some(_))
                         | OPending::ReplaceOne
+                        | OPending::GoTo
                 )
             {
                 self.num(ch)
