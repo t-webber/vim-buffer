@@ -200,13 +200,7 @@ impl Normal {
             && let KeyCode::Char(ch) = key_event.code
         {
             if (matches!(ch, '1'..='9') || (ch == '0' && has_num))
-                && !matches!(
-                    opending,
-                    OPending::CombinablePending(_)
-                        | OPending::Operator(_, Some(_))
-                        | OPending::ReplaceOne
-                        | OPending::GoTo
-                )
+                && matches!(opending, OPending::Operator(_, None))
             {
                 self.num(ch)
             } else {
