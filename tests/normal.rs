@@ -349,4 +349,7 @@ underscore_reg_y: r#"iabc def<Esc>0yww"_yw$p"# => "abc defabc ",
 capital_reg_paste_minuscule: r#"iabc def ghi<Esc>0"ayww"Ayww"Ayw0"Ayy$"ap"# => "abc def ghiabc def ghiabc def ghi",
 capital_reg_paste_capital: r#"iabc def ghi<Esc>0"ayww"Ayww"Ayw0"Ayy$"Ap"# => "abc def ghiabc def ghiabc def ghi",
 
+r2: "iabc<Esc>0r2" => "2bc",
+f2: "iabc2def<Esc>0f2a." => "abc2.def",
+
 );
