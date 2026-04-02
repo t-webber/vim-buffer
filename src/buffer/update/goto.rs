@@ -115,7 +115,7 @@ impl Buffer {
     fn goto_next_group(&mut self) -> bool {
         let mut after = self.chars_after_cursor();
         let compl = [('{', '}'), ('[', ']'), ('(', ')'), ('<', '>')];
-        let cursor = self.as_char();
+        let Some(cursor) = self.as_char() else { return false };
 
         if let Some((idx, _)) = match cursor {
             '{' | '[' | '(' | '<' =>

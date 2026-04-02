@@ -71,12 +71,12 @@ impl Buffer {
                     false,
                 ),
             Delimitation::Word => {
-                let cursor = IsIdentChar::new(self.as_char());
+                let cursor = IsIdentChar::new(self.as_char()?);
                 let good = |ch| cursor.xor(ch);
                 self.get_delimitation_indices_fn(good, good, true)
             }
             Delimitation::WORD => {
-                let cursor = IsSpace::new(self.as_char());
+                let cursor = IsSpace::new(self.as_char()?);
                 let good = |ch| cursor.xor(ch);
                 self.get_delimitation_indices_fn(good, good, true)
             }
@@ -95,7 +95,7 @@ impl Buffer {
         let mut before = self.chars_before_cursor_rev();
 
         let at_end = self.as_cursor() == self.len();
-        let maybe_start = if at_end || !is_start(self.as_char()) {
+        let maybe_start = if at_end || !is_start(self.as_char()?) {
             before.find(|ch| is_start(ch.1)).map(|ch| ch.0 + 1)
         } else {
             Some(self.as_cursor() + 1)

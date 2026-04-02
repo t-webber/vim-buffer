@@ -354,5 +354,6 @@ f2: "iabc2def<Esc>0f2a." => "abc2.def",
 g2e: "iabc def<Esc>Fdg2ea." => "abc def.",
 df2: "iabc2def<Esc>0df2" => "def",
 
+d_empty: "diw" => "",
 
 );
