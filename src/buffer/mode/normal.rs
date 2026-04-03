@@ -22,8 +22,6 @@ pub enum Normal {
     MidNum(Option<usize>, Option<char>, usize),
     /// Pending keymaps that wait for further keypresses
     Pending(Option<usize>, Option<char>, Option<usize>, OPending),
-    /// A digit was pressed in the middle of pending keymaps
-    PostNum(Option<usize>, Option<char>, Option<usize>, OPending, usize),
 }
 
 impl Normal {
@@ -55,15 +53,7 @@ impl Normal {
                 reg,
                 old.saturating_mul(10).saturating_add(num),
             ),
-            Self::Pending(pre, reg, mid, opending) =>
-                Self::PostNum(pre, reg, mid, opending, num),
-            Self::PostNum(pre, reg, mid, pend, old) => Self::PostNum(
-                pre,
-                reg,
-                mid,
-                pend,
-                old.saturating_mul(10).saturating_add(num),
-            ),
+            Self::Pending(..) => return Actions::Unsupported,
         };
         Actions::None
     }
@@ -80,8 +70,6 @@ impl Normal {
                 Self::Pending(pre, reg, Some(mid), pending.into()),
             Self::Pending(pre, reg, mid, _) =>
                 Self::Pending(pre, reg, mid, pending.into()),
-            Self::PostNum(pre, reg, mid, _, post) =>
-                Self::PostNum(pre, reg, mid, pending.into(), post), /* TODO: investigate this */
         };
         Actions::None
     }
@@ -129,19 +117,34 @@ impl Normal {
             OPending::ReplaceOne => Action::ReplaceWith(ch).into(),
             OPending::OperatorAction(op, combinable) =>
                 Self::handle_operator_action(op, combinable, ch),
-            OPending::Operator(op, None) => {
-                if let Some(scope) = OperatorPendingScope::maybe_from(ch) {
-                    self.pend(OPending::Operator(op, Some(scope)))
+            OPending::Operator(op, None, num) => {
+                if let Some(scope) = OperatorPendingScope::maybe_from(ch, num) {
+                    self.pend(OPending::Operator(op, Some(scope), None))
                 } else if ch == op.as_char() {
                     actions![(op, OperatorScope::WholeLine)]
+                        .repeat(num.unwrap_or(1))
+                } else if matches!(ch, '1'..='9') || num.is_some() && ch == '0'
+                {
+                    self.pend(OPending::Operator(
+                        op,
+                        None,
+                        Some(
+                            num.unwrap_or(0)
+                                .saturating_mul(10)
+                                .saturating_add(char_to_int_unchecked(ch)),
+                        ),
+                    ))
                 } else {
-                    self.handle_operator(event, op)
+                    self.handle_operator(event, op).repeat(num.unwrap_or(1))
                 }
             }
-            OPending::Operator(op, Some(scope)) => Delimitation::maybe_from(ch)
-                .map_or(Actions::Unsupported, |delim| {
-                    actions![(op, scope, delim)]
-                }),
+            OPending::Operator(op, Some(scope), num) =>
+                Delimitation::maybe_from(ch).map_or(
+                    Actions::Unsupported,
+                    |delim| {
+                        actions![(op, scope, delim)].repeat(num.unwrap_or(1))
+                    },
+                ),
         }
     }
 
@@ -200,9 +203,10 @@ impl Normal {
             && let KeyCode::Char(ch) = key_event.code
         {
             if (matches!(ch, '1'..='9') || (ch == '0' && has_num))
-                && matches!(opending, OPending::Operator(_, None))
+                && let Some(new_op) =
+                    opending.maybe_with_num(char_to_int_unchecked(ch))
             {
-                self.num(ch)
+                self.pend(new_op)
             } else {
                 self.handle_opending_event(opending, event, ch)
             }
@@ -252,10 +256,7 @@ impl HandleKeyPress for Normal {
                 GoToAction::NextChar
             ],
             KeyCode::Char('0')
-                if !matches!(
-                    self,
-                    Self::PreNum(..) | Self::MidNum(..) | Self::PostNum(..)
-                ) =>
+                if !matches!(self, Self::PreNum(..) | Self::MidNum(..)) =>
                 GoToAction::BeginningOfLine.into(),
             KeyCode::Char(ch @ '0'..='9') => self.num(ch),
             _ => Actions::Unsupported,
@@ -301,12 +302,6 @@ impl HandleKeyPress for Normal {
                                                                 //here
                 .with_reg(reg)
                 .repeat(pre.unwrap_or(1).saturating_mul(mid.unwrap_or(1))),
-            Self::PostNum(pre, reg, mid, opending, post) =>
-                self.handle_pending(event, true, opending).with_reg(reg).repeat(
-                    pre.unwrap_or(1)
-                        .saturating_mul(mid.unwrap_or(1))
-                        .saturating_mul(post),
-                ),
         };
         if actions != Actions::None {
             *self = Self::None;
@@ -347,4 +342,18 @@ impl HandleKeyPress for Normal {
             _ => Actions::Unsupported,
         }
     }
+}
+
+/// Converts a char representing a digit to its value
+///
+/// # Panics
+///
+/// If `ch` isn't an ascii digit.
+#[expect(
+    clippy::as_conversions,
+    clippy::arithmetic_side_effects,
+    reason = "in bounds"
+)]
+const fn char_to_int_unchecked(ch: char) -> usize {
+    ((ch as u32) - ('0' as u32)) as usize
 }

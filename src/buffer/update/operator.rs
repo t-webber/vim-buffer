@@ -47,11 +47,12 @@ impl Buffer {
     /// be included in the operator) or excluded.
     #[expect(clippy::arithmetic_side_effects, reason = "smaller than len")]
     fn get_delimitation_indices(
-        &self,
+        &mut self,
         delimitation: Delimitation,
         include_bounds: bool,
+        repetition: usize,
     ) -> Option<(usize, usize)> {
-        match delimitation {
+        let (min, max) = match delimitation {
             Delimitation::Group(open, close) if include_bounds => self
                 .get_delimitation_indices_fn(
                     |ch| ch == open,
@@ -80,6 +81,17 @@ impl Buffer {
                 let good = |ch| cursor.xor(ch);
                 self.get_delimitation_indices_fn(good, good, true)
             }
+        }?;
+        if repetition > 1 {
+            self.cursor.set(max);
+            let (new_min, new_max) = self.get_delimitation_indices(
+                delimitation,
+                include_bounds,
+                repetition - 1,
+            )?;
+            Some((new_min.min(min), new_max.max(max)))
+        } else {
+            Some((min, max))
         }
     }
 
@@ -166,10 +178,10 @@ impl Buffer {
                 OperatorScope::WholeLine => Some((0, self.len())),
                 OperatorScope::Goto(first, second) =>
                     self.get_motion_delimination_indices(first, second),
-                OperatorScope::Inner(delim) =>
-                    self.get_delimitation_indices(delim, false),
-                OperatorScope::Around(delim) =>
-                    self.get_delimitation_indices(delim, true),
+                OperatorScope::Inner(delim, count) =>
+                    self.get_delimitation_indices(delim, false, count),
+                OperatorScope::Around(delim, count) =>
+                    self.get_delimitation_indices(delim, true, count),
             }) else {
                 return false;
             };

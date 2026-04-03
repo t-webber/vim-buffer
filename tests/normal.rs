@@ -329,7 +329,7 @@ d20w: "iabc def ghi klm<Esc>0d20w" => "",
 _2d2w: "iabc def ghi klm nop<Esc>02d2w" => "nop",
 di2w: "iabc def<Esc>0di2wi." => "abc .def",
 d2iw: "iabc def<Esc>0d2iw" => "def",
-_2diw: "iabc def<Esc>0d2iw" => "def",
+_2diw: "iabc def<Esc>02diw" => "def",
 
 reg_yd: r#"iabc def<Esc>0ywwdw"0p"# => "abc abc ",
 reg_dy: r#"iabc def<Esc>0dwyw"-p"# => "dabc ef",
@@ -355,5 +355,11 @@ g2e: "iabc def<Esc>Fdg2ea." => "abc def.",
 df2: "iabc2def<Esc>0df2" => "def",
 
 d_empty: "diw" => "",
+
+_2diw_3words: "iabc def ghi<Esc>Fd2diwi." => "abc .ghi",
+d2iw_3words: "iabc def ghi<Esc>Fdd2iwi." => "abc .ghi",
+di2w_3words: "iabc def ghi<Esc>Fddi2wi." => "abc def .ghi",
+d2i2w: "iabc def ghi<Esc>Fdd2i2wi." => "abc def .ghi",
+_2di2w_possible: "iabc def ghi klm<Esc>Fd2d2iwi." => "abc .klm",
 
 );

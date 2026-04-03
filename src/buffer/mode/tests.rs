@@ -6,6 +6,7 @@ use crate::buffer::keymaps::{
 use crate::buffer::macros::actions;
 use crate::buffer::mode::all::Mode;
 use crate::buffer::mode::normal::Normal;
+use crate::buffer::mode::traits::HandleKeyPress;
 use crate::buffer::mode::{Actions, BufferMode};
 
 const NORMAL: BufferMode = BufferMode::Normal(Normal::new());
@@ -150,22 +151,37 @@ fn pending_cancelled() {
 }
 
 #[test]
-fn reg_num_yank() {
-    for chars in [['"', 'a', '3', 'y'], ['"', 'a', 'y', '3']] {
-        let mut mode = BufferMode::Normal(Normal::None);
-        for ch in chars {
-            assert_eq!(
-                mode.handle_event(code_event(KeyCode::Char(ch))),
-                Actions::None
-            );
-        }
+fn reg_yank_num() {
+    let mut mode = BufferMode::Normal(Normal::None);
+    for ch in ['"', 'a', 'y', '3'] {
         assert_eq!(
-            mode.handle_event(code_event(KeyCode::Char('w'))),
-            actions![(Operator::Yank, GoToAction::NextWord.into())]
-                .repeat(3)
-                .with_reg(Some('a'))
+            mode.handle_event(code_event(KeyCode::Char(ch))),
+            Actions::None
         );
     }
+    assert_eq!(
+        mode.handle_event(code_event(KeyCode::Char('w'))),
+        actions![(Operator::Yank, GoToAction::NextWord.into())]
+            .repeat(3)
+            .with_reg(Some('a'))
+    );
+}
+
+#[test]
+fn reg_num_yank() {
+    let mut mode = BufferMode::Normal(Normal::None);
+    for ch in ['"', 'a', '3', 'y'] {
+        assert_eq!(
+            mode.handle_event(code_event(KeyCode::Char(ch))),
+            Actions::None
+        );
+    }
+    assert_eq!(
+        mode.handle_event(code_event(KeyCode::Char('w'))),
+        actions![(Operator::Yank, GoToAction::NextWord.into())]
+            .repeat(3)
+            .with_reg(Some('a'))
+    );
 }
 
 #[test]
@@ -179,4 +195,14 @@ fn reg_unsupported() {
         mode.handle_event(code_event(KeyCode::Backspace)),
         Actions::Unsupported
     );
+}
+
+#[test]
+fn pending_digit_blank_key_press() {
+    let mut normal = Normal::Pending(None, None, None, OPending::GoTo);
+    let res = <Normal as HandleKeyPress>::handle_blank_key_press(
+        &mut normal,
+        KeyCode::Char('1'),
+    );
+    assert_eq!(res, Actions::Unsupported);
 }

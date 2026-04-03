@@ -66,8 +66,10 @@ impl From<(Operator, OperatorPendingScope, Delimitation)> for Action {
         Self::Operator(
             op,
             match scope {
-                OperatorPendingScope::Around => OperatorScope::Around(delim),
-                OperatorPendingScope::Inner => OperatorScope::Inner(delim),
+                OperatorPendingScope::Around(count) =>
+                    OperatorScope::Around(delim, count.unwrap_or(1)),
+                OperatorPendingScope::Inner(count) =>
+                    OperatorScope::Inner(delim, count.unwrap_or(1)),
             },
             1,
         )
@@ -142,32 +144,50 @@ pub enum OPending {
     /// Operator action, like `d`, `c`, `g~`
     ///
     /// The operator can also be pending a scope, like inner `i` or around `a`.
-    Operator(Operator, Option<OperatorPendingScope>),
-    /// Operator action that has the motion pending, like `df`, `cf`, `g~f`
-    ///
-    /// The boolean is here to indicate if the operator should be applied on the
-    /// 'inner' (`i`)
+    Operator(Operator, Option<OperatorPendingScope>, Option<usize>),
+    /// Operator action that has the motion pending, like `df`, `cf`, `yt`
     OperatorAction(Operator, CombinablePending),
     /// Replace one character
     ReplaceOne,
+}
+
+impl OPending {
+    /// Adds a number to repair text object operations
+    ///
+    /// Returns `Some(Self)` if it added `num` to `self`, otherwise returns
+    /// `None`.
+    pub fn maybe_with_num(self, num: usize) -> Option<Self> {
+        match self {
+            Self::CombinablePending(_)
+            | Self::GoTo
+            | Self::OperatorAction(..)
+            | Self::ReplaceOne
+            | Self::Operator(_, Some(_), _) => None,
+            Self::Operator(op, None, old) => Some(Self::Operator(
+                op,
+                None,
+                Some(old.unwrap_or(0).saturating_mul(10).saturating_add(num)),
+            )),
+        }
+    }
 }
 
 /// Pending Scope of an operator, like inner `i` or around `a`.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum OperatorPendingScope {
     /// Around the scope, including delimiters
-    Around,
+    Around(Option<usize>),
     /// Inside the scope, excluding delimiters
-    Inner,
+    Inner(Option<usize>),
 }
 
 impl OperatorPendingScope {
     /// Initiates an operator pending scope, like typing `i` after `d` to do
     /// `diw`
-    pub const fn maybe_from(ch: char) -> Option<Self> {
+    pub const fn maybe_from(ch: char, num: Option<usize>) -> Option<Self> {
         match ch {
-            'a' => Some(Self::Around),
-            'i' => Some(Self::Inner),
+            'a' => Some(Self::Around(num)),
+            'i' => Some(Self::Inner(num)),
             _ => None,
         }
     }
@@ -175,7 +195,7 @@ impl OperatorPendingScope {
 
 impl From<Operator> for OPending {
     fn from(value: Operator) -> Self {
-        Self::Operator(value, None)
+        Self::Operator(value, None, None)
     }
 }
 
@@ -221,11 +241,11 @@ impl Operator {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum OperatorScope {
     /// Apply operator on the around of an operation (e.g., `aw`)
-    Around(Delimitation),
+    Around(Delimitation, usize),
     /// Apply the operator on simply those actions
     Goto(GoToAction, Option<GoToAction>),
     /// Apply operator on the inner of an operation (e.g., `iw`)
-    Inner(Delimitation),
+    Inner(Delimitation, usize),
     /// Apply operator on the whole line
     WholeLine,
 }

@@ -23,9 +23,10 @@ impl Buffer {
     /// The cursor is always in bounds so this always returns `Some`, except if
     /// the buffer is empty.
     pub(super) fn as_char(&self) -> Option<char> {
-        let ch = self.content.chars().nth(self.as_cursor());
-        debug_assert!(ch.is_some() ^ self.is_empty(), "cursor should be valid");
-        ch
+        self.content
+            .chars()
+            .nth(self.as_cursor())
+            .map_or_else(|| self.content.chars().next_back(), Some)
     }
 
     /// Returns the index of the cursor, starting from the end of the

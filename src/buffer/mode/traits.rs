@@ -25,10 +25,14 @@ impl Actions {
         match self {
             Self::List(actions, reg) => {
                 if let [action] = actions.as_slice()
-                    && let Action::Operator(op, scope, _) = *action
+                    && let Action::Operator(op, scope, old) = *action
                 {
                     Self::List(
-                        vec![Action::Operator(op, scope, occurrences)],
+                        vec![Action::Operator(
+                            op,
+                            scope,
+                            occurrences.saturating_mul(old),
+                        )],
                         reg,
                     )
                 } else {
